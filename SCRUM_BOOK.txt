@@ -32,9 +32,13 @@ START DATE: 11/10/2025
 | Database Query Optimization & Indexing         | NIL     | 2 HRS | 15/10/2025 | 15/10/2025 | NIL              |
 | Mobile Responsiveness & UI/UX Polish           | NIL     | 3 HRS | 15/10/2025 | 15/10/2025 | NIL              |
 |------------------------------------------------|---------|-------|------------|------------|------------------|
-| Codebase Refactoring & Organization          | NIL     | 3 HRS | 16/10/2025 | 16/10/2025 | NIL              |
+| Codebase Refactoring & Organization            | NIL     | 3 HRS | 16/10/2025 | 16/10/2025 | NIL              |
 | UI/UX Enhancements (Icons, Layouts)            | NIL     | 2 HRS | 16/10/2025 | 16/10/2025 | NIL              |
 | Local Reporting & PDF Generation Fixes         | NIL     | 2 HRS | 16/10/2025 | 16/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
+| Resolved PDF Text Overlapping/Wrapping Issues  | NIL     | 2 HRS | 17/10/2025 | 17/10/2025 | NIL              |
+| Report Formatting & Dynamic Cell Adjustments   | NIL     | 2 HRS | 17/10/2025 | 17/10/2025 | NIL              |
+| Final Quality Assurance Check for Reports      | NIL     | 1 HR  | 17/10/2025 | 17/10/2025 | NIL              |
 |------------------------------------------------|---------|-------|------------|------------|------------------|
 
 ========================================================================================================================
