@@ -97,15 +97,43 @@ def generate_pdf_report(data, report_type, generated_by="System", subtitle=None,
     # Add data tables
     if isinstance(data, list) and len(data) > 0:
         if isinstance(data[0], dict):
+            # Create Paragraph style for table cells
+            normal_cell_style = ParagraphStyle(
+                'TableCell',
+                parent=styles['Normal'],
+                fontSize=9,
+                leading=11,
+                alignment=TA_LEFT
+            )
+            
+            header_cell_style = ParagraphStyle(
+                'TableHeader',
+                parent=styles['Normal'],
+                fontSize=10,
+                leading=12,
+                textColor=colors.whitesmoke,
+                fontName='Helvetica-Bold',
+                alignment=TA_CENTER
+            )
+
+            # Prepare table data with Paragraphs
             headers = list(data[0].keys())
-            table_data = [headers]
+            table_data = [[Paragraph(h, header_cell_style) for h in headers]]
             
             for row in data:
-                table_data.append([str(row.get(h, 'N/A'))[:100] for h in headers])  # Limit cell length
+                row_data = []
+                for h in headers:
+                    cell_text = str(row.get(h, 'N/A'))
+                    # Wrap in Paragraph for auto-wrapping
+                    row_data.append(Paragraph(cell_text, normal_cell_style))
+                table_data.append(row_data)
             
             # Calculate column widths
             num_cols = len(headers)
-            col_width = (A4[0] - 2*inch) / num_cols
+            # Use nearly full width (A4 width - margins)
+            # A4 width is ~595 points. Margins are 0.5 inch * 2 = 1 inch = 72 points.
+            # Available width ~ 523 points.
+            col_width = (A4[0] - 1.0*inch) / num_cols
             col_widths = [col_width] * num_cols
             
             # Create table
