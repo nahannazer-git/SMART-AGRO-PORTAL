@@ -33,7 +33,7 @@ instance/
 *.sqlite3
 
 # IDE
-.vscode/
+# .vscode/
 .idea/
 *.swp
 *.swo
