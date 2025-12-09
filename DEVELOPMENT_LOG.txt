@@ -1,0 +1,87 @@
+================================================================================
+                        PROJECT DEVELOPMENT LOG & HANDOVER
+================================================================================
+DATE: 2025-12-10
+PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
+--------------------------------------------------------------------------------
+
+1. SESSION OBJECTIVES
+   - Fix "Chat with Expert" functionality (Fetch errors, duplicates, images).
+   - Resolve Logout redirection issues.
+   - Restructure "Marketplace First" to "Portal First" architecture.
+   - Fix Admin Dashboard statistics errors.
+   - Push complete codebase to GitHub.
+
+--------------------------------------------------------------------------------
+2. CRITICAL ERRORS ENCOUNTERED & FIXED
+--------------------------------------------------------------------------------
+
+[E1] Chat "Failed to fetch" Error
+   - SYMPTOM: Chat messages wouldn't load or send; console showed fetch errors.
+   - CAUSE: Using Jinja2 `{{ url_for(...) }}` inside external .js files or un-rendered script blocks blocks resulted in invalid URLs.
+   - FIX: Replaced dynamic Jinja paths with hardcoded absolute routes (e.g., `/farmer/chat/...`).
+
+[E2] Duplicate "Ghost" Messages
+   - SYMPTOM: Sending a message caused it to appear twice (once immediately, once from polling).
+   - CAUSE: The polling mechanism retrieved ALL messages, including the one just sent by the user.
+   - FIX: Implemented filtering in the polling logic to ignore messages where `sender_id` matches the current user.
+
+[E3] Image Preview Not Showing / NameError in Chat
+   - SYMPTOM: "Preview" container missing; Backend crashed with `NameError: message not defined`.
+   - CAUSE: 
+     1. The HTML for `#imagePreviewContainer` was accidentally overwritten.
+     2. In `farmer.py`, the line `message = request.form.get('message')` was deleted during refactoring.
+   - FIX: Restored HTML container and the missing Python variable assignment.
+
+[E4] Logout Redirection Loop
+   - SYMPTOM: Logging out kept redirecting back to the Dashboard instead of the Login/Home page.
+   - CAUSE: Browser caching and persistent Session cookies were too aggressive.
+   - FIX: In `auth.py/logout`:
+     1. Manually cleared all session keys.
+     2. Deleted `remember_token` cookie.
+     3. Added `Cache-Control: no-cache` headers to the redirect response.
+
+[E5] Admin Statistics Error (TypeError: Function.__init__ got 'else')
+   - SYMPTOM: Admin > Statistics > Diseases page crashed (500 Error).
+   - CAUSE: Improper usage of `func.case(...)` in SQLAlchemy. `func` is for SQL functions, `case` is an expression.
+   - FIX: Imported `case` from `sqlalchemy` and used `case(...)` directly instead of `func.case(...)`.
+
+[E6] Git Push Errors (Unrelated Histories)
+   - SYMPTOM: "Fatal: refusing to merge unrelated histories".
+   - CAUSE: The remote repo (GitHub) was created with a README, while local repo was initialized separately.
+   - FIX: Ran `git pull origin main --allow-unrelated-histories` to merge them before pushing.
+
+--------------------------------------------------------------------------------
+3. FEATURE IMPLEMENTATION SUMMARY
+--------------------------------------------------------------------------------
+
+[A] CHAT SYSTEM (Farmer & Expert)
+   - Converted to partial AJAX (no page reloads).
+   - Added Image Upload capability (`input type="file"`).
+   - Added Image Thumbnail Preview with "Remove" button.
+   - Implemented "Optimistic UI" (message appears instantly before server confirmation).
+
+[B] PORTAL ARCHITECTURE
+   - Created new Landing Page (`/`):
+     - Displays 4 distinct Login Cards (Farmer, Expert, Officer, Admin).
+     - "Admin" card added with distinct Red theme.
+     - "Public Marketplace" clearly separated from login areas.
+   - Updated Navigation:
+     - Marketplace now has a "Back to Portal" button.
+     - Removed "Login to Request" button from Marketplace (View Only mode).
+
+[C] UI/UX ENHANCEMENTS
+   - Added "Show Password" (Eye Icon) toggle to Farmer Login.
+   - Standardized 4-column layout for Landing Page cards.
+
+--------------------------------------------------------------------------------
+4. HOW TO RUN
+--------------------------------------------------------------------------------
+1. Ensure Virtual Environment is active (`venv\Scripts\activate`).
+2. Run `python run.py`.
+3. Admin Login: Access via Landing Page -> Admin Card.
+4. Public View: Access via Landing Page -> Browse Catalog.
+
+================================================================================
+                                  END OF LOG
+================================================================================
