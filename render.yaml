@@ -14,8 +14,6 @@ services:
         fromDatabase:
           name: farmers-portal-db
           property: connectionString
-      - key: WEATHER_API_KEY
-        sync: false  # Optional - add manually if you have one
     healthCheckPath: /
 
 databases:
