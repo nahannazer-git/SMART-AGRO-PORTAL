@@ -1,7 +1,7 @@
 ================================================================================
                         PROJECT DEVELOPMENT LOG & HANDOVER
 ================================================================================
-DATE: 2025-12-10
+DATE: 2025-12-10 (Updated: Expert Rating Feature & Marketplace Fixes)
 PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
 --------------------------------------------------------------------------------
 
@@ -92,6 +92,42 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
      - Send button now functional with working image uploads
      - Both farmer and expert sides have identical, seamless chat functionality
 
+[E9] Expert Rating Feature Not Showing on Farmer Side
+   - SYMPTOM: Farmers were unable to rate experts after receiving diagnosis reports.
+   - CAUSE: 
+     1. No route existed in `farmer.py` to handle rating submissions.
+     2. The `view_disease_prediction` template didn't fetch or display diagnosis reports from experts.
+     3. No UI component for rating submission was present in the farmer interface.
+   - FIX:
+     1. **Added rating route** (`/farmer/rate-expert`): Handles POST requests for rating submissions/updates.
+     2. **Updated `view_disease_prediction` route**: Now fetches and passes `DiagnosisReport` and existing `ExpertRating` to template.
+     3. **Enhanced template** (`farmer/view_disease_prediction.html`):
+        - Displays complete expert diagnosis report (diagnosis, treatment plan, preventive measures, recommended products).
+        - Added interactive star rating form (1-5 stars) with hover effects.
+        - Shows existing rating if already submitted.
+        - Allows updating existing ratings.
+        - Optional comment field for detailed feedback.
+     4. **Added imports**: `ExpertRating` and `DiagnosisReport` models to `farmer.py`.
+   - VERIFICATION:
+     - Rating form appears when expert has diagnosed an issue.
+     - Farmers can submit new ratings and update existing ones.
+     - Ratings are properly associated with expert, farmer, and crop issue.
+
+[E10] Marketplace Product View Route Error
+   - SYMPTOM: Clicking "View" button on marketplace products resulted in broken image paths or potential errors.
+   - CAUSE:
+     1. Incorrect static file path construction in `product_detail.html`: Used `filename=''` instead of `filename=product.product_image_path`.
+     2. Missing null check for farmer object could cause template errors if farmer doesn't exist.
+     3. Same incorrect path pattern in `my_products.html` thumbnail images.
+   - FIX:
+     1. **Fixed static file path** in `product_detail.html`: Changed from `url_for('static', filename=''){{ product.product_image_path }}` to `url_for('static', filename=product.product_image_path)`.
+     2. **Added farmer validation** in `product_detail` route: Checks if farmer exists before rendering template, redirects to marketplace index with flash message if not found.
+     3. **Fixed thumbnail path** in `my_products.html`: Applied same path correction for consistency.
+   - VERIFICATION:
+     - Product detail pages load correctly with proper image display.
+     - No errors when viewing products from marketplace listing.
+     - Graceful handling of missing farmer data.
+
 --------------------------------------------------------------------------------
 3. FEATURE IMPLEMENTATION SUMMARY
 --------------------------------------------------------------------------------
@@ -138,6 +174,26 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
      * Added "Agro Marketplace" card to Landing Page
      * Added "My Products" link to Farmer Dashboard navbar
    - STATUS: ✅ Fully functional, tested with E2E verification (no regressions to existing features)
+
+[E] EXPERT RATING SYSTEM IMPLEMENTATION (Dec 10, 2025)
+   - FEATURE: Farmers can rate experts after receiving diagnosis reports, providing feedback on service quality.
+   - DATABASE: Uses existing `ExpertRating` model (expert_id, farmer_id, crop_issue_id, rating 1-5, comment, created_at).
+   - ROUTES ADDED:
+     * POST /farmer/rate-expert - Submit or update rating for an expert
+   - ROUTES UPDATED:
+     * GET /farmer/disease-prediction/<issue_id> - Now includes diagnosis report and existing rating data
+   - FUNCTIONALITY:
+     * Rating form appears automatically when expert has diagnosed a crop issue.
+     * Interactive 5-star rating system with hover effects.
+     * Optional comment field for detailed feedback.
+     * Prevents duplicate ratings (allows updates to existing ratings).
+     * Validates expert has actually diagnosed the issue before allowing rating.
+     * Shows existing rating if farmer has already rated.
+   - UI ENHANCEMENTS:
+     * Diagnosis report displayed in dedicated card with full details (diagnosis, treatment plan, preventive measures, recommended products).
+     * Star rating UI with smooth hover transitions.
+     * Clear visual feedback for submitted ratings.
+   - STATUS: ✅ Fully functional, integrated with existing diagnosis workflow
 
 --------------------------------------------------------------------------------
 4. HOW TO RUN

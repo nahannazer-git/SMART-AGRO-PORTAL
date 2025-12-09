@@ -127,6 +127,13 @@
 {% endblock %}
 
 {% block content %}
+<!-- Back Button to Landing Page -->
+<div class="container mt-3">
+    <a href="{{ url_for('main.index') }}" class="btn btn-light">
+        <i class="bi bi-arrow-left"></i> Back to Portal
+    </a>
+</div>
+
 <!-- Marketplace Header -->
 <div class="marketplace-header">
     <div class="container">

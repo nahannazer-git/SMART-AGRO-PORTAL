@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify, send_file, session, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, CropIssue, YieldPrediction, Notice, ProductRequest, ChatMessage, User
+from app.models import db, CropIssue, YieldPrediction, Notice, ProductRequest, ChatMessage, User, ExpertRating, DiagnosisReport
 from app.utils.weather import get_weather_data, get_temperature_for_location
 from app.utils.ml_helpers import predict_disease, predict_yield
 from app.utils.reports import generate_pdf_report, generate_csv_report
@@ -48,6 +48,13 @@ def dashboard():
         .filter(Notice.target_audience.in_(['all', 'farmers']))\
         .order_by(Notice.created_at.desc()).limit(5).all()
     
+    # Marketplace inquiries count
+    marketplace_inquiries_count = ChatMessage.query.filter_by(
+        farmer_id=current_user.id,
+        sender_role='public',
+        is_read=False
+    ).count()
+    
     return render_template('farmer/dashboard.html', 
                          weather=weather,
                          total_issues=total_issues,
@@ -55,7 +62,8 @@ def dashboard():
                          total_predictions=total_predictions,
                          active_chats=active_chats,
                          recent_issues=recent_issues,
-                         recent_notices=recent_notices)
+                         recent_notices=recent_notices,
+                         marketplace_inquiries_count=marketplace_inquiries_count)
 
 # ==================== CROP ISSUE SUBMISSION ====================
 
@@ -244,9 +252,23 @@ def view_disease_prediction(issue_id):
         except:
             pass
     
+    # Get diagnosis report if available
+    diagnosis_report = DiagnosisReport.query.filter_by(crop_issue_id=issue_id).first()
+    
+    # Check if farmer has already rated this expert for this issue
+    existing_rating = None
+    if diagnosis_report:
+        existing_rating = ExpertRating.query.filter_by(
+            farmer_id=current_user.id,
+            expert_id=diagnosis_report.expert_id,
+            crop_issue_id=issue_id
+        ).first()
+    
     return render_template('farmer/view_disease_prediction.html',
                          issue=issue,
-                         prediction=prediction_data)
+                         prediction=prediction_data,
+                         diagnosis_report=diagnosis_report,
+                         existing_rating=existing_rating)
 
 @farmer_bp.route('/yield-prediction/<int:prediction_id>')
 @login_required
@@ -530,6 +552,194 @@ def chat_unread_count():
     ).count()
     
     return jsonify({'unread_count': unread_count})
+
+# ==================== RATINGS ====================
+
+@farmer_bp.route('/rate-expert', methods=['POST'])
+@login_required
+def rate_expert():
+    """Submit rating for an expert"""
+    if not current_user.is_farmer():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('auth.farmer_login'))
+    
+    expert_id = request.form.get('expert_id', type=int)
+    issue_id = request.form.get('issue_id', type=int)
+    rating_value = request.form.get('rating', type=int)
+    comment = request.form.get('comment', '').strip()
+    
+    # Validation
+    if not all([expert_id, issue_id, rating_value]):
+        flash('Please provide all required information.', 'danger')
+        return redirect(url_for('farmer.view_disease_prediction', issue_id=issue_id))
+    
+    if rating_value < 1 or rating_value > 5:
+        flash('Rating must be between 1 and 5.', 'danger')
+        return redirect(url_for('farmer.view_disease_prediction', issue_id=issue_id))
+    
+    # Verify the issue belongs to the farmer
+    issue = CropIssue.query.get_or_404(issue_id)
+    if issue.farmer_id != current_user.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('farmer.dashboard'))
+    
+    # Verify expert exists and has diagnosed this issue
+    expert = User.query.get_or_404(expert_id)
+    if not expert.is_expert():
+        flash('Invalid expert.', 'danger')
+        return redirect(url_for('farmer.view_disease_prediction', issue_id=issue_id))
+    
+    diagnosis_report = DiagnosisReport.query.filter_by(
+        crop_issue_id=issue_id,
+        expert_id=expert_id
+    ).first()
+    
+    if not diagnosis_report:
+        flash('This expert has not diagnosed this issue yet.', 'danger')
+        return redirect(url_for('farmer.view_disease_prediction', issue_id=issue_id))
+    
+    # Check if rating already exists
+    existing_rating = ExpertRating.query.filter_by(
+        farmer_id=current_user.id,
+        expert_id=expert_id,
+        crop_issue_id=issue_id
+    ).first()
+    
+    if existing_rating:
+        # Update existing rating
+        existing_rating.rating = rating_value
+        existing_rating.comment = comment
+        try:
+            db.session.commit()
+            flash('Rating updated successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating rating: {str(e)}', 'danger')
+    else:
+        # Create new rating
+        rating = ExpertRating(
+            farmer_id=current_user.id,
+            expert_id=expert_id,
+            crop_issue_id=issue_id,
+            rating=rating_value,
+            comment=comment
+        )
+        try:
+            db.session.add(rating)
+            db.session.commit()
+            flash('Thank you for rating the expert!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error submitting rating: {str(e)}', 'danger')
+    
+    return redirect(url_for('farmer.view_disease_prediction', issue_id=issue_id))
+
+# ==================== MARKETPLACE INQUIRIES ====================
+
+@farmer_bp.route('/marketplace-inquiries')
+@login_required
+def marketplace_inquiries():
+    """View inquiries from public users on marketplace products"""
+    if not current_user.is_farmer():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('auth.farmer_login'))
+    
+    # Get sort parameter
+    sort_by = request.args.get('sort', 'latest')  # latest, oldest
+    
+    # Get all inquiries (ChatMessages with sender_role='public')
+    query = ChatMessage.query.filter_by(
+        farmer_id=current_user.id,
+        sender_role='public'
+    )
+    
+    # Apply sorting
+    if sort_by == 'oldest':
+        query = query.order_by(ChatMessage.created_at.asc())
+    else:  # default: latest first
+        query = query.order_by(ChatMessage.created_at.desc())
+    
+    inquiries_list = query.all()
+    
+    # Parse inquiry data from message format: "[Public Inquiry] {name} ({phone}): {message}"
+    parsed_inquiries = []
+    for inquiry in inquiries_list:
+        message_text = inquiry.message
+        # Parse the message format
+        if message_text.startswith("[Public Inquiry]"):
+            try:
+                # Extract name, phone, and message
+                parts = message_text.replace("[Public Inquiry]", "").strip()
+                if "(" in parts and "):" in parts:
+                    name_part = parts.split("(")[0].strip()
+                    phone_part = parts.split("(")[1].split(")")[0].strip()
+                    message_part = parts.split("):", 1)[1].strip() if "):" in parts else ""
+                else:
+                    # Fallback parsing
+                    name_part = "Guest"
+                    phone_part = "N/A"
+                    message_part = parts
+                
+                parsed_inquiries.append({
+                    'id': inquiry.id,
+                    'name': name_part,
+                    'phone': phone_part,
+                    'message': message_part,
+                    'created_at': inquiry.created_at,
+                    'is_read': inquiry.is_read
+                })
+            except:
+                # If parsing fails, show raw message
+                parsed_inquiries.append({
+                    'id': inquiry.id,
+                    'name': 'Guest',
+                    'phone': 'N/A',
+                    'message': message_text,
+                    'created_at': inquiry.created_at,
+                    'is_read': inquiry.is_read
+                })
+        else:
+            # Handle cases where format might be different
+            parsed_inquiries.append({
+                'id': inquiry.id,
+                'name': 'Guest',
+                'phone': 'N/A',
+                'message': message_text,
+                'created_at': inquiry.created_at,
+                'is_read': inquiry.is_read
+            })
+    
+    # Get unread count
+    unread_count = ChatMessage.query.filter_by(
+        farmer_id=current_user.id,
+        sender_role='public',
+        is_read=False
+    ).count()
+    
+    return render_template('farmer/marketplace_inquiries.html',
+                         inquiries=parsed_inquiries,
+                         sort_by=sort_by,
+                         unread_count=unread_count)
+
+@farmer_bp.route('/marketplace-inquiries/<int:inquiry_id>/mark-read', methods=['POST'])
+@login_required
+def mark_inquiry_read(inquiry_id):
+    """Mark an inquiry as read"""
+    if not current_user.is_farmer():
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+    
+    inquiry = ChatMessage.query.get_or_404(inquiry_id)
+    
+    if inquiry.farmer_id != current_user.id or inquiry.sender_role != 'public':
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+    
+    try:
+        inquiry.is_read = True
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Inquiry marked as read'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # ==================== HISTORY ====================
 

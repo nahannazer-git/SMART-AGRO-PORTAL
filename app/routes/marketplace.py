@@ -59,6 +59,10 @@ def product_detail(product_id):
     
     farmer = User.query.get(product.farmer_id)
     
+    if not farmer:
+        flash('Farmer information not found for this product.', 'warning')
+        return redirect(url_for('marketplace.index'))
+    
     return render_template('marketplace/product_detail.html', 
                          product=product,
                          farmer=farmer)

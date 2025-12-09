@@ -144,7 +144,7 @@
                     <!-- Image -->
                     <td>
                         {% if product.product_image_path %}
-                        <img src="{{ url_for('static', filename='') }}{{ product.product_image_path }}"
+                        <img src="{{ url_for('static', filename=product.product_image_path) }}"
                             class="product-thumbnail" alt="{{ product.product_name }}">
                         {% else %}
                         <div class="product-thumbnail" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center;">
@@ -195,8 +195,8 @@
                     <td>
                         <div class="action-buttons">
                             <!-- View -->
-                            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}"
-                                class="btn btn-sm btn-info" title="View">
+                            <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}" 
+                               class="btn btn-sm btn-info" title="View">
                                 <i class="bi bi-eye"></i>
                             </a>
 

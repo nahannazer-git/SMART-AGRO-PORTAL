@@ -116,8 +116,143 @@
                 AI prediction is being processed. Please check back later.
             </div>
             {% endif %}
+            
+            <!-- Expert Diagnosis Report -->
+            {% if diagnosis_report %}
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Expert Diagnosis Report</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Diagnosed by:</strong> {{ diagnosis_report.expert.full_name }}</p>
+                            <p><strong>Disease Identified:</strong> {{ diagnosis_report.disease_identified or 'N/A' }}</p>
+                            <p><strong>Severity:</strong> 
+                                <span class="badge bg-{{ 'danger' if diagnosis_report.severity == 'Critical' else 'warning' if diagnosis_report.severity == 'High' else 'info' if diagnosis_report.severity == 'Medium' else 'success' }}">
+                                    {{ diagnosis_report.severity or 'N/A' }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Confidence Level:</strong> {{ diagnosis_report.confidence_level or 'N/A' }}</p>
+                            <p><strong>Reported on:</strong> {{ diagnosis_report.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5><i class="bi bi-file-medical"></i> Diagnosis:</h5>
+                        <p class="text-muted">{{ diagnosis_report.diagnosis }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h5><i class="bi bi-prescription"></i> Treatment Plan:</h5>
+                        <p class="text-muted">{{ diagnosis_report.treatment_plan }}</p>
+                    </div>
+                    
+                    {% if diagnosis_report.preventive_measures %}
+                    <div class="mb-3">
+                        <h5><i class="bi bi-shield-check"></i> Preventive Measures:</h5>
+                        <p class="text-muted">{{ diagnosis_report.preventive_measures }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if diagnosis_report.recommended_products %}
+                    <div class="mb-3">
+                        <h5><i class="bi bi-box-seam"></i> Recommended Products:</h5>
+                        <ul class="list-group">
+                            {% for product in diagnosis_report.recommended_products|from_json %}
+                            <li class="list-group-item">{{ product }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Rating Form -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Rate Expert</h5>
+                </div>
+                <div class="card-body">
+                    {% if existing_rating %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> You have already rated this expert for this issue.
+                        <div class="mt-2">
+                            <strong>Your Rating:</strong>
+                            {% for i in range(1, 6) %}
+                                <i class="bi bi-star{{ '-fill' if i <= existing_rating.rating else '' }} text-warning"></i>
+                            {% endfor %}
+                            ({{ existing_rating.rating }}/5)
+                            {% if existing_rating.comment %}
+                            <br><strong>Your Comment:</strong> {{ existing_rating.comment }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('farmer.rate_expert') }}">
+                        <input type="hidden" name="expert_id" value="{{ diagnosis_report.expert_id }}">
+                        <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Rating (1-5 stars):</strong></label>
+                            <div class="star-rating">
+                                {% for i in range(1, 6) %}
+                                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" 
+                                       {% if existing_rating and existing_rating.rating == i %}checked{% endif %}
+                                       required>
+                                <label for="star{{ i }}" class="star-label">
+                                    <i class="bi bi-star-fill"></i>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="comment" class="form-label"><strong>Your Comment (Optional):</strong></label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3" 
+                                      placeholder="Share your experience with this expert's diagnosis...">{% if existing_rating %}{{ existing_rating.comment }}{% endif %}</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> {{ 'Update Rating' if existing_rating else 'Submit Rating' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+</style>
 {% endblock %}
 

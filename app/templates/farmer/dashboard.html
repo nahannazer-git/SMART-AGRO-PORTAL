@@ -67,10 +67,21 @@
                         <li><a class="dropdown-item" href="{{ url_for('farmer.new_product_request') }}">Request Product</a></li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('marketplace.my_products') }}">
-                        <i class="bi bi-shop"></i> My Products
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-shop"></i> Marketplace
                     </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('marketplace.my_products') }}">
+                            <i class="bi bi-box-seam"></i> My Products
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.marketplace_inquiries') }}">
+                            <i class="bi bi-envelope-check"></i> Inquiries
+                            {% if marketplace_inquiries_count and marketplace_inquiries_count > 0 %}
+                            <span class="badge bg-warning ms-2">{{ marketplace_inquiries_count }}</span>
+                            {% endif %}
+                        </a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('farmer.notices') }}">Notices</a>
