@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Krishi Bhavan Portal - Welcome{% endblock %}
+
+{% block content %}
+<div class="landing-page position-relative overflow-hidden"
+    style="min-height: 100vh; background: linear-gradient(135deg, #f0fdf4 0%, #e6f7ed 100%);">
+
+    <!-- Decorative Circles -->
+    <div class="position-absolute translate-middle rounded-circle bg-success opacity-10"
+        style="width: 500px; height: 500px; top: 0; left: 0; filter: blur(80px);"></div>
+    <div class="position-absolute translate-middle rounded-circle bg-warning opacity-10"
+        style="width: 400px; height: 400px; bottom: 0; right: 0; filter: blur(80px);"></div>
+
+    <div class="container position-relative py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-success mb-3">
+                <i class="bi bi-flower1 me-2"></i>Smart Agriculture Portal
+            </h1>
+            <p class="lead text-muted fs-4">Connecting Farmers, Experts, and Krishi Bhavan.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- Public Access Card -->
+            <div class="col-md-8 col-lg-6 mb-4">
+                <div class="card border-0 shadow-lg h-100 bg-success text-white overflow-hidden landing-card">
+                    <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                        <div class="mb-4 p-3 rounded-circle bg-white bg-opacity-25">
+                            <i class="bi bi-shop-window" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h2 class="card-title fw-bold mb-3">Public Marketplace</h2>
+                        <p class="card-text fs-5 mb-4 opacity-75">
+                            View subsidized seeds, fertilizers, and equipment available at Krishi Bhavan. No login
+                            required.
+                        </p>
+                        <a href="{{ url_for('main.marketplace') }}"
+                            class="btn btn-light rounded-pill px-5 py-3 fw-bold stretched-link shadow-sm">
+                            <i class="bi bi-arrow-right-circle me-2"></i>Browse Catalog
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Roles Section -->
+            <div class="col-12 text-center mb-4">
+                <h4 class="text-secondary fw-bold text-uppercase tracking-wider">Login to Your Account</h4>
+            </div>
+
+            <!-- Farmer Login -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3 text-success">
+                            <i class="bi bi-person-badge" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Farmer Login</h5>
+                        <p class="text-muted small mb-4">Access dashboard, report issues, and chat with experts.</p>
+                        <a href="{{ url_for('auth.farmer_login') }}"
+                            class="btn btn-outline-success w-100 rounded-pill">Login</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expert Login -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3 text-primary">
+                            <i class="bi bi-mortarboard-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Expert Login</h5>
+                        <p class="text-muted small mb-4">Review crops, diagnose diseases, and advise farmers.</p>
+                        <a href="{{ url_for('auth.expert_login') }}"
+                            class="btn btn-outline-primary w-100 rounded-pill">Login</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Officer Login -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3 text-warning">
+                            <i class="bi bi-building-fill-gear" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Officer Login</h5>
+                        <p class="text-muted small mb-4">Manage inventory, approve requests, and system admin.</p>
+                        <a href="{{ url_for('auth.krishi_bhavan_officer_login') }}"
+                            class="btn btn-outline-warning w-100 rounded-pill text-dark">Login</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Login -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
+                    <div class="card-body p-4 text-center">
+                        <div class="mb-3 text-danger">
+                            <i class="bi bi-shield-lock-fill" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">Admin Login</h5>
+                        <p class="text-muted small mb-4">System configuration, user management, and logs.</p>
+                        <a href="{{ url_for('auth.admin_login') }}"
+                            class="btn btn-outline-danger w-100 rounded-pill">Login</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-5 mb-4">
+            <p class="text-muted small">New to the portal? <a href="{{ url_for('auth.farmer_register') }}"
+                    class="text-success fw-bold text-decoration-none">Register as a Farmer</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .landing-card {
+        background: radial-gradient(circle at top right, #198754, #146c43);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Notice - Officer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('officer.notices') }}">
+            <i class="bi bi-arrow-left"></i> Back to Notices
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil"></i> Edit Notice</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Notice Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ notice.title }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="content" name="content" rows="6" required>{{ notice.content }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label">Category</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">Select Category</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat.lower() }}" 
+                                            {{ 'selected' if cat.lower() == (notice.category or '') }}>
+                                        {{ cat }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority" name="priority">
+                                    {% for pri in priorities %}
+                                    <option value="{{ pri.lower() }}" 
+                                            {{ 'selected' if pri.lower() == (notice.priority or 'normal') }}>
+                                        {{ pri }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="target_audience" class="form-label">Target Audience</label>
+                                <select class="form-select" id="target_audience" name="target_audience">
+                                    {% for aud in audiences %}
+                                    <option value="{{ aud.lower() }}" 
+                                            {{ 'selected' if aud.lower() == notice.target_audience }}>
+                                        {{ aud }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expires_at" class="form-label">Expiry Date</label>
+                            <input type="date" class="form-control" id="expires_at" name="expires_at" 
+                                   value="{{ notice.expires_at.strftime('%Y-%m-%d') if notice.expires_at else '' }}">
+                            <small class="text-muted">Leave empty for notices that don't expire</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                       {{ 'checked' if notice.is_active }}>
+                                <label class="form-check-label" for="is_active">
+                                    Active Notice
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('officer.notices') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Update Notice
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

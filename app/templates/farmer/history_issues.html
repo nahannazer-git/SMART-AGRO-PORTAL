@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Issues History - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="bi bi-list-ul"></i> Crop Issues History</h3>
+                <div>
+                    <a href="{{ url_for('farmer.report_disease_history_pdf') }}" class="btn btn-danger">
+                        <i class="bi bi-file-pdf"></i> PDF Report
+                    </a>
+                    <a href="{{ url_for('farmer.report_disease_history_csv') }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Report
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Crop Issues History</h5>
+                </div>
+                <div class="card-body">
+                    {% if issues %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Crop Type</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for issue in issues %}
+                                    <tr>
+                                        <td><strong>#{{ issue.id }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ issue.crop_type }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="text-truncate" style="max-width: 200px;" title="{{ issue.issue_description }}">
+                                                {{ issue.issue_description[:50] }}{% if issue.issue_description|length > 50 %}...{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' if issue.status == 'resolved' else 'info' }} rounded-pill">
+                                                {{ issue.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ issue.created_at.strftime('%Y-%m-%d') }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{{ url_for('farmer.view_disease_prediction', issue_id=issue.id) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center py-5">
+                            <i class="bi bi-info-circle" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">No crop issues yet</h5>
+                            <p class="mb-0">
+                                <a href="{{ url_for('farmer.new_crop_issue') }}" class="btn btn-success mt-2">
+                                    <i class="bi bi-plus-circle"></i> Report your first issue
+                                </a>
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

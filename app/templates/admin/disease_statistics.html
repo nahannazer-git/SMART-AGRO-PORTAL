@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Statistics - Admin Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3><i class="bi bi-bug"></i> Disease Frequency Statistics</h3>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Disease Frequency</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Disease</th>
+                                    <th>Frequency</th>
+                                    <th>Average Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for disease in disease_freq %}
+                                <tr>
+                                    <td><strong>{{ disease.disease_identified }}</strong></td>
+                                    <td>{{ disease.count }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'danger' if disease.avg_severity >= 3 else 'warning' if disease.avg_severity >= 2 else 'info' }}">
+                                            {{ disease.avg_severity|round(1) if disease.avg_severity else 'N/A' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Disease by Crop Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Crop Type</th>
+                                    <th>Disease</th>
+                                    <th>Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in disease_by_crop %}
+                                <tr>
+                                    <td><strong>{{ item.crop_type }}</strong></td>
+                                    <td>{{ item.disease_identified }}</td>
+                                    <td>{{ item[2] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

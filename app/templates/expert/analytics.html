@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Expert Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('expert.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-graph-up"></i> Analytics Dashboard</h2>
+                    <p class="text-muted">Performance metrics and insights</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('expert.report_performance_pdf') }}" class="btn btn-danger">
+                        <i class="bi bi-file-pdf"></i> PDF Report
+                    </a>
+                    <a href="{{ url_for('expert.report_performance_csv') }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ total_diagnoses }}</h3>
+                    <p class="text-muted mb-0">Total Diagnoses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ avg_rating }}/5.0</h3>
+                    <p class="text-muted mb-0">Average Rating</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ total_ratings }}</h3>
+                    <p class="text-muted mb-0">Total Ratings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ avg_response_days }} days</h3>
+                    <p class="text-muted mb-0">Avg Response Time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Diagnoses by Crop Type</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="cropChart" class="chart-container"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Diagnoses by Severity</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="severityChart" class="chart-container"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Performance -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Monthly Performance (Last 12 Months)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" class="chart-container"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Crop Type Chart
+const cropCtx = document.getElementById('cropChart').getContext('2d');
+new Chart(cropCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys({{ diagnoses_by_crop|tojson }}),
+        datasets: [{
+            data: Object.values({{ diagnoses_by_crop|tojson }}),
+            backgroundColor: [
+                '#0d6efd', '#198754', '#ffc107', '#dc3545', 
+                '#0dcaf0', '#6610f2', '#fd7e14'
+            ]
+        }]
+    }
+});
+
+// Severity Chart
+const severityCtx = document.getElementById('severityChart').getContext('2d');
+new Chart(severityCtx, {
+    type: 'bar',
+    data: {
+        labels: Object.keys({{ diagnoses_by_severity|tojson }}),
+        datasets: [{
+            label: 'Diagnoses',
+            data: Object.values({{ diagnoses_by_severity|tojson }}),
+            backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#dc3545']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// Monthly Performance Chart
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyData = {{ monthly_performance|tojson }};
+new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+        labels: Object.keys(monthlyData).reverse(),
+        datasets: [{
+            label: 'Diagnoses',
+            data: Object.values(monthlyData).reverse(),
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with {{ farmer.full_name }} - Expert Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-messages {
+        height: 500px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .message {
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        max-width: 70%;
+    }
+
+    .message.expert {
+        background-color: #198754;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .message.farmer {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('expert.chat_list') }}">
+            <i class="bi bi-arrow-left"></i> Back to Chat List
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            <i class="bi bi-person"></i> {{ farmer.full_name }}
+                        </h5>
+                        <small>{{ farmer.email }}</small>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="chat-messages" id="chatMessages">
+                        {% if messages %}
+                        {% for msg in messages %}
+                        <div class="message {{ msg.sender_role }}">
+                            <div>{{ msg.message }}</div>
+                            <div class="message-time">{{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-chat-left-text" style="font-size: 3rem;"></i>
+                            <p class="mt-3">No messages yet. Start the conversation!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer">
+                        <form method="POST" id="chatForm" class="d-flex gap-2">
+                            <select name="related_issue_id" class="form-select" style="max-width: 200px;">
+                                <option value="">Link to issue (optional)</option>
+                                {% for issue in crop_issues %}
+                                <option value="{{ issue.id }}">Issue #{{ issue.id }} - {{ issue.crop_type }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="text" name="message" id="messageInput" class="form-control"
+                                placeholder="Type your message..." required>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send"></i> Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let lastMessageId = {{ last_message_id }};
+    let isPolling = false;
+    let pollTimeout = null;
+
+    // Auto-scroll to bottom
+    function scrollToBottom() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Initial scroll
+    scrollToBottom();
+
+    // Function to add new message to chat
+    function addMessage(messageData) {
+        const chatMessages = document.getElementById('chatMessages');
+
+        // Remove empty state if exists
+        const emptyState = chatMessages.querySelector('.text-center.text-muted');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        // Create message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${messageData.sender_role}`;
+        messageDiv.innerHTML = `
+        <div>${escapeHtml(messageData.message)}</div>
+        <div class="message-time">${messageData.time_display}</div>
+    `;
+
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Long-polling function
+    function pollForNewMessages() {
+        if (isPolling) return;
+
+        isPolling = true;
+
+        fetch(`/expert/chat/{{ farmer.id }}/poll?last_message_id=${lastMessageId}`)
+            .then(response => response.json())
+            .then(data => {
+                isPolling = false;
+
+                if (data.new_messages && data.new_messages.length > 0) {
+                    // Add new messages
+                    data.new_messages.forEach(msg => {
+                        // Skip our own messages to avoid duplicates
+                        if (msg.sender_role === 'expert') return;
+                        addMessage(msg);
+                    });
+
+                    lastMessageId = data.last_message_id;
+
+                    // Show notification sound/visual feedback
+                    if (data.new_messages[0].sender_role === 'farmer') {
+                        // Play notification sound (optional)
+                        // new Audio('/static/sounds/notification.mp3').play();
+                    }
+                }
+
+                // Continue polling
+                pollTimeout = setTimeout(pollForNewMessages, 2000); // Poll every 2 seconds
+            })
+            .catch(error => {
+                console.error('Polling error:', error);
+                isPolling = false;
+                // Retry after 5 seconds on error
+                pollTimeout = setTimeout(pollForNewMessages, 5000);
+            });
+    }
+
+    // Start polling when page loads
+    window.addEventListener('load', () => {
+        pollForNewMessages();
+    });
+
+    // Stop polling when page is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (pollTimeout) {
+                clearTimeout(pollTimeout);
+                pollTimeout = null;
+            }
+        } else {
+            pollForNewMessages();
+        }
+    });
+
+    // Update unread count badge in navigation
+    function updateUnreadBadge() {
+        fetch('/expert/chat/unread-count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('chatUnreadBadge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating badge:', error));
+    }
+
+    // Update badge every 10 seconds
+    setInterval(updateUnreadBadge, 10000);
+    updateUnreadBadge();
+
+    // Handle form submission - add message immediately to UI
+    document.getElementById('chatForm').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        const relatedIssueId = document.querySelector('select[name="related_issue_id"]').value;
+
+        if (message) {
+            // Optimistic UI update
+            const tempId = Date.now();
+            const tempMessage = {
+                id: tempId,
+                message: message,
+                sender_role: 'expert',
+                time_display: new Date().toLocaleString('en-US', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit'
+                })
+            };
+            addMessage(tempMessage);
+            messageInput.value = '';
+
+            // Send to server
+            const formData = new FormData();
+            formData.append('message', message);
+            formData.append('related_issue_id', relatedIssueId);
+
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Message saved successfully
+                        console.log('Message sent successfully');
+                        // IMPORTANT: Update lastMessageId so polling doesn't pick up our own message again
+                        if (data.data && data.data.id) {
+                            lastMessageId = data.data.id;
+                        }
+                    } else {
+                        console.error('Error sending message:', data.message);
+                        // Optional: Show error to user
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+</script>
+{% endblock %}

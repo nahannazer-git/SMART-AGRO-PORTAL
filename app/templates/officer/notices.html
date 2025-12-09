@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Notices - Officer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('officer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="bi bi-megaphone"></i> Manage Notices</h3>
+                <a href="{{ url_for('officer.add_notice') }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Add Notice
+                </a>
+            </div>
+            
+            <div class="card shadow-lg border-0">
+                <div class="card-body">
+                    {% if notices %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Category</th>
+                                        <th>Priority</th>
+                                        <th>Target</th>
+                                        <th>Status</th>
+                                        <th>Expires</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for notice in notices %}
+                                    <tr>
+                                        <td><strong>{{ notice.title }}</strong></td>
+                                        <td><span class="badge bg-info">{{ notice.category or 'N/A' }}</span></td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if notice.priority == 'High' else 'warning' if notice.priority == 'Normal' else 'secondary' }}">
+                                                {{ notice.priority or 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ notice.target_audience|title }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if notice.is_active else 'secondary' }}">
+                                                {{ 'Active' if notice.is_active else 'Inactive' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if notice.expires_at %}
+                                                {% if notice.expires_at < current_time %}
+                                                    <span class="text-danger">Expired</span>
+                                                {% else %}
+                                                    {{ notice.expires_at.strftime('%Y-%m-%d') }}
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">No expiry</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ notice.created_at.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('officer.edit_notice', notice_id=notice.id) }}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                            <form method="POST" action="{{ url_for('officer.delete_notice', notice_id=notice.id) }}" 
+                                                  class="d-inline" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this notice?');">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-info-circle"></i> No notices created yet.
+                            <a href="{{ url_for('officer.add_notice') }}">Create your first notice</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Dashboard - Smart Agriculture Support System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+    .weather-widget {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+    .card-header {
+        font-weight: 600;
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        transition: background-color 0.2s;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .list-group-item:first-child {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    .list-group-item:last-child {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-house-door"></i> Farmer Portal
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('farmer.dashboard') }}">Dashboard</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_crop_issue') }}">Report Crop Issue</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_yield_prediction') }}">Yield Prediction</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_product_request') }}">Request Product</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('farmer.notices') }}">Notices</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ url_for('farmer.chat_list') }}">
+                        Chat with Expert
+                        {% if total_unread and total_unread > 0 %}
+                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem;">{{ total_unread }}</span>
+                        {% else %}
+                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem; display: none;">0</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        History
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.history_issues') }}">Crop Issues</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.history_predictions') }}">Yield Predictions</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-3 px-md-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-1">Welcome, {{ current_user.full_name }}!</h2>
+                    <p class="text-muted mb-0">Manage your farming activities and get expert support</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    {% if current_user.farm_location %}
+                    <span class="badge bg-info fs-6">
+                        <i class="bi bi-geo-alt"></i> {{ current_user.farm_location }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Issues</h6>
+                            <h3 class="mb-0">{{ total_issues }}</h3>
+                        </div>
+                        <div class="text-primary" style="font-size: 2.5rem;">
+                            <i class="bi bi-bug"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending Issues</h6>
+                            <h3 class="mb-0 text-warning">{{ pending_issues }}</h3>
+                        </div>
+                        <div class="text-warning" style="font-size: 2.5rem;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Yield Predictions</h6>
+                            <h3 class="mb-0">{{ total_predictions }}</h3>
+                        </div>
+                        <div class="text-success" style="font-size: 2.5rem;">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Active Chats</h6>
+                            <h3 class="mb-0">{{ active_chats }}</h3>
+                        </div>
+                        <div class="text-info" style="font-size: 2.5rem;">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Weather Widget -->
+        <div class="col-md-4 mb-4">
+            <div class="card weather-widget shadow-lg border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-cloud-sun"></i> Weather
+                    </h5>
+                    <div class="mb-3">
+                        <h2 class="mb-0">{{ weather.temperature }}°C</h2>
+                        <p class="mb-0">{{ weather.description or weather.condition }}</p>
+                        <small>{{ weather.location }}</small>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="bi bi-droplet"></i>
+                            <p class="mb-0">{{ weather.humidity }}%</p>
+                            <small>Humidity</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-wind"></i>
+                            <p class="mb-0">{{ weather.wind_speed }} km/h</p>
+                            <small>Wind</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-cloud-rain"></i>
+                            <p class="mb-0">{{ (weather.rain_chance * 100)|round(0) }}%</p>
+                            <small>Rain</small>
+                        </div>
+                    </div>
+                    {% if weather.forecast %}
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                    <div class="forecast-preview">
+                        <small class="d-block mb-2"><strong>5-Day Forecast:</strong></small>
+                        <div class="row g-2">
+                            {% for day in weather.forecast[:3] %}
+                            <div class="col-4 text-center">
+                                <small class="d-block">{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</small>
+                                <small class="d-block">{{ day.temperature }}°C</small>
+                                <small class="d-block text-white-50">{{ day.condition }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                    <small class="text-white-50">Updated: {{ weather.last_updated }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Issues -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Recent Crop Issues</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_issues %}
+                        <div class="list-group list-group-flush">
+                            {% for issue in recent_issues %}
+                            <a href="{{ url_for('farmer.view_disease_prediction', issue_id=issue.id) }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ issue.crop_type }}</h6>
+                                    <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
+                                        {{ issue.status }}
+                                    </span>
+                                </div>
+                                <p class="mb-1 small text-muted">{{ issue.issue_description[:50] }}...</p>
+                                <small>{{ issue.created_at.strftime('%Y-%m-%d') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No issues yet</p>
+                    {% endif %}
+                    <a href="{{ url_for('farmer.new_crop_issue') }}" class="btn btn-sm btn-primary w-100 mt-2">
+                        <i class="bi bi-plus-circle"></i> Report New Issue
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notices -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-megaphone"></i> Recent Notices</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_notices %}
+                        <div class="list-group list-group-flush">
+                            {% for notice in recent_notices %}
+                            <a href="{{ url_for('farmer.notices') }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ notice.title }}</h6>
+                                    <span class="badge bg-info">{{ notice.category }}</span>
+                                </div>
+                                <p class="mb-1 small text-muted">{{ notice.content[:50] }}...</p>
+                                <small>{{ notice.created_at.strftime('%Y-%m-%d') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No notices</p>
+                    {% endif %}
+                    <a href="{{ url_for('farmer.notices') }}" class="btn btn-sm btn-success w-100 mt-2">
+                        <i class="bi bi-eye"></i> View All Notices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('farmer.new_crop_issue') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-bug"></i><br>Report Issue
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('farmer.new_yield_prediction') }}" class="btn btn-outline-success w-100">
+                                <i class="bi bi-graph-up"></i><br>Predict Yield
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('farmer.chat_list') }}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-chat-dots"></i><br>Chat Expert
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{{ url_for('farmer.new_product_request') }}" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-box-seam"></i><br>Request Product
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

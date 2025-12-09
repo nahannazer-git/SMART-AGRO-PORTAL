@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Diagnose Issue #{{ issue.id }} - Expert Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .issue-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('expert.view_issue', issue_id=issue.id) }}">
+            <i class="bi bi-arrow-left"></i> Back to Issue
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Diagnose Issue #{{ issue.id }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Issue Details</h5>
+                            <p><strong>Crop:</strong> {{ issue.crop_type }}</p>
+                            <p><strong>Description:</strong> {{ issue.issue_description }}</p>
+                            {% if issue.symptoms %}
+                            <p><strong>Symptoms:</strong></p>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for symptom in issue.symptoms|from_json %}
+                                <span class="badge bg-secondary">{{ symptom }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if issue.image_path %}
+                            <h5>Crop Image</h5>
+                            <img src="{{ url_for('static', filename=issue.image_path) }}" 
+                                 class="issue-image" alt="Crop Image">
+                            {% endif %}
+                            
+                            {% if ai_prediction %}
+                            <div class="alert alert-info mt-3">
+                                <h6><i class="bi bi-robot"></i> AI Prediction</h6>
+                                <p><strong>Disease:</strong> {{ ai_prediction.disease_name }}</p>
+                                <p><strong>Confidence:</strong> {{ (ai_prediction.confidence * 100)|round(1) }}%</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="diagnosis" class="form-label">Diagnosis <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="diagnosis" name="diagnosis" rows="4" required
+                                      placeholder="Provide your professional diagnosis of the crop issue..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="disease_identified" class="form-label">Disease Identified</label>
+                                <input type="text" class="form-control" id="disease_identified" name="disease_identified"
+                                       placeholder="e.g., Blast, Rust, Leaf Spot">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="severity" class="form-label">Severity</label>
+                                <select class="form-select" id="severity" name="severity">
+                                    <option value="">Select Severity</option>
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="treatment_plan" class="form-label">Treatment Plan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="treatment_plan" name="treatment_plan" rows="5" required
+                                      placeholder="Provide detailed treatment plan including recommended products, application methods, and timeline..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="preventive_measures" class="form-label">Preventive Measures</label>
+                            <textarea class="form-control" id="preventive_measures" name="preventive_measures" rows="3"
+                                      placeholder="Suggest preventive measures to avoid future occurrences..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Recommended Products</label>
+                            <div class="row">
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="recommended_products" 
+                                               value="Fungicide" id="prod1">
+                                        <label class="form-check-label" for="prod1">Fungicide</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="recommended_products" 
+                                               value="Pesticide" id="prod2">
+                                        <label class="form-check-label" for="prod2">Pesticide</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="recommended_products" 
+                                               value="Fertilizer" id="prod3">
+                                        <label class="form-check-label" for="prod3">Fertilizer</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="recommended_products" 
+                                               value="Organic Treatment" id="prod4">
+                                        <label class="form-check-label" for="prod4">Organic Treatment</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="use_ai_prediction" 
+                                       name="use_ai_prediction">
+                                <label class="form-check-label" for="use_ai_prediction">
+                                    Use AI Prediction as Reference
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confidence_level" class="form-label">Confidence Level</label>
+                            <select class="form-select" id="confidence_level" name="confidence_level">
+                                <option value="">Select Confidence</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('expert.view_issue', issue_id=issue.id) }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Submit Diagnosis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Yield Prediction Results - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-graph-up-arrow"></i> AI Yield Prediction Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Crop Information</h5>
+                            <p><strong>Crop Type:</strong> {{ prediction.crop_type }}</p>
+                            {% if prediction.crop_variety %}
+                            <p><strong>Variety:</strong> {{ prediction.crop_variety }}</p>
+                            {% endif %}
+                            <p><strong>Location:</strong> {{ prediction.location }}</p>
+                            <p><strong>Farm Size:</strong> {{ prediction.farm_size }} acres</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Farming Conditions</h5>
+                            <p><strong>Soil Type:</strong> {{ prediction.soil_type }}</p>
+                            <p><strong>Irrigation:</strong> {{ prediction.irrigation_type }}</p>
+                            <p><strong>Fertilizer:</strong> {{ prediction.fertilizer_type }}</p>
+                            <p><strong>Planting Date:</strong> {{ prediction.planting_date.strftime('%Y-%m-%d') }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <h3 class="mb-0">{{ prediction.predicted_yield|round(2) if prediction.predicted_yield else 'N/A' }}</h3>
+                                <p class="mb-0">Tons per Acre</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="mb-0">
+                                    {{ ((prediction.predicted_yield or 0) * prediction.farm_size)|round(2) }}
+                                </h3>
+                                <p class="mb-0">Total Yield (Tons)</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="mb-0">{{ (prediction.confidence_score * 100)|round(1) if prediction.confidence_score else 'N/A' }}%</h3>
+                                <p class="mb-0">Confidence Score</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-thermometer-half"></i> Environmental Factors</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Temperature:</strong> {{ prediction.temperature }}°C</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Rainfall:</strong> {{ prediction.rainfall }} mm</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-info-circle"></i> AI Model Information</h5>
+                        <p><strong>Model Used:</strong> {{ prediction.ai_model_used or 'yield_predictor_v1' }}</p>
+                        <p><strong>Prediction Date:</strong> {{ prediction.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('farmer.new_yield_prediction') }}" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> New Prediction
+                        </a>
+                        <a href="{{ url_for('farmer.history_predictions') }}" class="btn btn-secondary">
+                            <i class="bi bi-list"></i> View All Predictions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

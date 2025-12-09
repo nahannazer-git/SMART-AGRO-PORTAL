@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}ML Datasets - Admin Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="bi bi-database"></i> ML Datasets</h3>
+                <a href="{{ url_for('admin.upload_dataset') }}" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Upload Dataset
+                </a>
+            </div>
+            
+            <div class="card shadow-lg border-0">
+                <div class="card-body">
+                    {% if datasets %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>File Size</th>
+                                        <th>Records</th>
+                                        <th>Status</th>
+                                        <th>Uploaded By</th>
+                                        <th>Uploaded Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dataset in datasets %}
+                                    <tr>
+                                        <td>{{ dataset.id }}</td>
+                                        <td><strong>{{ dataset.name }}</strong></td>
+                                        <td><span class="badge bg-info">{{ dataset.dataset_type }}</span></td>
+                                        <td>{{ dataset.description or 'N/A' }}</td>
+                                        <td>{{ (dataset.file_size / 1024 / 1024)|round(2) }} MB</td>
+                                        <td>{{ dataset.record_count or 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if dataset.status == 'active' else 'secondary' }}">
+                                                {{ dataset.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>{{ dataset.uploader.full_name }}</td>
+                                        <td>{{ dataset.created_at.strftime('%Y-%m-%d') }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-info-circle"></i> No datasets uploaded yet.
+                            <a href="{{ url_for('admin.upload_dataset') }}">Upload your first dataset</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

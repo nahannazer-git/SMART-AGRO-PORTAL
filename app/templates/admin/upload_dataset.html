@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Upload ML Dataset - Admin Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('admin.ml_datasets') }}">
+            <i class="bi bi-arrow-left"></i> Back to Datasets
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-upload"></i> Upload ML Dataset</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        Supported formats: CSV, JSON, XLSX, XLS. Maximum file size: 16MB
+                    </div>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Dataset Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                   placeholder="e.g., Crop Disease Dataset 2024">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                      placeholder="Describe the dataset..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dataset_type" class="form-label">Dataset Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="dataset_type" name="dataset_type" required>
+                                <option value="">Select Type</option>
+                                <option value="disease">Disease</option>
+                                <option value="yield">Yield</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dataset_file" class="form-label">Dataset File <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="dataset_file" name="dataset_file" 
+                                   accept=".csv,.json,.xlsx,.xls" required>
+                            <small class="text-muted">Accepted formats: CSV, JSON, XLSX, XLS</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin.ml_datasets') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Upload Dataset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

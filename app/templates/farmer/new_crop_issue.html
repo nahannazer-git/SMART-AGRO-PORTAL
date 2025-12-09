@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Report Crop Issue - Farmer Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 10px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-bug"></i> Report Crop Issue</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="crop_type" class="form-label">Crop Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="crop_type" name="crop_type" required>
+                                    <option value="">Select Crop Type</option>
+                                    {% for crop in crop_types %}
+                                    <option value="{{ crop }}">{{ crop }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="crop_variety" class="form-label">Crop Variety</label>
+                                <input type="text" class="form-control" id="crop_variety" name="crop_variety" 
+                                       placeholder="e.g., Basmati, Hybrid">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="planting_date" class="form-label">Planting Date</label>
+                                <input type="date" class="form-control" id="planting_date" name="planting_date">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       value="{{ current_user.farm_location or '' }}" 
+                                       placeholder="Farm location">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="issue_description" class="form-label">Issue Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="issue_description" name="issue_description" 
+                                      rows="4" required 
+                                      placeholder="Describe the problem you're experiencing with your crop..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Symptoms (Select all that apply)</label>
+                            <div class="row">
+                                {% for symptom in symptom_options %}
+                                <div class="col-md-4 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="symptoms" 
+                                               value="{{ symptom }}" id="symptom_{{ loop.index }}">
+                                        <label class="form-check-label" for="symptom_{{ loop.index }}">
+                                            {{ symptom }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="crop_image" class="form-label">Upload Crop Image</label>
+                            <input type="file" class="form-control" id="crop_image" name="crop_image" 
+                                   accept="image/*" onchange="previewImage(this)">
+                            <small class="text-muted">Supported formats: JPG, PNG, GIF (Max 16MB)</small>
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Submit Issue
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'image-preview';
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+{% endblock %}
+

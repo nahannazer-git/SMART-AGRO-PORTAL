@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Officer Dashboard - Smart Agriculture Support System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('officer.dashboard') }}">
+            <i class="bi bi-building"></i> Krishi Bhavan Officer Portal
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('officer.dashboard') }}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('officer.products') }}">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('officer.notices') }}">Notices</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('officer.product_requests') }}">Product Requests</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-3 px-md-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-1">Welcome, {{ current_user.full_name }}!</h2>
+                    <p class="text-muted mb-0">Krishi Bhavan Officer Dashboard</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    {% if current_user.designation %}
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="bi bi-briefcase"></i> {{ current_user.designation }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Products</h6>
+                            <h3 class="mb-0">{{ total_products }}</h3>
+                            <small class="text-danger">{{ low_stock_products }} low stock</small>
+                        </div>
+                        <div class="text-primary" style="font-size: 2.5rem;">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Product Requests</h6>
+                            <h3 class="mb-0">{{ total_requests }}</h3>
+                            <small class="text-warning">{{ pending_requests }} pending</small>
+                        </div>
+                        <div class="text-warning" style="font-size: 2.5rem;">
+                            <i class="bi bi-inbox"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Notices</h6>
+                            <h3 class="mb-0">{{ total_notices }}</h3>
+                            <small class="text-success">{{ active_notices }} active</small>
+                        </div>
+                        <div class="text-success" style="font-size: 2.5rem;">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Approved Requests</h6>
+                            <h3 class="mb-0">{{ approved_requests }}</h3>
+                        </div>
+                        <div class="text-info" style="font-size: 2.5rem;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Product Requests -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-inbox"></i> Recent Product Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_requests %}
+                        <div class="list-group list-group-flush">
+                            {% for req in recent_requests %}
+                            <a href="{{ url_for('officer.product_requests') }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ req.product_name }}</h6>
+                                    <span class="badge bg-{{ 'warning' if req.status == 'pending' else 'success' if req.status == 'approved' else 'danger' }}">
+                                        {{ req.status|title }}
+                                    </span>
+                                </div>
+                                <p class="mb-1 small">From: {{ req.farmer.full_name }}</p>
+                                <small>{{ req.created_at.strftime('%Y-%m-%d') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No requests yet</p>
+                    {% endif %}
+                    <a href="{{ url_for('officer.product_requests') }}" class="btn btn-sm btn-warning w-100 mt-2">
+                        <i class="bi bi-list"></i> View All Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if low_stock %}
+                        <div class="list-group list-group-flush">
+                            {% for product in low_stock %}
+                            <a href="{{ url_for('officer.products') }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ product.name }}</h6>
+                                    <span class="badge bg-danger">{{ product.stock_quantity }} {{ product.unit }}</span>
+                                </div>
+                                <small class="text-muted">{{ product.product_type }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">All products have sufficient stock</p>
+                    {% endif %}
+                    <a href="{{ url_for('officer.products') }}" class="btn btn-sm btn-danger w-100 mt-2">
+                        <i class="bi bi-box-seam"></i> Manage Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notices -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-megaphone"></i> Recent Notices</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_notices %}
+                        <div class="list-group list-group-flush">
+                            {% for notice in recent_notices %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ notice.title }}</h6>
+                                    <span class="badge bg-{{ 'success' if notice.is_active else 'secondary' }}">
+                                        {{ 'Active' if notice.is_active else 'Inactive' }}
+                                    </span>
+                                </div>
+                                <p class="mb-1 small text-muted">{{ notice.content[:80] }}...</p>
+                                <small>{{ notice.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No notices yet</p>
+                    {% endif %}
+                    <a href="{{ url_for('officer.notices') }}" class="btn btn-sm btn-success w-100 mt-2">
+                        <i class="bi bi-plus-circle"></i> Add New Notice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

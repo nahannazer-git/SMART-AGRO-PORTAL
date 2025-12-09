@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}View Issue #{{ issue.id }} - Expert Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .issue-image {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .modal-image {
+        max-width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('expert.pending_issues') }}">
+            <i class="bi bi-arrow-left"></i> Back to Issues
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-bug"></i> Crop Issue #{{ issue.id }}</h4>
+                    <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
+                        {{ issue.status|title }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Issue Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Crop Type:</th>
+                                    <td>{{ issue.crop_type }}</td>
+                                </tr>
+                                {% if issue.crop_variety %}
+                                <tr>
+                                    <th>Variety:</th>
+                                    <td>{{ issue.crop_variety }}</td>
+                                </tr>
+                                {% endif %}
+                                {% if issue.planting_date %}
+                                <tr>
+                                    <th>Planting Date:</th>
+                                    <td>{{ issue.planting_date }}</td>
+                                </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Location:</th>
+                                    <td>{{ issue.location or 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Farmer:</th>
+                                    <td>{{ issue.farmer.full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Submitted:</th>
+                                    <td>{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Description</h5>
+                            <p>{{ issue.issue_description }}</p>
+                            
+                            {% if issue.symptoms %}
+                            <h5 class="mt-3">Symptoms</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for symptom in issue.symptoms|from_json %}
+                                <span class="badge bg-secondary">{{ symptom }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if issue.image_path %}
+                    <div class="mt-4">
+                        <h5>Crop Image</h5>
+                        <img src="{{ url_for('static', filename=issue.image_path) }}" 
+                             class="issue-image" 
+                             alt="Crop Image"
+                             data-bs-toggle="modal" 
+                             data-bs-target="#imageModal">
+                    </div>
+                    {% endif %}
+                    
+                    {% if ai_prediction %}
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-robot"></i> AI Prediction Available</h5>
+                            <p><strong>Disease:</strong> {{ ai_prediction.disease_name }}</p>
+                            <p><strong>Confidence:</strong> {{ (ai_prediction.confidence * 100)|round(1) }}%</p>
+                            <p><strong>Severity:</strong> {{ ai_prediction.severity }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if existing_report %}
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Diagnosis Report</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Diagnosed by:</strong> {{ existing_report.expert.full_name }}</p>
+                    <p><strong>Disease Identified:</strong> {{ existing_report.disease_identified or 'N/A' }}</p>
+                    <p><strong>Severity:</strong> {{ existing_report.severity or 'N/A' }}</p>
+                    <hr>
+                    <h6>Diagnosis:</h6>
+                    <p>{{ existing_report.diagnosis }}</p>
+                    <h6>Treatment Plan:</h6>
+                    <p>{{ existing_report.treatment_plan }}</p>
+                    {% if existing_report.preventive_measures %}
+                    <h6>Preventive Measures:</h6>
+                    <p>{{ existing_report.preventive_measures }}</p>
+                    {% endif %}
+                    <p class="text-muted small">Reported on: {{ existing_report.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('expert.diagnose_issue', issue_id=issue.id) }}" 
+                       class="btn btn-success btn-lg">
+                        <i class="bi bi-clipboard-check"></i> Diagnose This Issue
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+{% if issue.image_path %}
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Crop Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('static', filename=issue.image_path) }}" 
+                     class="modal-image" alt="Crop Image">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

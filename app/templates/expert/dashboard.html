@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Expert Dashboard - Smart Agriculture Support System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .weather-widget {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('expert.dashboard') }}">
+            <i class="bi bi-house-door"></i> Expert Portal
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('expert.dashboard') }}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('expert.pending_issues') }}">Pending Issues</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ url_for('expert.chat_list') }}">
+                        Chat with Farmers
+                        {% if total_unread and total_unread > 0 %}
+                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem;">{{ total_unread }}</span>
+                        {% else %}
+                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem; display: none;">0</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('expert.ratings') }}">Ratings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('expert.analytics') }}">Analytics</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-3 px-md-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2 class="mb-1">Welcome, {{ current_user.full_name }}!</h2>
+                    <p class="text-muted mb-0">Expert Dashboard - Help farmers with crop issues</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    {% if current_user.expertise_area %}
+                    <span class="badge bg-info fs-6">
+                        <i class="bi bi-tag"></i> {{ current_user.expertise_area }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Issues</h6>
+                            <h3 class="mb-0">{{ total_issues }}</h3>
+                        </div>
+                        <div class="text-primary" style="font-size: 2.5rem;">
+                            <i class="bi bi-bug"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending Issues</h6>
+                            <h3 class="mb-0 text-warning">{{ pending_issues }}</h3>
+                        </div>
+                        <div class="text-warning" style="font-size: 2.5rem;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">My Diagnoses</h6>
+                            <h3 class="mb-0">{{ my_diagnoses }}</h3>
+                        </div>
+                        <div class="text-success" style="font-size: 2.5rem;">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Average Rating</h6>
+                            <h3 class="mb-0">{{ avg_rating }}/5.0</h3>
+                            <small class="text-muted">{{ my_ratings }} ratings</small>
+                        </div>
+                        <div class="text-warning" style="font-size: 2.5rem;">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Weather Widget -->
+        <div class="col-md-4 mb-4">
+            <div class="card weather-widget shadow-lg border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-cloud-sun"></i> Weather
+                    </h5>
+                    <div class="mb-3">
+                        <h2 class="mb-0">{{ weather.temperature }}°C</h2>
+                        <p class="mb-0">{{ weather.description or weather.condition }}</p>
+                        <small>{{ weather.location }}</small>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="bi bi-droplet"></i>
+                            <p class="mb-0">{{ weather.humidity }}%</p>
+                            <small>Humidity</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-wind"></i>
+                            <p class="mb-0">{{ weather.wind_speed }} km/h</p>
+                            <small>Wind</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-cloud-rain"></i>
+                            <p class="mb-0">{{ (weather.rain_chance * 100)|round(0) }}%</p>
+                            <small>Rain</small>
+                        </div>
+                    </div>
+                    {% if weather.forecast %}
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                    <div class="forecast-preview">
+                        <small class="d-block mb-2"><strong>5-Day Forecast:</strong></small>
+                        <div class="row g-2">
+                            {% for day in weather.forecast[:3] %}
+                            <div class="col-4 text-center">
+                                <small class="d-block">{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</small>
+                                <small class="d-block">{{ day.temperature }}°C</small>
+                                <small class="d-block text-white-50">{{ day.condition }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                    <small class="text-white-50">Updated: {{ weather.last_updated }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Pending Issues -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Recent Pending Issues</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_pending %}
+                        <div class="list-group list-group-flush">
+                            {% for issue in recent_pending %}
+                            <a href="{{ url_for('expert.view_issue', issue_id=issue.id) }}" 
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ issue.crop_type }}</h6>
+                                    <span class="badge bg-warning">Pending</span>
+                                </div>
+                                <p class="mb-1 small text-muted">{{ issue.issue_description[:60] }}...</p>
+                                <small>From: {{ issue.farmer.full_name }} | {{ issue.created_at.strftime('%Y-%m-%d') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No pending issues</p>
+                    {% endif %}
+                    <a href="{{ url_for('expert.pending_issues') }}" class="btn btn-sm btn-warning w-100 mt-2">
+                        <i class="bi bi-list"></i> View All Pending Issues
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Recent Diagnoses -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> My Recent Diagnoses</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_recent_diagnoses %}
+                        <div class="list-group list-group-flush">
+                            {% for report in my_recent_diagnoses %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Issue #{{ report.crop_issue_id }}</h6>
+                                    <span class="badge bg-{{ 'danger' if report.severity == 'Critical' else 'warning' if report.severity == 'High' else 'info' }}">
+                                        {{ report.severity or 'N/A' }}
+                                    </span>
+                                </div>
+                                <p class="mb-1 small text-muted">{{ report.diagnosis[:60] }}...</p>
+                                <small>{{ report.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No diagnoses yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Analytics -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Issues by Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" class="chart-container"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Top Crop Types</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="cropChart" class="chart-container"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Status Chart
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys({{ issues_by_status|tojson }}),
+        datasets: [{
+            data: Object.values({{ issues_by_status|tojson }}),
+            backgroundColor: ['#ffc107', '#198754', '#0dcaf0']
+        }]
+    }
+});
+
+// Crop Chart
+const cropCtx = document.getElementById('cropChart').getContext('2d');
+new Chart(cropCtx, {
+    type: 'bar',
+    data: {
+        labels: Object.keys({{ issues_by_crop|tojson }}),
+        datasets: [{
+            label: 'Issues',
+            data: Object.values({{ issues_by_crop|tojson }}),
+            backgroundColor: '#0d6efd'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+{% endblock %}
+

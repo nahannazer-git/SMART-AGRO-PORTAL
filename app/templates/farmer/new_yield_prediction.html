@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Yield Prediction - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-graph-up"></i> Yield Prediction</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="temperature" class="form-label">Temperature (°C) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.1" class="form-control" id="temperature" name="temperature" 
+                                   value="{{ temperature }}" required readonly
+                                   style="background-color: #e9ecef; cursor: not-allowed;">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle"></i> 
+                                Auto-fetched from weather API for your location ({{ current_user.farm_location or 'Kerala, India' }})
+                            </small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="crop_type" class="form-label">Crop Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="crop_type" name="crop_type" required>
+                                    <option value="">Select Crop Type</option>
+                                    {% for crop in crop_types %}
+                                    <option value="{{ crop }}">{{ crop }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="crop_variety" class="form-label">Crop Variety</label>
+                                <input type="text" class="form-control" id="crop_variety" name="crop_variety" 
+                                       placeholder="e.g., Basmati, Hybrid">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="soil_type" class="form-label">Soil Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="soil_type" name="soil_type" required>
+                                    <option value="">Select Soil Type</option>
+                                    {% for soil in soil_types %}
+                                    <option value="{{ soil }}">{{ soil }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="irrigation_type" class="form-label">Irrigation Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="irrigation_type" name="irrigation_type" required>
+                                    <option value="">Select Irrigation Type</option>
+                                    {% for irrigation in irrigation_types %}
+                                    <option value="{{ irrigation }}">{{ irrigation }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fertilizer_type" class="form-label">Fertilizer Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="fertilizer_type" name="fertilizer_type" required>
+                                    <option value="">Select Fertilizer Type</option>
+                                    {% for fertilizer in fertilizer_types %}
+                                    <option value="{{ fertilizer }}">{{ fertilizer }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="planting_date" class="form-label">Planting Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="planting_date" name="planting_date" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="farm_size" class="form-label">Farm Size (acres) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" 
+                                       id="farm_size" name="farm_size" required
+                                       value="{{ current_user.farm_size or '' }}">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="location" name="location" required
+                                       value="{{ current_user.farm_location or '' }}" 
+                                       placeholder="Farm location"
+                                       onchange="updateTemperature()">
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-calculator"></i> Predict Yield
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateTemperature() {
+    const location = document.getElementById('location').value;
+    if (location) {
+        // In a real implementation, you could make an AJAX call to update temperature
+        // For now, the temperature is set on page load
+        console.log('Location changed to:', location);
+    }
+}
+</script>
+{% endblock %}
+

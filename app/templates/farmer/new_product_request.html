@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Request Free Product - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Request Free Product</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        Submit a request for free agricultural products (seeds, fertilizers, pesticides, equipment) 
+                        from Krishi Bhavan. Your request will be reviewed by an officer.
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="product_name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="product_name" name="product_name" 
+                                   required placeholder="e.g., Rice Seeds, Urea Fertilizer">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="product_type" class="form-label">Product Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="product_type" name="product_type" required>
+                                    <option value="">Select Type</option>
+                                    {% for ptype in product_types %}
+                                    <option value="{{ ptype }}">{{ ptype }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                                <input type="number" min="1" class="form-control" id="quantity" name="quantity" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="unit" class="form-label">Unit</label>
+                                <select class="form-select" id="unit" name="unit">
+                                    {% for u in units %}
+                                    <option value="{{ u }}" {{ 'selected' if u == 'kg' }}>{{ u }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="purpose" class="form-label">Purpose/Reason</label>
+                            <textarea class="form-control" id="purpose" name="purpose" rows="3" 
+                                      placeholder="Explain why you need this product..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-send"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

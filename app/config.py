@@ -1,0 +1,29 @@
+# Application Configuration
+import os
+from pathlib import Path
+
+basedir = Path(__file__).parent.parent
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'sqlite:///{basedir / "instance" / "farmers_portal.db"}'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # Upload settings
+    UPLOAD_FOLDER = basedir / 'app' / 'static' / 'uploads'
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    
+    # Crop images upload path
+    CROP_IMAGES_FOLDER = UPLOAD_FOLDER / 'crops'
+    
+    # ML datasets upload path
+    ML_DATASETS_FOLDER = UPLOAD_FOLDER / 'ml_datasets'
+    
+    # Product images upload path
+    PRODUCT_IMAGES_FOLDER = UPLOAD_FOLDER / 'products'
+    
+    # OpenWeatherMap API
+    WEATHER_API_KEY = os.environ.get('WEATHER_API_KEY') or None
+    WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather'
+    WEATHER_FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast'
+

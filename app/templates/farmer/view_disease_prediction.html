@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Disease Prediction Results - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-shield-check"></i> AI Disease Prediction Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Crop Type:</strong> {{ issue.crop_type }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
+                                    {{ issue.status }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Submitted:</strong> {{ issue.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            {% if issue.location %}
+                            <p><strong>Location:</strong> {{ issue.location }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if issue.image_path %}
+                    <div class="mb-3">
+                        <img src="{{ url_for('static', filename=issue.image_path) }}" 
+                             class="img-fluid rounded" alt="Crop Image" style="max-height: 300px;">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <h5>Issue Description:</h5>
+                        <p>{{ issue.issue_description }}</p>
+                    </div>
+                    
+                    {% if issue.symptoms %}
+                    <div class="mb-3">
+                        <h5>Selected Symptoms:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for symptom in issue.symptoms|from_json %}
+                            <span class="badge bg-secondary">{{ symptom }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if prediction %}
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-robot"></i> AI Prediction</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5 class="mb-2">
+                            <i class="bi bi-bug"></i> Predicted Disease: 
+                            <strong>{{ prediction.disease_name }}</strong>
+                        </h5>
+                        <p class="mb-0">
+                            Confidence: <strong>{{ (prediction.confidence * 100)|round(1) }}%</strong> | 
+                            Severity: <strong>{{ prediction.severity }}</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5><i class="bi bi-lightbulb"></i> Recommendations:</h5>
+                        <ul class="list-group">
+                            {% for rec in prediction.recommendations %}
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle text-success"></i> {{ rec }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h5><i class="bi bi-clipboard-check"></i> Treatment Options:</h5>
+                        <ul class="list-group">
+                            {% for treatment in prediction.treatment_options %}
+                            <li class="list-group-item">
+                                <i class="bi bi-arrow-right-circle text-primary"></i> {{ treatment }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('farmer.chat_list') }}" class="btn btn-primary">
+                            <i class="bi bi-chat-dots"></i> Consult with Expert
+                        </a>
+                        <a href="{{ url_for('farmer.history_issues') }}" class="btn btn-secondary">
+                            <i class="bi bi-list"></i> View All Issues
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> 
+                AI prediction is being processed. Please check back later.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

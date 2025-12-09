@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Yield Predictions History - Farmer Portal{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="bi bi-graph-up"></i> Yield Predictions History</h3>
+                <div>
+                    <a href="{{ url_for('farmer.report_yield_predictions_pdf') }}" class="btn btn-danger">
+                        <i class="bi bi-file-pdf"></i> PDF Report
+                    </a>
+                    <a href="{{ url_for('farmer.report_yield_predictions_csv') }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Report
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card shadow-lg border-0">
+                <div class="card-body">
+                    {% if predictions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Crop Type</th>
+                                        <th>Predicted Yield</th>
+                                        <th>Farm Size</th>
+                                        <th>Location</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pred in predictions %}
+                                    <tr>
+                                        <td>#{{ pred.id }}</td>
+                                        <td>{{ pred.crop_type }}</td>
+                                        <td>
+                                            <strong>{{ pred.predicted_yield|round(2) if pred.predicted_yield else 'N/A' }}</strong> tons/acre
+                                        </td>
+                                        <td>{{ pred.farm_size }} acres</td>
+                                        <td>{{ pred.location }}</td>
+                                        <td>{{ pred.created_at.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('farmer.view_yield_prediction', prediction_id=pred.id) }}" 
+                                               class="btn btn-sm btn-success">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-info-circle"></i> No yield predictions yet.
+                            <a href="{{ url_for('farmer.new_yield_prediction') }}">Create your first prediction</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
