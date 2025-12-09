@@ -1,5 +1,7 @@
 # Smart Agriculture Support System
 
+> **🚀 Want to deploy?** See [`deployment/DEPLOYMENT.md`](deployment/DEPLOYMENT.md) for complete Render deployment guide.
+
 A Flask-based web application for agricultural support with multi-role functionality.
 
 ## Project Structure
