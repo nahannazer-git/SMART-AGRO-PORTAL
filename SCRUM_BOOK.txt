@@ -28,6 +28,11 @@ START DATE: 11/10/2025
 | Model Training & Hyperparameter Tuning         | NIL     | 2 HRS | 14/10/2025 | 14/10/2025 | NIL              |
 | Model Serialization (.pkl) & Backend Linking   | NIL     | 1 HR  | 14/10/2025 | 14/10/2025 | NIL              |
 |------------------------------------------------|---------|-------|------------|------------|------------------|
+| Security Hardening (CSRF/XSS Protection)       | NIL     | 3 HRS | 15/10/2025 | 15/10/2025 | NIL              |
+| Database Query Optimization & Indexing         | NIL     | 2 HRS | 15/10/2025 | 15/10/2025 | NIL              |
+| Mobile Responsiveness & UI/UX Polish           | NIL     | 3 HRS | 15/10/2025 | 15/10/2025 | NIL              |
+| Final Documentation & Project Handover Manual  | NIL     | 2 HRS | 15/10/2025 | 15/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
 
 ========================================================================================================================
                                                 END OF LOG
