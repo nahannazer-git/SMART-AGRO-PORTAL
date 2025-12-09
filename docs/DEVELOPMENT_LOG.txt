@@ -115,6 +115,30 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
    - Added "Show Password" (Eye Icon) toggle to Farmer Login.
    - Standardized 4-column layout for Landing Page cards.
 
+[D] PUBLIC AGRO MARKETPLACE IMPLEMENTATION (Dec 10, 2025)
+   - FEATURE: Farmers can list and sell agricultural products directly to public buyers.
+   - DATABASE MODEL: Created FarmerProduct model with fields:
+     * product_name, category, description, quantity, unit, price_per_unit
+     * product_image_path, location, is_available, timestamps (created_at, updated_at)
+   - ROUTES IMPLEMENTED (8 endpoints):
+     * GET /marketplace/ - Public product listing with search/filter/pagination
+     * GET /marketplace/product/<id> - Product detail view with farmer profile
+     * POST /marketplace/contact-farmer - Public inquiry system
+     * GET/POST /marketplace/products/new - Add new product (Farmer only)
+     * GET/POST /marketplace/products/<id>/edit - Edit product (Farmer only)
+     * POST /marketplace/products/<id>/delete - Archive product (Farmer only)
+     * POST /marketplace/products/<id>/toggle-availability - Toggle active/inactive (Farmer only)
+   - TEMPLATES CREATED:
+     * marketplace/index.html - Public browse with search/filter (12 items per page)
+     * marketplace/product_detail.html - Detail + farmer contact + WhatsApp link + inquiry form
+     * marketplace/my_products.html - Farmer dashboard with product management
+     * marketplace/add_product.html - Product listing form with image upload
+     * marketplace/edit_product.html - Edit product details form
+   - NAVIGATION UPDATES:
+     * Added "Agro Marketplace" card to Landing Page
+     * Added "My Products" link to Farmer Dashboard navbar
+   - STATUS: ✅ Fully functional, tested with E2E verification (no regressions to existing features)
+
 --------------------------------------------------------------------------------
 4. HOW TO RUN
 --------------------------------------------------------------------------------

@@ -115,3 +115,36 @@ class ChatMessage(db.Model):
     def __repr__(self):
         return f'<ChatMessage {self.id}>'
 
+
+class FarmerProduct(db.Model):
+    """
+    Farmer's agricultural products for public agro marketplace.
+    Allows farmers to list products for sale (tomato, onion, etc.) with stock and contact details.
+    """
+    __tablename__ = 'farmer_products'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_name = db.Column(db.String(150), nullable=False)  # e.g., "Tomato", "Onion"
+    category = db.Column(db.String(100), nullable=False)  # e.g., "Vegetables", "Fruits", "Grains"
+    description = db.Column(db.Text)
+    quantity = db.Column(db.Float, nullable=False)  # Stock available
+    unit = db.Column(db.String(50), nullable=False)  # kg, liter, bunch, etc.
+    price_per_unit = db.Column(db.Float, nullable=False)  # Price in rupees
+    product_image_path = db.Column(db.String(255))  # Image of the product
+    location = db.Column(db.String(200))  # Farm location
+    is_available = db.Column(db.Boolean, default=True, nullable=False)  # Active listing
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to farmer user
+    farmer = db.relationship('User', backref='farmer_products')
+    
+    def __repr__(self):
+        return f'<FarmerProduct {self.id} - {self.product_name}>'
+    
+    def get_total_price_for_quantity(self, qty):
+        """Calculate total price for given quantity"""
+        return self.price_per_unit * qty
+
+

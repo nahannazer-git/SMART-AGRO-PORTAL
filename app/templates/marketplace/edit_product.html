@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Product - Agro Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-header h2 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+
+    .form-header p {
+        color: #7f8c8d;
+        margin: 0;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section-title {
+        font-weight: 600;
+        color: #2c3e50;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #27ae60;
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #27ae60;
+        box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
+    }
+
+    .image-preview-container {
+        margin-top: 15px;
+        text-align: center;
+    }
+
+    .image-preview {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 10px;
+        border: 2px solid #27ae60;
+    }
+
+    .upload-hint {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    .submit-section {
+        display: flex;
+        gap: 10px;
+        margin-top: 40px;
+    }
+
+    .submit-section button {
+        flex: 1;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    .required-mark {
+        color: #e74c3c;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="form-container">
+        <!-- Header -->
+        <div class="form-header">
+            <h2><i class="bi bi-pencil-square"></i> Edit Product</h2>
+            <p>Update your product details</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="productForm">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="form-section-title">Basic Information</div>
+
+                <div class="mb-3">
+                    <label for="product_name" class="form-label">
+                        Product Name <span class="required-mark">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="product_name" name="product_name"
+                        value="{{ product.product_name }}" required>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="category" class="form-label">
+                                Category <span class="required-mark">*</span>
+                            </label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="Vegetables" {% if product.category == 'Vegetables' %}selected{% endif %}>Vegetables</option>
+                                <option value="Fruits" {% if product.category == 'Fruits' %}selected{% endif %}>Fruits</option>
+                                <option value="Grains" {% if product.category == 'Grains' %}selected{% endif %}>Grains</option>
+                                <option value="Pulses" {% if product.category == 'Pulses' %}selected{% endif %}>Pulses</option>
+                                <option value="Herbs & Spices" {% if product.category == 'Herbs & Spices' %}selected{% endif %}>Herbs & Spices</option>
+                                <option value="Dairy" {% if product.category == 'Dairy' %}selected{% endif %}>Dairy Products</option>
+                                <option value="Others" {% if product.category == 'Others' %}selected{% endif %}>Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location"
+                                value="{{ product.location or '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4">{{ product.description or '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Pricing & Stock -->
+            <div class="form-section">
+                <div class="form-section-title">Pricing & Stock</div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="quantity" class="form-label">
+                                Quantity Available <span class="required-mark">*</span>
+                            </label>
+                            <input type="number" class="form-control" id="quantity" name="quantity"
+                                step="0.01" value="{{ product.quantity }}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="unit" class="form-label">
+                                Unit <span class="required-mark">*</span>
+                            </label>
+                            <select class="form-select" id="unit" name="unit" required>
+                                <option value="">Select Unit</option>
+                                <option value="kg" {% if product.unit == 'kg' %}selected{% endif %}>Kilogram (kg)</option>
+                                <option value="liter" {% if product.unit == 'liter' %}selected{% endif %}>Liter (L)</option>
+                                <option value="ton" {% if product.unit == 'ton' %}selected{% endif %}>Ton</option>
+                                <option value="dozen" {% if product.unit == 'dozen' %}selected{% endif %}>Dozen</option>
+                                <option value="piece" {% if product.unit == 'piece' %}selected{% endif %}>Piece</option>
+                                <option value="bunch" {% if product.unit == 'bunch' %}selected{% endif %}>Bunch</option>
+                                <option value="box" {% if product.unit == 'box' %}selected{% endif %}>Box</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="price_per_unit" class="form-label">
+                        Price per Unit (₹) <span class="required-mark">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="price_per_unit" name="price_per_unit"
+                        step="0.01" value="{{ product.price_per_unit }}" required>
+                </div>
+
+                <!-- Price Preview -->
+                <div class="alert alert-info">
+                    <small>
+                        <strong>Total Value:</strong> <span id="totalValue">₹{{ "%.2f"|format(product.price_per_unit * product.quantity) }}</span>
+                    </small>
+                </div>
+            </div>
+
+            <!-- Product Image -->
+            <div class="form-section">
+                <div class="form-section-title">Product Image</div>
+
+                {% if product.product_image_path %}
+                <div class="mb-3">
+                    <label class="form-label">Current Image</label>
+                    <div class="image-preview-container">
+                        <img src="{{ url_for('static', filename='') }}{{ product.product_image_path }}"
+                            class="image-preview" alt="{{ product.product_name }}">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="product_image" class="form-label">Update Product Photo</label>
+                    <input type="file" class="form-control" id="product_image" name="product_image"
+                        accept="image/*">
+                    <div class="upload-hint">
+                        <i class="bi bi-info-circle"></i>
+                        Leave empty to keep current image. Supported formats: JPG, PNG, GIF, WebP (Max 5MB)
+                    </div>
+                    <div class="image-preview-container">
+                        <img id="previewImage" class="image-preview" alt="Preview" style="display:none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="submit-section">
+                <a href="{{ url_for('marketplace.my_products') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check-circle"></i> Update Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Calculate total value
+    function updateTotalValue() {
+        const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+        const price = parseFloat(document.getElementById('price_per_unit').value) || 0;
+        const total = quantity * price;
+        document.getElementById('totalValue').textContent = '₹' + total.toFixed(2);
+    }
+
+    document.getElementById('quantity').addEventListener('input', updateTotalValue);
+    document.getElementById('price_per_unit').addEventListener('input', updateTotalValue);
+
+    // Image preview for new image
+    document.getElementById('product_image').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const preview = document.getElementById('previewImage');
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Form validation
+    document.getElementById('productForm').addEventListener('submit', function (e) {
+        const quantity = parseFloat(document.getElementById('quantity').value);
+        const price = parseFloat(document.getElementById('price_per_unit').value);
+
+        if (quantity <= 0) {
+            e.preventDefault();
+            alert('Quantity must be greater than 0');
+            return false;
+        }
+
+        if (price <= 0) {
+            e.preventDefault();
+            alert('Price must be greater than 0');
+            return false;
+        }
+    });
+</script>
+
+{% endblock %}

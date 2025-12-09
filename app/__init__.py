@@ -55,12 +55,14 @@ def create_app(config_class=Config):
     from app.routes.expert import expert_bp
     from app.routes.admin import admin_bp
     from app.routes.officer import officer_bp
+    from app.routes.marketplace import marketplace_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
     app.register_blueprint(farmer_bp, url_prefix='/farmer')
     app.register_blueprint(expert_bp, url_prefix='/expert')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(officer_bp, url_prefix='/officer')
+    app.register_blueprint(marketplace_bp)
     
     return app
 

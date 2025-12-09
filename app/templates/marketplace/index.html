@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Agro Marketplace - Buy Fresh Farm Products{% endblock %}
+
+{% block extra_css %}
+<style>
+    .marketplace-header {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 40px;
+    }
+
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+        background-color: #f0f0f0;
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #27ae60;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+    }
+
+    .product-info {
+        padding: 15px;
+    }
+
+    .product-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .product-category {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #27ae60;
+        margin-bottom: 10px;
+    }
+
+    .product-stock {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    .farmer-name {
+        color: #34495e;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .farmer-name i {
+        margin-right: 5px;
+        color: #27ae60;
+    }
+
+    .btn-view-product {
+        width: 100%;
+        background-color: #27ae60;
+        border: none;
+        color: white;
+    }
+
+    .btn-view-product:hover {
+        background-color: #229954;
+        color: white;
+    }
+
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+    .search-box {
+        margin-bottom: 20px;
+    }
+
+    .no-products {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+
+    .no-products i {
+        font-size: 4rem;
+        color: #bdc3c7;
+        margin-bottom: 20px;
+    }
+
+    .farmer-location {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Marketplace Header -->
+<div class="marketplace-header">
+    <div class="container">
+        <h1><i class="bi bi-shop"></i> Agro Marketplace</h1>
+        <p class="mb-0">Buy fresh agricultural products directly from farmers</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Search and Filter Section -->
+    <div class="filter-section">
+        <form method="GET" class="row g-2">
+            <!-- Search Box -->
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" name="search" placeholder="Search by product name..."
+                        value="{{ search }}">
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="col-md-4">
+                <select class="form-select" name="category">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Search Button -->
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Products Grid -->
+    {% if products.items %}
+    <div class="row g-4">
+        {% for product in products.items %}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="card product-card h-100">
+                <!-- Product Image -->
+                <div style="position: relative;">
+                    {% if product.product_image_path %}
+                    <img src="{{ url_for('static', filename='') }}{{ product.product_image_path }}"
+                        class="card-img-top product-image" alt="{{ product.product_name }}"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%25%27 height=%27200%27%3E%3Crect fill=%27%23ddd%27 width=%27100%25%27 height=%27200%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2714%27 fill=%27%23999%27%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    {% else %}
+                    <svg class="card-img-top product-image" xmlns="http://www.w3.org/2000/svg" width="100%"
+                        height="200">
+                        <rect fill="#ddd" width="100%" height="200" />
+                        <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial"
+                            font-size="14" fill="#999">No Image</text>
+                    </svg>
+                    {% endif %}
+                    <span class="product-badge">{{ product.category }}</span>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info d-flex flex-column flex-grow-1">
+                    <h6 class="product-name">{{ product.product_name }}</h6>
+                    <p class="product-category mb-2">
+                        <i class="bi bi-tag"></i> {{ product.category }}
+                    </p>
+
+                    <div class="product-price">₹{{ "%.2f"|format(product.price_per_unit) }}/{{ product.unit }}</div>
+
+                    <p class="product-stock">
+                        <i class="bi bi-box2"></i>
+                        Stock: {{ "%.2f"|format(product.quantity) }} {{ product.unit }}
+                        {% if product.quantity < 5 %}
+                        <span class="badge bg-warning">Low Stock</span>
+                        {% endif %}
+                    </p>
+
+                    <!-- Farmer Info -->
+                    <p class="farmer-name">
+                        <i class="bi bi-person-fill"></i> {{ product.farmer.full_name }}
+                    </p>
+                    {% if product.location %}
+                    <p class="farmer-location">
+                        <i class="bi bi-geo-alt-fill"></i> {{ product.location }}
+                    </p>
+                    {% endif %}
+
+                    <!-- Description -->
+                    {% if product.description %}
+                    <p class="small text-muted mb-auto">
+                        {{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}
+                    </p>
+                    {% endif %}
+
+                    <!-- View Button -->
+                    <a href="{{ url_for('marketplace.product_detail', product_id=product.id) }}"
+                        class="btn btn-view-product mt-3">
+                        <i class="bi bi-eye"></i> View & Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if products.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-5 mb-5">
+        <ul class="pagination justify-content-center">
+            {% if products.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('marketplace.index', page=products.prev_num, search=search, category=selected_category) }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in products.iter_pages(left_edge=1, left_margin=1, right_margin=1, right_edge=1) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == products.page %}active{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('marketplace.index', page=page_num, search=search, category=selected_category) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{{ url_for('marketplace.index', page=products.next_num, search=search, category=selected_category) }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- No Products -->
+    <div class="no-products">
+        <i class="bi bi-inbox"></i>
+        <h4>No products found</h4>
+        <p>Try adjusting your search filters or check back later!</p>
+        <a href="{{ url_for('marketplace.index') }}" class="btn btn-success mt-3">
+            <i class="bi bi-arrow-left"></i> View All Products
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Login Prompt for Farmers -->
+<div class="container mt-5">
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <strong>Are you a farmer?</strong>
+        <span>List your products on our marketplace to reach more customers!
+            <a href="{{ url_for('auth.farmer_login') }}" class="alert-link">Login</a> or
+            <a href="{{ url_for('auth.farmer_register') }}" class="alert-link">Register</a> to start selling.
+        </span>
+    </div>
+</div>
+
+{% endblock %}

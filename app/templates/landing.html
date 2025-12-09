@@ -22,7 +22,7 @@
 
         <div class="row g-4 justify-content-center">
 
-            <!-- Public Access Card -->
+            <!-- Public Krishi Bhavan Marketplace Card -->
             <div class="col-md-8 col-lg-6 mb-4">
                 <div class="card border-0 shadow-lg h-100 bg-success text-white overflow-hidden landing-card">
                     <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
@@ -37,6 +37,25 @@
                         <a href="{{ url_for('main.marketplace') }}"
                             class="btn btn-light rounded-pill px-5 py-3 fw-bold stretched-link shadow-sm">
                             <i class="bi bi-arrow-right-circle me-2"></i>Browse Catalog
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agro Marketplace Card (NEW) -->
+            <div class="col-md-8 col-lg-6 mb-4">
+                <div class="card border-0 shadow-lg h-100 overflow-hidden landing-card" style="background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);">
+                    <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
+                        <div class="mb-4 p-3 rounded-circle bg-white bg-opacity-25">
+                            <i class="bi bi-bag-check-fill" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h2 class="card-title fw-bold mb-3 text-white">Agro Marketplace</h2>
+                        <p class="card-text fs-5 mb-4 opacity-75 text-white">
+                            Buy fresh farm products directly from farmers. Browse vegetables, fruits, grains, and more!
+                        </p>
+                        <a href="{{ url_for('marketplace.index') }}"
+                            class="btn btn-light rounded-pill px-5 py-3 fw-bold stretched-link shadow-sm">
+                            <i class="bi bi-shop me-2"></i>Explore Products
                         </a>
                     </div>
                 </div>
