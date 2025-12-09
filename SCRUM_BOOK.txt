@@ -1,0 +1,25 @@
+========================================================================================================================
+                                                PROJECT SCRUM LOG
+========================================================================================================================
+PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
+DEVELOPER: NAHAN NAZER
+START DATE: 11/10/2025
+========================================================================================================================
+
+| TASK DESCRIPTION                               | PENDING | HOURS | EXP DATE   | ACT DATE   | REASON FOR DELAY |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
+| System Analysis & Requirement Gathering        | NIL     | 2 HRS | 11/10/2025 | 11/10/2025 | NIL              |
+| Database Schema Design (Users, Crops, Issues)  | NIL     | 3 HRS | 11/10/2025 | 11/10/2025 | NIL              |
+| Authentication Module (Login/Register/Roles)   | NIL     | 3 HRS | 11/10/2025 | 11/10/2025 | NIL              |
+| Basic Chat Architecture Setup (Backend)        | NIL     | 2 HRS | 11/10/2025 | 11/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
+| Chat System Implementation (AJAX Polling UI)   | NIL     | 3 HRS | 12/10/2025 | 12/10/2025 | NIL              |
+| Image Functionality Integration (Upload/View)  | NIL     | 2 HRS | 12/10/2025 | 12/10/2025 | NIL              |
+| Portal Restructuring (Landing Page & Roles)    | NIL     | 3 HRS | 12/10/2025 | 12/10/2025 | NIL              |
+| Admin Dashboard Statistics Debugging & Fixes   | NIL     | 2 HRS | 12/10/2025 | 12/10/2025 | NIL              |
+| Final Integration Testing & Git Deployment     | NIL     | 1 HR  | 12/10/2025 | 12/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
+
+========================================================================================================================
+                                                END OF LOG
+========================================================================================================================
