@@ -51,6 +51,11 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
    - CAUSE: The remote repo (GitHub) was created with a README, while local repo was initialized separately.
    - FIX: Ran `git pull origin main --allow-unrelated-histories` to merge them before pushing.
 
+[E7] PDF Report Text Overlapping
+   - SYMPTOM: in downloaded PDF reports, long text from database columns overlapped with adjacent cells, making it unreadable.
+   - CAUSE: The PDF generation logic used fixed-width strings without wrapping capabilities.
+   - FIX: Refactored `app/utils/reports.py` to wrap all table cells in ReportLab `Paragraph` objects, enabling automatic text wrapping and dynamic row heights.
+
 --------------------------------------------------------------------------------
 3. FEATURE IMPLEMENTATION SUMMARY
 --------------------------------------------------------------------------------
