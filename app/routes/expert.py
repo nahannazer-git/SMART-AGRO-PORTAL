@@ -291,7 +291,6 @@ def chat_with_farmer(farmer_id):
     if not current_user.is_expert():
         flash('Access denied.', 'danger')
         return redirect(url_for('auth.expert_login'))
-    
     farmer = User.query.get_or_404(farmer_id)
     if not farmer.is_farmer():
         flash('Invalid farmer.', 'danger')
@@ -300,26 +299,41 @@ def chat_with_farmer(farmer_id):
     if request.method == 'POST':
         message = request.form.get('message')
         related_issue_id = request.form.get('related_issue_id')
-        
-        if message:
+        image = request.files.get('image')
+        image_path = None
+
+        # Handle image upload if present
+        if image:
+            from werkzeug.utils import secure_filename
+            import os
+            from datetime import datetime
+            from flask import current_app
+            upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'chat_images')
+            os.makedirs(upload_dir, exist_ok=True)
+            filename = secure_filename(f"chat_{int(datetime.utcnow().timestamp())}_{image.filename}")
+            image.save(os.path.join(upload_dir, filename))
+            image_path = f"uploads/chat_images/{filename}"
+
+        if message or image_path:
             chat_message = ChatMessage(
                 farmer_id=farmer_id,
                 expert_id=current_user.id,
-                message=message,
+                message=message if message else "Sent an image",
                 sender_role='expert',
-                related_issue_id=int(related_issue_id) if related_issue_id else None
+                related_issue_id=int(related_issue_id) if related_issue_id else None,
+                image_path=image_path
             )
             
             try:
                 db.session.add(chat_message)
                 db.session.commit()
-                # Return JSON for AJAX
                 return jsonify({
-                    'status': 'success', 
+                    'status': 'success',
                     'message': 'Message sent!',
                     'data': {
                         'id': chat_message.id,
                         'message': chat_message.message,
+                        'image_path': chat_message.image_path,
                         'created_at': chat_message.created_at.strftime('%Y-%m-%d %H:%M'),
                         'sender_role': 'expert'
                     }
@@ -355,10 +369,12 @@ def chat_with_farmer(farmer_id):
 def chat_poll(farmer_id):
     """Long-polling endpoint to check for new messages"""
     if not current_user.is_expert():
+        print(f"[DEBUG] expert.chat_poll access denied: current_user={{id:{getattr(current_user, 'id', None)}, role:{getattr(current_user, 'role', None)}}}, farmer_id={farmer_id}")
         return jsonify({'error': 'Access denied'}), 403
     
     last_message_id = request.args.get('last_message_id', 0, type=int)
     timeout = 30  # seconds
+    print(f"[DEBUG] expert.chat_poll called: current_user_id={getattr(current_user, 'id', None)}, farmer_id={farmer_id}, last_message_id={last_message_id}")
     
     import time
     start_time = time.time()
@@ -372,6 +388,7 @@ def chat_poll(farmer_id):
         ).order_by(ChatMessage.created_at.asc()).all()
         
         if new_messages:
+            print(f"[DEBUG] expert.chat_poll found {len(new_messages)} new_messages for farmer_id={farmer_id}: {[m.id for m in new_messages]}")
             # Mark farmer messages as read
             for msg in new_messages:
                 if msg.sender_role == 'farmer' and not msg.is_read:
@@ -383,6 +400,7 @@ def chat_poll(farmer_id):
                 messages_data.append({
                     'id': msg.id,
                     'message': msg.message,
+                    'image_path': msg.image_path,
                     'sender_role': msg.sender_role,
                     'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                     'time_display': msg.created_at.strftime('%Y-%m-%d %H:%M')

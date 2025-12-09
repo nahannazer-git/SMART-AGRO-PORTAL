@@ -1,5 +1,5 @@
 # Authentication Routes
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import db, User
 from datetime import datetime
@@ -405,4 +405,17 @@ def logout():
     response.set_cookie('remember_token', '', expires=0)
     
     return response
+
+
+@auth_bp.route('/whoami')
+def whoami():
+    """Return current logged-in user's id and role (safe, non-sensitive)."""
+    if not current_user or not getattr(current_user, 'is_authenticated', False):
+        return jsonify({'authenticated': False}), 200
+
+    return jsonify({
+        'authenticated': True,
+        'id': getattr(current_user, 'id', None),
+        'role': getattr(current_user, 'role', None)
+    }), 200
 

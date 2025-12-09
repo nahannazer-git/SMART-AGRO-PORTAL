@@ -28,6 +28,10 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                 <input type="password" class="form-control" id="password" name="password" required>
+                                <button class="btn btn-outline-secondary" type="button"
+                                    onclick="const p=document.getElementById('password');const i=this.querySelector('i');if(p.type==='password'){p.type='text';i.classList.replace('bi-eye','bi-eye-slash');}else{p.type='password';i.classList.replace('bi-eye-slash','bi-eye');}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
                         </div>
                         

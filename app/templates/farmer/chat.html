@@ -68,6 +68,10 @@
                         {% for msg in messages %}
                         <div class="message {{ msg.sender_role }}">
                             <div>{{ msg.message }}</div>
+                            {% if msg.image_path %}
+                            <div class="mt-2"><img src="{{ url_for('static', filename='') }}{{ msg.image_path }}"
+                                    alt="Chat image" class="img-fluid rounded" style="max-height:200px;"></div>
+                            {% endif %}
                             <div class="message-time">{{ msg.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
                         </div>
                         {% endfor %}
@@ -114,6 +118,10 @@
     let isPolling = false;
     let pollTimeout = null;
 
+    // Debug info: print expert id and whoami for troubleshooting (safe)
+    console.log('[CHAT DEBUG] Farmer chat page loaded. expert.id=', {{ expert.id }}, 'url=', window.location.href);
+    fetch('/auth/whoami').then(r=>r.json()).then(function(d){ console.log('[CHAT DEBUG] whoami', d); }).catch(function(e){ console.error('[CHAT DEBUG] whoami fetch error', e); });
+
     // Auto-scroll to bottom
     function scrollToBottom() {
         const chatMessages = document.getElementById('chatMessages');
@@ -133,9 +141,10 @@
             emptyState.remove();
         }
 
-        // Create message element
+        // Create message element with ID for deduplication
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${messageData.sender_role}`;
+        messageDiv.setAttribute('data-msg-id', messageData.id);
 
         let contentHtml = `<div>${escapeHtml(messageData.message)}</div>`;
 
@@ -148,7 +157,7 @@
 
             contentHtml += `
             <div class="mt-2">
-                <img src="${imgSrc}" class="img-fluid rounded" style="max-height: 200px;" alt="Shared image">
+                <img src="${imgSrc}" class="img-fluid rounded" style="max-height: 200px;" alt="Shared image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27150%27%3E%3Crect fill=%27%23ddd%27 width=%27200%27 height=%27150%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2714%27 fill=%27%23999%27%3EImage not found%3C/text%3E%3C/svg%3E'\"">
             </div>
         `;
         }
@@ -175,17 +184,31 @@
 
         isPolling = true;
 
-        fetch(`/farmer/chat/{{ expert.id }}/poll?last_message_id=${lastMessageId}`)
+        const pollUrl = `/farmer/chat/{{ expert.id }}/poll?last_message_id=${lastMessageId}`;
+        console.log('[CHAT] Farmer polling:', pollUrl);
+
+        fetch(pollUrl)
             .then(response => response.json())
             .then(data => {
                 isPolling = false;
 
                 if (data.new_messages && data.new_messages.length > 0) {
+                    console.log('[CHAT] Received', data.new_messages.length, 'new messages');
+                    // Deduplicate by ID to avoid rendering same message twice
+                    const existingIds = new Set();
+                    document.querySelectorAll('.message[data-msg-id]').forEach(el => {
+                        existingIds.add(parseInt(el.getAttribute('data-msg-id')));
+                    });
+
                     // Add new messages
                     data.new_messages.forEach(msg => {
-                        // Skip our own messages to avoid duplicates (optimistic UI)
-                        if (msg.sender_role === 'farmer') return;
+                        // Skip our own messages and duplicates
+                        if (msg.sender_role === 'farmer' || existingIds.has(msg.id)) {
+                            console.log('[CHAT] Skipping message id', msg.id, 'role:', msg.sender_role);
+                            return;
+                        }
                         addMessage(msg);
+                        existingIds.add(msg.id);
                     });
 
                     lastMessageId = data.last_message_id;
@@ -321,6 +344,8 @@
                 formData.append('image', imageFile);
             }
 
+            console.log('[CHAT] Farmer submitting message:', message.substring(0, 50), 'with image:', !!imageFile);
+
             fetch(window.location.href, {
                 method: 'POST',
                 body: formData
@@ -329,18 +354,24 @@
                 .then(data => {
                     if (data.status === 'success') {
                         // Message saved successfully
-                        console.log('Message sent successfully');
+                        console.log('[CHAT] Message sent successfully with server ID:', data.data?.id);
                         // IMPORTANT: Update lastMessageId so polling doesn't pick up our own message again
                         if (data.data && data.data.id) {
                             lastMessageId = data.data.id;
+                            // Also update the temporary message with the real server ID
+                            const tempMessages = document.querySelectorAll(`[data-msg-id="${tempId}"]`);
+                            if (tempMessages.length > 0) {
+                                tempMessages[0].setAttribute('data-msg-id', data.data.id);
+                                console.log('[CHAT] Updated temp message ID from', tempId, 'to', data.data.id);
+                            }
                         }
                     } else {
-                        console.error('Error sending message:', data.message);
+                        console.error('[CHAT] Error sending message:', data.message);
                         // Optional: Show error to user
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('[CHAT] Error:', error);
                 });
         }
     });
