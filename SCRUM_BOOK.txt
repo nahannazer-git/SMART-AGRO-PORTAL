@@ -19,6 +19,15 @@ START DATE: 11/10/2025
 | Admin Dashboard Statistics Debugging & Fixes   | NIL     | 2 HRS | 12/10/2025 | 12/10/2025 | NIL              |
 | Final Integration Testing & Git Deployment     | NIL     | 1 HR  | 12/10/2025 | 12/10/2025 | NIL              |
 |------------------------------------------------|---------|-------|------------|------------|------------------|
+| ML Disease Prediction Model (Leaf Dataset)     | NIL     | 4 HRS | 13/10/2025 | 13/10/2025 | NIL              |
+| Data Preprocessing & Augmentation (Disease)    | NIL     | 3 HRS | 13/10/2025 | 13/10/2025 | NIL              |
+| CNN Model Architecture Setup (TensorFlow)      | NIL     | 2 HRS | 13/10/2025 | 13/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
+| Yield Prediction Model Development             | NIL     | 4 HRS | 14/10/2025 | 14/10/2025 | NIL              |
+| Environmental Data Integration (Weather/Soil)  | NIL     | 3 HRS | 14/10/2025 | 14/10/2025 | NIL              |
+| Model Training & Hyperparameter Tuning         | NIL     | 2 HRS | 14/10/2025 | 14/10/2025 | NIL              |
+| Model Serialization (.pkl) & Backend Linking   | NIL     | 1 HR  | 14/10/2025 | 14/10/2025 | NIL              |
+|------------------------------------------------|---------|-------|------------|------------|------------------|
 
 ========================================================================================================================
                                                 END OF LOG
