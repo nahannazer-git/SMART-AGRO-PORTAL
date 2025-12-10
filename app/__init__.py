@@ -145,6 +145,28 @@ def seed_demo_users_if_needed():
 
     return result
 
+def ensure_role_column_length():
+    """
+    Ensure the 'role' column can store longer values like 'krishi_bhavan_officer'.
+    """
+    import sys
+    from sqlalchemy import inspect, text
+    try:
+        inspector = inspect(db.engine)
+        cols = inspector.get_columns('users')
+        role_col = next((c for c in cols if c['name'] == 'role'), None)
+        if role_col:
+            # Some drivers report length in different keys; handle generically
+            length = role_col.get('type', None)
+            length_val = getattr(length, 'length', None) if length is not None else None
+            if length_val is not None and length_val < 30:
+                print(f"INFO: Altering users.role length from {length_val} to 30", file=sys.stderr, flush=True)
+                db.session.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(30);"))
+                db.session.commit()
+    except Exception as e:
+        print(f"WARNING: Could not verify/alter role column length: {e}", file=sys.stderr, flush=True)
+        db.session.rollback()
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -181,6 +203,9 @@ def create_app(config_class=Config):
         print("INFO: Initializing database...", file=sys.stderr, flush=True)
         db.create_all()
         print("INFO: Database tables created/verified", file=sys.stderr, flush=True)
+
+        # Ensure the role column can hold longer role names
+        ensure_role_column_length()
         
         # Auto-seed demo users if they don't exist (for production deployment)
         print("INFO: Checking if demo users need seeding...", file=sys.stderr, flush=True)
