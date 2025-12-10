@@ -1,0 +1,230 @@
+================================================================================
+                    SMART AGRICULTURE SUPPORT SYSTEM
+                   Comprehensive Project Documentation
+================================================================================
+LAST UPDATED: 2025-12-10
+PROJECT STATUS: Active / Deployed Strategy
+DEPLOYMENT URL: https://farmers-portal.onrender.com
+================================================================================
+
+1. PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+The Smart Agriculture Support System is a centralized digital platform designed 
+to bridge the gap between Farmers, Agricultural Experts, and Government Officers 
+(Krishi Bhavan). It aims to modernize agricultural practices by integrating 
+Machine Learning (AI) for disease detection and yield prediction, real-time 
+communication channels, and a robust e-marketplace.
+
+CORE OBJECTIVES:
+- Empower farmers with AI-driven tools for crop health verification.
+- Provide a direct line of communication between farmers and certified experts.
+- Streamline government subsidy distribution and product requests.
+- Create a marketplace for farmers to sell produce directly to the public.
+
+--------------------------------------------------------------------------------
+2. TECHNOLOGY STACK
+--------------------------------------------------------------------------------
+[FRONTEND]
+- HTML5 / CSS3: Semantic structure and custom styling.
+- Bootstrap 5: Responsive UI framework for grid layout and components.
+- JavaScript (Vanilla): AJAX polling, dynamic DOM manipulation, chart visualization.
+- Jinja2: Server-side templating engine.
+
+[BACKEND]
+- Python 3.11+: Core programming language.
+- Flask 3.0: Lightweight, extensible web framework.
+- Flask-SQLAlchemy: ORM for database abstraction.
+- Flask-Login: Session management and authentication.
+- Werkzeug: Security helpers (password hashing).
+
+[DATABASE]
+- SQLite: Local development environment.
+- PostgreSQL: Production database (hosted on Render).
+
+[AI / MACHINE LEARNING]
+- TensorFlow / Keras: Convolutional Neural Networks (CNN) for leaf disease detection.
+- Scikit-Learn: Regression models for crop yield prediction.
+- NumPy / Pandas: Data preprocessing and manipulation.
+- Pillow (PIL): Image processing.
+
+[DEPLOYMENT & INFRASTRUCTURE]
+- Render: Cloud hosting platform for Web Service and PostgreSQL.
+- Gunicorn: WSGI HTTP server for production.
+- Git / GitHub: Version control and CI/CD pipelines.
+
+[EXTERNAL APIS]
+- OpenWeatherMap API: Real-time weather data fetching for yield prediction.
+
+--------------------------------------------------------------------------------
+3. USER ROLES & FEATURES (A-Z)
+--------------------------------------------------------------------------------
+The system supports 4 distinct authenticated roles + 1 Public Public view.
+
+[A] FARMER
+- Dashboard: Real-time weather, active alerts, crop issue status summary.
+- Crop Health Analysis: Upload leaf images to AI model for disease prediction.
+- Expert Consultation: Chat system to discuss issues with assigned experts.
+- Yield Prediction: AI tool to estimate harvest volume based on soil/inputs.
+- Krishi Bhavan Market: View and request subsidized seeds/fertilizers/tools.
+- Agro Marketplace: List and sell own farm produce to the public.
+- Reports: View diagnosis reports and rate expert performance.
+
+[B] EXPERT (Agricultural Scientist)
+- Dashboard: Analytics on assigned cases, diagnosis stats, and ratings.
+- Diagnosis Workflow: Review farmer crop issues (images/symptoms), provide diagnosis, treatment plans, and product recommendations.
+- Communication: Real-time chat with farmers to clarify symptoms.
+- Performance Tracking: View personal ratings and monthly resolution stats.
+
+[C] KRISHI BHAVAN OFFICER (Government)
+- Dashboard: Monitor regional inventory and request statistics.
+- Inventory Management: Add/Edit subsidized products (seeds, fertilizers) visible to farmers.
+- Request Approval: Review and approve/reject farmer requests for resources.
+- Notices: Publish official government schemes and alerts to farmers.
+
+[D] ADMIN (System Administrator)
+- Dashboard: Global statistics (Users, Issues, Predictions, Yields).
+- User Management: Manage/Ban Farmers, Experts, and Officers.
+- Reports: Generate system-wide PDF/CSV reports (Regional stats, Disease frequency).
+- AI Monitoring: Track model accuracy and upload new training datasets.
+
+[E] PUBLIC USER (Unregistered)
+- Agro Marketplace: Browse crops sold by farmers (connect via phone/chat inquiry).
+- Landing Page: Access general portal information and login selection.
+
+--------------------------------------------------------------------------------
+4. DEPLOYMENT ARCHITECTURE
+--------------------------------------------------------------------------------
+Hosted on Render (PaaS) with "Blueprint" auto-deployment.
+- Configuration: defined in `render.yaml`.
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn run:app`
+- Database: Managed PostgreSQL instance.
+- Persistence: 'One-click' deployment architecture; database is persistent, file uploads are ephemeral (reset on redeploy).
+
+--------------------------------------------------------------------------------
+5. USER STORIES
+--------------------------------------------------------------------------------
+[FARMER]
+1. "As a Farmer, I want to upload a photo of my sick plant so I can know what disease it has."
+2. "As a Farmer, I want to sell my tomato harvest online so I can get better prices."
+3. "As a Farmer, I want to chat with an expert to ask about fertilizer usage."
+
+[EXPERT]
+1. "As an Expert, I want to see a list of pending crop issues so I can prioritize urgent cases."
+2. "As an Expert, I want to write a digital prescription (diagnosis) for a farmer."
+3. "As an Expert, I want to see my feedback ratings to improve my service."
+
+[OFFICER]
+1. "As an Officer, I want to add new subsidized fertilizers to the inventory."
+2. "As an Officer, I want to approve specific farmer requests for machinery."
+
+[ADMIN]
+1. "As an Admin, I want to see which region has the most crop diseases."
+2. "As an Admin, I want to download a PDF report of all registered users."
+
+--------------------------------------------------------------------------------
+6. DATABASE SCHEMA (Exact Design)
+--------------------------------------------------------------------------------
+Detailed breakdown of all database tables.
+
+[1] TABLE: users
+- id (Integer, PK): Unique User ID.
+- username (String): Unique login name.
+- email (String): Unique contact email.
+- password_hash (String): Encrypted password.
+- role (String[50]): 'farmer', 'expert', 'admin', 'krishi_bhavan_officer'.
+- full_name, phone, address: Profile details.
+- farm_size, farm_location: (Farmer specific).
+- expertise_area, qualifications: (Expert specific).
+- officer_id, designation: (Officer specific).
+
+[2] TABLE: crop_issues
+- id (Integer, PK): Unique Issue ID.
+- farmer_id (FK -> users): Who reported it.
+- crop_type, crop_variety: Crop details.
+- image_path: Path to uploaded image.
+- symptoms: JSON list of symptoms.
+- status: 'pending', 'reviewed', 'resolved'.
+- ai_prediction: JSON result from ML model.
+- expert_response: Text summary from expert.
+- expert_id (FK -> users): Assigned expert.
+
+[3] TABLE: diagnosis_reports
+- id (Integer, PK): Report ID.
+- crop_issue_id (FK -> crop_issues): Link to issue.
+- expert_id (FK -> users): Author.
+- diagnosis, disease_identified: Core findings.
+- treatment_plan, preventive_measures: Advice.
+- recommended_products: JSON list.
+- severity, confidence_level: Metadata.
+
+[4] TABLE: chat_messages
+- id (Integer, PK): Message ID.
+- farmer_id, expert_id (FK -> users): Participants.
+- message: Content text.
+- sender_role: 'farmer' or 'expert'.
+- image_path: Optional details for image messages.
+- is_read (Boolean): Read receipt status.
+
+[5] TABLE: farmer_products (Agro Marketplace)
+- id (Integer, PK): Product ID.
+- farmer_id (FK -> users): Seller.
+- product_name, category: Item details.
+- quantity, unit, price_per_unit: Inventory info.
+- is_available (Boolean): Stock status.
+- location: Sale location.
+
+[6] TABLE: products (Krishi Bhavan Marketplace)
+- id (Integer, PK): Item ID.
+- name, type, category: Resource details.
+- stock_quantity: Current inventory.
+- price_per_unit: Cost (often 0 for subsidies).
+- created_by (FK -> users): Officer.
+
+[7] TABLE: yield_predictions
+- id (Integer, PK): Prediction ID.
+- farmer_id (FK -> users): Requester.
+- crop_type, soil_type, params: Input variables.
+- predicted_yield (Float): AI output (tons/acre).
+
+[8] TABLE: expert_ratings
+- id (Integer, PK): Rating ID.
+- expert_id, farmer_id: Participants.
+- rating (1-5): Score.
+- comment: Feedback text.
+
+[9] TABLE: ml_datasets
+- id (Integer, PK): Dataset ID.
+- file_path, dataset_type: Training data info.
+
+[10] TABLE: product_requests (Subsidies)
+- id (Integer, PK): Request ID.
+- farmer_id, product_name, purpose: Request details.
+- status: 'pending', 'approved', 'rejected'.
+- approved_by (FK): Officer action.
+
+[11] TABLE: notices
+- id (Integer, PK): Notice ID.
+- title, content, category: Bulletin info.
+- posted_by: Officer ID.
+
+--------------------------------------------------------------------------------
+7. AI & MACHINE LEARNING MODELS
+--------------------------------------------------------------------------------
+
+(A) DISEASE PREDICTION MODEL
+- Type: Multi-label Classification Model (Random Forest / Decision Tree).
+- Framework: Scikit-Learn.
+- Input: Crop Type, Selected Symptoms (Dropdowns), Location, Season.
+- Workflow: User Inputs Symptoms -> Preprocessing (Encoding) -> Classifier Inference -> Disease Prediction.
+- Note: Image upload is used for record-keeping and expert review, not for direct AI inference.
+
+(B) YIELD PREDICTION MODEL
+- Type: Random Forest Regressor / Linear Regression.
+- Framework: Scikit-learn.
+- Input Features: Rainfall, Temperature, pH, Soil Type, Crop Type.
+- Output: Estimated yield in tons per hectare/acre.
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
