@@ -15,22 +15,30 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 def seed_demo_users_if_needed():
-    """Automatically seed demo users if they don't exist (for production)"""
+    """Automatically seed demo users if they don't exist (for production)."""
     import sys
     import traceback
-    
+
+    result = {
+        "created": [],
+        "skipped": [],
+        "errors": []
+    }
+
     try:
         # Check if demo users already exist
         existing = User.query.filter_by(username='farmer_demo').first()
         if existing:
-            print("INFO: Demo users already exist, skipping seeding", file=sys.stderr, flush=True)
-            return  # Users already exist, skip seeding
-        
+            msg = "INFO: Demo users already exist, skipping seeding"
+            print(msg, file=sys.stderr, flush=True)
+            result["skipped"].append("all_exist")
+            return result  # Users already exist, skip seeding
+
         print("INFO: Starting to seed demo users...", file=sys.stderr, flush=True)
-        
+
         # Common password for all demo users
         demo_password = "demo123"
-        
+
         demo_users = [
             {
                 'username': 'farmer_demo',
@@ -73,8 +81,7 @@ def seed_demo_users_if_needed():
                 'department': 'Agricultural Extension'
             }
         ]
-        
-        created_users = []
+
         for user_data in demo_users:
             try:
                 user = User(
@@ -86,7 +93,7 @@ def seed_demo_users_if_needed():
                     role=user_data['role'],
                     is_active=True
                 )
-                
+
                 # Add role-specific fields
                 if user_data['role'] == 'farmer':
                     user.farm_size = user_data.get('farm_size')
@@ -99,37 +106,44 @@ def seed_demo_users_if_needed():
                     user.officer_id = user_data.get('officer_id')
                     user.designation = user_data.get('designation')
                     user.department = user_data.get('department')
-                
+
                 # Set password
                 user.set_password(demo_password)
                 db.session.add(user)
-                created_users.append(user_data['username'])
+                result["created"].append(user_data['username'])
                 print(f"INFO: Created user: {user_data['username']}", file=sys.stderr, flush=True)
             except Exception as user_error:
-                print(f"ERROR: Failed to create user {user_data.get('username', 'unknown')}: {str(user_error)}", file=sys.stderr, flush=True)
+                err_msg = f"ERROR: Failed to create user {user_data.get('username', 'unknown')}: {str(user_error)}"
+                result["errors"].append(err_msg)
+                print(err_msg, file=sys.stderr, flush=True)
                 print(traceback.format_exc(), file=sys.stderr, flush=True)
-        
+
         # Commit all users at once
         try:
             db.session.commit()
-            print(f"SUCCESS: Seeded {len(created_users)} demo users: {', '.join(created_users)}", file=sys.stderr, flush=True)
-            
+            print(f"SUCCESS: Seeded {len(result['created'])} demo users: {', '.join(result['created'])}", file=sys.stderr, flush=True)
+
             # Verify users were actually saved
-            verify_count = User.query.filter(User.username.in_(created_users)).count()
+            verify_count = User.query.filter(User.username.in_(result["created"])).count()
             print(f"VERIFY: Found {verify_count} seeded users in database", file=sys.stderr, flush=True)
-            
+            result["verified_count"] = verify_count
         except Exception as commit_error:
             db.session.rollback()
-            print(f"ERROR: Failed to commit users to database: {str(commit_error)}", file=sys.stderr, flush=True)
+            err_msg = f"ERROR: Failed to commit users to database: {str(commit_error)}"
+            result["errors"].append(err_msg)
+            print(err_msg, file=sys.stderr, flush=True)
             print(traceback.format_exc(), file=sys.stderr, flush=True)
             raise
-            
+
     except Exception as e:
         db.session.rollback()
         error_msg = f"CRITICAL ERROR: Could not auto-seed demo users: {str(e)}"
+        result["errors"].append(error_msg)
         print(error_msg, file=sys.stderr, flush=True)
         print(traceback.format_exc(), file=sys.stderr, flush=True)
         # Don't fail app startup if seeding fails, but log the error clearly
+
+    return result
 
 def create_app(config_class=Config):
     app = Flask(__name__)

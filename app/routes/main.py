@@ -75,27 +75,28 @@ def seed_users_manual():
     """Manually seed demo users - DEBUG ENDPOINT"""
     try:
         from app import seed_demo_users_if_needed
-        
-        # Run seeding
-        seed_demo_users_if_needed()
-        
+
+        # Run seeding and capture detailed result
+        seed_result = seed_demo_users_if_needed()
+
         # Check if users were created
         users = User.query.all()
         user_list = []
         for u in users:
             password_test = u.check_password('demo123') if u.username.endswith('_demo') else None
             user_list.append({
-                'username': u.username, 
-                'role': u.role, 
+                'username': u.username,
+                'role': u.role,
                 'email': u.email,
                 'password_test': password_test
             })
-        
+
         return jsonify({
             'status': 'success',
             'message': 'Seeding completed. Check logs for details.',
             'total_users': len(users),
-            'users': user_list
+            'users': user_list,
+            'seed_result': seed_result
         }), 200
     except Exception as e:
         import traceback
