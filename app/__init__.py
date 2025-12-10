@@ -159,9 +159,9 @@ def ensure_role_column_length():
             # Some drivers report length in different keys; handle generically
             length = role_col.get('type', None)
             length_val = getattr(length, 'length', None) if length is not None else None
-            if length_val is not None and length_val < 30:
-                print(f"INFO: Altering users.role length from {length_val} to 30", file=sys.stderr, flush=True)
-                db.session.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(30);"))
+            if length_val is not None and length_val < 50:
+                print(f"INFO: Altering users.role length from {length_val} to 50", file=sys.stderr, flush=True)
+                db.session.execute(text("ALTER TABLE users ALTER COLUMN role TYPE VARCHAR(50);"))
                 db.session.commit()
     except Exception as e:
         print(f"WARNING: Could not verify/alter role column length: {e}", file=sys.stderr, flush=True)

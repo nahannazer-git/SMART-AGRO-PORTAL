@@ -57,9 +57,11 @@ def dashboard():
         func.count(CropIssue.id)
     ).group_by(CropIssue.crop_type).limit(5).all()
     
-    # Monthly diagnoses (last 6 months)
+    # Monthly diagnoses (last 6 months) - handle Postgres vs SQLite
+    dialect = db.engine.dialect.name
+    month_expr = func.strftime('%Y-%m', DiagnosisReport.created_at) if dialect == 'sqlite' else func.to_char(DiagnosisReport.created_at, 'YYYY-MM')
     monthly_diagnoses = db.session.query(
-        func.strftime('%Y-%m', DiagnosisReport.created_at).label('month'),
+        month_expr.label('month'),
         func.count(DiagnosisReport.id)
     ).filter_by(expert_id=current_user.id)\
      .group_by('month')\

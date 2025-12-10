@@ -73,9 +73,11 @@ def dashboard():
         func.count(CropIssue.id)
     ).group_by(CropIssue.crop_type).all()
     
-    # Monthly trends (last 6 months)
+    # Monthly trends (last 6 months) - handle Postgres vs SQLite
+    dialect = db.engine.dialect.name
+    month_expr = func.strftime('%Y-%m', CropIssue.created_at) if dialect == 'sqlite' else func.to_char(CropIssue.created_at, 'YYYY-MM')
     monthly_issues = db.session.query(
-        func.strftime('%Y-%m', CropIssue.created_at).label('month'),
+        month_expr.label('month'),
         func.count(CropIssue.id)
     ).group_by('month')\
      .order_by(desc('month'))\
@@ -289,9 +291,11 @@ def yield_statistics():
     ).group_by(YieldPrediction.location)\
      .order_by(desc('avg_yield')).all()
     
-    # Yield trends (monthly)
+    # Yield trends (monthly) - handle Postgres vs SQLite
+    dialect = db.engine.dialect.name
+    month_expr = func.strftime('%Y-%m', YieldPrediction.created_at) if dialect == 'sqlite' else func.to_char(YieldPrediction.created_at, 'YYYY-MM')
     yield_trends = db.session.query(
-        func.strftime('%Y-%m', YieldPrediction.created_at).label('month'),
+        month_expr.label('month'),
         func.avg(YieldPrediction.predicted_yield).label('avg_yield'),
         func.count(YieldPrediction.id).label('count')
     ).group_by('month')\
