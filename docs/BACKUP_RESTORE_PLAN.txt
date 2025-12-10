@@ -1,0 +1,77 @@
+================================================================================
+                    PROJECT BACKUP & RESTORE STRATEGY
+================================================================================
+DATE: 2025-12-10
+================================================================================
+
+1. BACKUP METHOD (THE "FULL ZIP" STRATEGY)
+--------------------------------------------------------------------------------
+The simplest and most effective backup method used for this project is creating
+a full archive of the project directory.
+
+[STEPS]
+1. Locate the project folder: `FARMERS PORTAL` (or current name).
+2. Right-click the folder > "Compress to ZIP file" (or Send to > Compressed folder).
+3. Save this .zip file to external storage (USB Drive, Google Drive, External HDD).
+
+[WHAT IS INCLUDED?]
+- Source Code: All `.py`, `.html`, `.css`, `.js` files.
+- Database: The `instance/farmers_portal.db` file (Contains User/Product data).
+- Uploads: The `app/static/uploads` folder (Contains all crop/product images).
+- Model Files: The `app/ml/models` folder (Contains trained .pkl files).
+- Virtual Environment: The `venv` folder (Libraries).
+
+--------------------------------------------------------------------------------
+2. RESTORATION PROCESS
+--------------------------------------------------------------------------------
+If the main project is lost or corrupted, follow these steps to restore from 
+the backup .zip file.
+
+[STEPS]
+1. Copy the .zip file from your USB/Drive to your Desktop.
+2. Right-click > "Extract All...".
+3. Open the extracted folder in VS Code.
+
+--------------------------------------------------------------------------------
+3. TROUBLESHOOTING: "VENV" PATH ISSUES (CRITICAL)
+--------------------------------------------------------------------------------
+When you unzip the project to a NEW computer or a NEW folder path, the 
+`venv` (Virtual Environment) folder might break.
+This happens because `venv` often "remembers" the absolute path of the original
+folder (e.g., C:\Users\OldName\Desktop\...) and gets confused if moved.
+
+[SYMPTOMS]
+- "python : The term 'python' is not recognized..."
+- "Fatal error in launcher: Unable to create process using..."
+- "No module named flask..." (even though it looks installed).
+
+[THE FIX (The "Reset" Protocol)]
+If you face any issues running the app after unzipping:
+
+1. DELETE the existing `venv` folder inside the project.
+2. Open the terminal in VS Code (Ctrl + `).
+3. Run the following commands to create a fresh environment:
+
+   # Create new environment
+   python -m venv venv
+
+   # Activate it
+   venv\Scripts\activate
+
+   # Install dependencies
+   pip install -r requirements.txt
+
+4. Run the app:
+   python run.py
+
+--------------------------------------------------------------------------------
+4. GIT REPOSITORY
+--------------------------------------------------------------------------------
+This project is also hosted on GitHub.
+URL: https://github.com/nahannazer-git/SMART-AGRO-PORTAL
+
+- Git contains: Source Code, Docs, Tests.
+- Git DOES NOT contain: The Database (due to .gitignore), User Uploads, or venv.
+- USE THE ZIP BACKUP for a complete state restore (Data + Code).
+- USE GIT for Code-only restoration.
+================================================================================
