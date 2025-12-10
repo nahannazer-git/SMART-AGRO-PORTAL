@@ -7,7 +7,7 @@ Creates demo users for all 4 roles with consistent credentials for testing
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from app import create_app
 from app.models import db, User

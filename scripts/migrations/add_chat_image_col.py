@@ -3,7 +3,8 @@ import sqlite3
 import os
 
 def add_image_column():
-    db_path = os.path.join('instance', 'farmers_portal.db')
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+    db_path = os.path.join(base_dir, 'instance', 'farmers_portal.db')
     if not os.path.exists(db_path):
         print(f"Database not found at {db_path}")
         return
