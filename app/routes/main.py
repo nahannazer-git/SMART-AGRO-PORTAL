@@ -1,6 +1,6 @@
 # Main Routes
 from flask import Blueprint, redirect, url_for, render_template, jsonify
-from app.models import db, User
+from app.models import db, User, Product
 from flask_login import current_user
 
 main_bp = Blueprint('main', __name__)
@@ -18,6 +18,18 @@ def index():
             return redirect(url_for('officer.dashboard'))
             
     return render_template('landing.html')
+
+
+@main_bp.route('/marketplace')
+def marketplace():
+    """Public Public Marketplace/Notice Page (Krishi Bhavan)"""
+    # Get all active products with stock > 0
+    products = Product.query.filter(
+        Product.stock_quantity > 0,
+        Product.is_active == True
+    ).order_by(Product.created_at.desc()).all()
+    
+    return render_template('marketplace.html', products=products)
 
 
 @main_bp.route('/check-users')
