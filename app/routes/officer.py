@@ -243,6 +243,9 @@ def delete_product(product_id):
             flash('Cannot delete product. There are pending requests associated with this product.', 'warning')
             return redirect(url_for('officer.products'))
         
+        # Delete associated stock history first
+        ProductStockHistory.query.filter_by(product_id=product.id).delete()
+        
         db.session.delete(product)
         db.session.commit()
         flash('Product deleted successfully!', 'success')
