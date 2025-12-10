@@ -127,6 +127,16 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
      - Product detail pages load correctly with proper image display.
      - No errors when viewing products from marketplace listing.
      - Graceful handling of missing farmer data.
+   
+[E11] Render Deployment Login Crash (Internal Server Error)
+   - SYMPTOM: Admin and Expert logins failed on Render production (500 Internal Error) but worked partially on localhost.
+   - CAUSE: 
+     1. Dashboard statistics used `db.session.bind.dialect.name`, which is deprecated/unreliable in newer SQLAlchemy versions on production.
+     2. `krishi_bhavan_officer` role length (21 chars) exceeded `VARCHAR(20)` column limit in database.
+   - FIX:
+     1. Updated dashboard routes (`admin.py`, `expert.py`) to use `db.engine.dialect.name` for correct dialect detection.
+     2. Increased `role` column length to `VARCHAR(50)` in `app/models/user.py`.
+     3. Added auto-migration in `app/__init__.py` to update the column length on application startup.
 
 --------------------------------------------------------------------------------
 3. FEATURE IMPLEMENTATION SUMMARY
