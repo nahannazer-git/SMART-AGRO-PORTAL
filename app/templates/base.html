@@ -12,44 +12,141 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --primary-color: #198754;
-            --secondary-color: #0d6efd;
-            --success-color: #198754;
+            /* Agricultural Color Palette */
+            --primary-color: #2d5016;      /* Deep forest green */
+            --secondary-color: #6b8e23;     /* Olive green */
+            --success-color: #228b22;       /* Forest green */
             --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #0dcaf0;
+            --warning-color: #daa520;       /* Goldenrod */
+            --info-color: #20b2aa;          /* Light sea green */
+            --earth-brown: #8b4513;         /* Saddle brown */
+            --wheat-gold: #f5deb3;         /* Wheat */
+            --soil-brown: #a0522d;          /* Sienna */
+            --leaf-green: #90ee90;          /* Light green */
+            --harvest-orange: #ff8c00;      /* Dark orange */
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #f0f8e8 0%, #e8f5e9 50%, #f1f8e9 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+        }
+        /* Agricultural Pattern Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(45, 80, 22, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(107, 142, 35, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(34, 139, 34, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body > * {
+            position: relative;
+            z-index: 1;
         }
         .alert {
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+        .alert-success {
+            border-left-color: var(--success-color);
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+        .alert-danger {
+            border-left-color: var(--danger-color);
+        }
+        .alert-warning {
+            border-left-color: var(--warning-color);
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+        .alert-info {
+            border-left-color: var(--info-color);
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
         }
         .card {
-            border-radius: 12px;
+            border-radius: 16px;
             border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.1);
             transition: all 0.3s ease;
+            background: white;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success-color) 0%, var(--secondary-color) 100%);
         }
         .card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(45, 80, 22, 0.15);
+            transform: translateY(-2px);
         }
         .table {
             border-radius: 8px;
             overflow: hidden;
         }
         .table thead {
-            background-color: #f8f9fa;
+            background: linear-gradient(135deg, #2d5016 0%, #228b22 100%);
+            color: white;
+        }
+        .table thead th {
+            border: none;
+            font-weight: 600;
+        }
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+        .table tbody tr:hover {
+            background-color: #f0f8e8;
+            transform: scale(1.01);
         }
         .btn {
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #228b22 0%, #2d5016 100%);
+            border: none;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #2d5016 0%, #228b22 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6b8e23 0%, #556b2f 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #556b2f 0%, #6b8e23 100%);
+            transform: translateY(-2px);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #daa520 0%, #b8860b 100%);
+            border: none;
+            color: #2d5016;
         }
         .navbar {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
             padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, #2d5016 0%, #228b22 100%) !important;
+        }
+        .navbar-brand {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         .navbar-brand {
             font-weight: 600;
@@ -75,6 +172,17 @@
         .badge {
             font-weight: 500;
             padding: 0.35em 0.65em;
+            border-radius: 8px;
+        }
+        .badge.bg-success {
+            background: linear-gradient(135deg, #228b22 0%, #2d5016 100%) !important;
+        }
+        .badge.bg-primary {
+            background: linear-gradient(135deg, #6b8e23 0%, #556b2f 100%) !important;
+        }
+        .badge.bg-warning {
+            background: linear-gradient(135deg, #daa520 0%, #b8860b 100%) !important;
+            color: #2d5016;
         }
         .table thead th {
             font-weight: 600;

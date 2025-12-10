@@ -7,9 +7,10 @@
     .chat-messages {
         height: 500px;
         overflow-y: auto;
-        background-color: #f8f9fa;
+        background: linear-gradient(135deg, #f0f8e8 0%, #e8f5e9 100%);
         padding: 20px;
-        border-radius: 10px;
+        border-radius: 12px;
+        border: 2px solid rgba(45, 80, 22, 0.1);
     }
 
     .message {
@@ -20,15 +21,17 @@
     }
 
     .message.farmer {
-        background-color: #0d6efd;
+        background: linear-gradient(135deg, #6b8e23 0%, #556b2f 100%);
         color: white;
         margin-left: auto;
         text-align: right;
+        box-shadow: 0 2px 8px rgba(107, 142, 35, 0.3);
     }
 
     .message.expert {
-        background-color: #198754;
+        background: linear-gradient(135deg, #228b22 0%, #2d5016 100%);
         color: white;
+        box-shadow: 0 2px 8px rgba(45, 80, 22, 0.3);
     }
 
     .message-time {
@@ -39,10 +42,10 @@
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark mb-4" style="background: linear-gradient(135deg, #2d5016 0%, #228b22 100%) !important;">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('farmer.chat_list') }}">
-            <i class="bi bi-arrow-left"></i> Back to Chat List
+            <i class="bi bi-arrow-left me-2"></i><i class="bi bi-chat-dots-fill me-2"></i>Chat with Expert
         </a>
     </div>
 </nav>

@@ -14,13 +14,14 @@
     .product-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
+        border-top: 3px solid #228b22;
     }
 
     .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 12px 35px rgba(45, 80, 22, 0.25);
     }
 
     .product-image {
@@ -60,7 +61,10 @@
     .product-price {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #27ae60;
+        background: linear-gradient(135deg, #228b22 0%, #2d5016 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         margin-bottom: 10px;
     }
 
@@ -85,21 +89,27 @@
 
     .btn-view-product {
         width: 100%;
-        background-color: #27ae60;
+        background: linear-gradient(135deg, #228b22 0%, #2d5016 100%);
         border: none;
         color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
     .btn-view-product:hover {
-        background-color: #229954;
+        background: linear-gradient(135deg, #2d5016 0%, #228b22 100%);
         color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(45, 80, 22, 0.4);
     }
 
     .filter-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
+        background: linear-gradient(135deg, #f0f8e8 0%, #e8f5e9 100%);
+        padding: 25px;
+        border-radius: 12px;
         margin-bottom: 30px;
+        border: 2px solid rgba(45, 80, 22, 0.1);
+        box-shadow: 0 2px 8px rgba(45, 80, 22, 0.1);
     }
 
     .search-box {
@@ -135,10 +145,18 @@
 </div>
 
 <!-- Marketplace Header -->
-<div class="marketplace-header">
-    <div class="container">
-        <h1><i class="bi bi-shop"></i> Agro Marketplace</h1>
-        <p class="mb-0">Buy fresh agricultural products directly from farmers</p>
+<div class="marketplace-header" style="background: linear-gradient(135deg, #2d5016 0%, #228b22 50%, #6b8e23 100%); position: relative; overflow: hidden;">
+    <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+        <div class="position-absolute" style="top: 20%; left: 10%; font-size: 8rem;">🌾</div>
+        <div class="position-absolute" style="top: 60%; right: 15%; font-size: 6rem;">🌱</div>
+        <div class="position-absolute" style="bottom: 20%; left: 20%; font-size: 7rem;">🌿</div>
+    </div>
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="text-center mb-3">
+            <i class="bi bi-flower1" style="font-size: 3rem; opacity: 0.9;"></i>
+        </div>
+        <h1 class="text-center"><i class="bi bi-shop me-2"></i>Agro Marketplace</h1>
+        <p class="text-center mb-0 opacity-90">Buy fresh agricultural products directly from farmers</p>
     </div>
 </div>
 
@@ -167,8 +185,8 @@
 
             <!-- Search Button -->
             <div class="col-md-2">
-                <button type="submit" class="btn btn-success w-100">
-                    <i class="bi bi-search"></i> Search
+                <button type="submit" class="btn btn-success w-100" style="background: linear-gradient(135deg, #228b22 0%, #2d5016 100%); border: none; font-weight: 600;">
+                    <i class="bi bi-search me-2"></i>Search
                 </button>
             </div>
         </form>
@@ -285,22 +303,26 @@
         <i class="bi bi-inbox"></i>
         <h4>No products found</h4>
         <p>Try adjusting your search filters or check back later!</p>
-        <a href="{{ url_for('marketplace.index') }}" class="btn btn-success mt-3">
-            <i class="bi bi-arrow-left"></i> View All Products
+        <a href="{{ url_for('marketplace.index') }}" class="btn btn-success mt-3" style="background: linear-gradient(135deg, #228b22 0%, #2d5016 100%); border: none; font-weight: 600;">
+            <i class="bi bi-arrow-left me-2"></i>View All Products
         </a>
     </div>
     {% endif %}
 </div>
 
 <!-- Login Prompt for Farmers -->
-<div class="container mt-5">
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i>
-        <strong>Are you a farmer?</strong>
-        <span>List your products on our marketplace to reach more customers!
-            <a href="{{ url_for('auth.farmer_login') }}" class="alert-link">Login</a> or
-            <a href="{{ url_for('auth.farmer_register') }}" class="alert-link">Register</a> to start selling.
-        </span>
+<div class="container mt-5 mb-5">
+    <div class="alert" style="background: linear-gradient(135deg, #f0f8e8 0%, #e8f5e9 100%); border-left: 4px solid #228b22; border-radius: 12px; padding: 20px;">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-seedling me-3" style="font-size: 2rem; color: #228b22;"></i>
+            <div>
+                <strong style="color: #2d5016;">Are you a farmer?</strong>
+                <span style="color: #556b2f;"> List your products on our marketplace to reach more customers!
+                    <a href="{{ url_for('auth.farmer_login') }}" class="fw-bold" style="color: #228b22; text-decoration: none;">Login</a> or
+                    <a href="{{ url_for('auth.farmer_register') }}" class="fw-bold" style="color: #228b22; text-decoration: none;">Register</a> to start selling.
+                </span>
+            </div>
+        </div>
     </div>
 </div>
 

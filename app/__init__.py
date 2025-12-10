@@ -16,15 +16,10 @@ def load_user(user_id):
 
 def seed_demo_users_if_needed():
     """Automatically seed demo users if they don't exist (for production)"""
-    import traceback
     try:
         # Check if demo users already exist
-        existing_user = User.query.filter_by(username='farmer_demo').first()
-        if existing_user:
-            print("ℹ️  Demo users already exist. Skipping seeding.")
+        if User.query.filter_by(username='farmer_demo').first():
             return  # Users already exist, skip seeding
-        
-        print("🌱 Starting demo user seeding...")
         
         # Common password for all demo users
         demo_password = "demo123"
@@ -72,13 +67,7 @@ def seed_demo_users_if_needed():
             }
         ]
         
-        created_count = 0
         for user_data in demo_users:
-            # Check if user already exists
-            if User.query.filter_by(username=user_data['username']).first():
-                print(f"⚠️  User {user_data['username']} already exists, skipping...")
-                continue
-                
             user = User(
                 username=user_data['username'],
                 email=user_data['email'],
@@ -105,17 +94,12 @@ def seed_demo_users_if_needed():
             # Set password
             user.set_password(demo_password)
             db.session.add(user)
-            created_count += 1
-            print(f"✓ Created user: {user_data['username']} ({user_data['role']})")
         
         db.session.commit()
-        print(f"✅ Successfully created {created_count} demo users!")
-        print("📝 Login credentials - Username: [role]_demo, Password: demo123")
+        print("✅ Demo users auto-seeded successfully!")
     except Exception as e:
         db.session.rollback()
-        error_msg = f"❌ ERROR: Could not auto-seed demo users: {str(e)}"
-        print(error_msg)
-        print(traceback.format_exc())
+        print(f"⚠️  Warning: Could not auto-seed demo users: {str(e)}")
         # Don't fail app startup if seeding fails
 
 def create_app(config_class=Config):
