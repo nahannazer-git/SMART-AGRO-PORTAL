@@ -16,10 +16,17 @@ def load_user(user_id):
 
 def seed_demo_users_if_needed():
     """Automatically seed demo users if they don't exist (for production)"""
+    import sys
+    import traceback
+    
     try:
         # Check if demo users already exist
-        if User.query.filter_by(username='farmer_demo').first():
+        existing = User.query.filter_by(username='farmer_demo').first()
+        if existing:
+            print("INFO: Demo users already exist, skipping seeding", file=sys.stderr, flush=True)
             return  # Users already exist, skip seeding
+        
+        print("INFO: Starting to seed demo users...", file=sys.stderr, flush=True)
         
         # Common password for all demo users
         demo_password = "demo123"
@@ -67,40 +74,62 @@ def seed_demo_users_if_needed():
             }
         ]
         
+        created_users = []
         for user_data in demo_users:
-            user = User(
-                username=user_data['username'],
-                email=user_data['email'],
-                full_name=user_data['full_name'],
-                phone=user_data['phone'],
-                address=user_data['address'],
-                role=user_data['role'],
-                is_active=True
-            )
-            
-            # Add role-specific fields
-            if user_data['role'] == 'farmer':
-                user.farm_size = user_data.get('farm_size')
-                user.farm_location = user_data.get('farm_location')
-            elif user_data['role'] == 'expert':
-                user.expertise_area = user_data.get('expertise_area')
-                user.qualifications = user_data.get('qualifications')
-                user.years_of_experience = user_data.get('years_of_experience')
-            elif user_data['role'] == 'krishi_bhavan_officer':
-                user.officer_id = user_data.get('officer_id')
-                user.designation = user_data.get('designation')
-                user.department = user_data.get('department')
-            
-            # Set password
-            user.set_password(demo_password)
-            db.session.add(user)
+            try:
+                user = User(
+                    username=user_data['username'],
+                    email=user_data['email'],
+                    full_name=user_data['full_name'],
+                    phone=user_data['phone'],
+                    address=user_data['address'],
+                    role=user_data['role'],
+                    is_active=True
+                )
+                
+                # Add role-specific fields
+                if user_data['role'] == 'farmer':
+                    user.farm_size = user_data.get('farm_size')
+                    user.farm_location = user_data.get('farm_location')
+                elif user_data['role'] == 'expert':
+                    user.expertise_area = user_data.get('expertise_area')
+                    user.qualifications = user_data.get('qualifications')
+                    user.years_of_experience = user_data.get('years_of_experience')
+                elif user_data['role'] == 'krishi_bhavan_officer':
+                    user.officer_id = user_data.get('officer_id')
+                    user.designation = user_data.get('designation')
+                    user.department = user_data.get('department')
+                
+                # Set password
+                user.set_password(demo_password)
+                db.session.add(user)
+                created_users.append(user_data['username'])
+                print(f"INFO: Created user: {user_data['username']}", file=sys.stderr, flush=True)
+            except Exception as user_error:
+                print(f"ERROR: Failed to create user {user_data.get('username', 'unknown')}: {str(user_error)}", file=sys.stderr, flush=True)
+                print(traceback.format_exc(), file=sys.stderr, flush=True)
         
-        db.session.commit()
-        print("✅ Demo users auto-seeded successfully!")
+        # Commit all users at once
+        try:
+            db.session.commit()
+            print(f"SUCCESS: Seeded {len(created_users)} demo users: {', '.join(created_users)}", file=sys.stderr, flush=True)
+            
+            # Verify users were actually saved
+            verify_count = User.query.filter(User.username.in_(created_users)).count()
+            print(f"VERIFY: Found {verify_count} seeded users in database", file=sys.stderr, flush=True)
+            
+        except Exception as commit_error:
+            db.session.rollback()
+            print(f"ERROR: Failed to commit users to database: {str(commit_error)}", file=sys.stderr, flush=True)
+            print(traceback.format_exc(), file=sys.stderr, flush=True)
+            raise
+            
     except Exception as e:
         db.session.rollback()
-        print(f"⚠️  Warning: Could not auto-seed demo users: {str(e)}")
-        # Don't fail app startup if seeding fails
+        error_msg = f"CRITICAL ERROR: Could not auto-seed demo users: {str(e)}"
+        print(error_msg, file=sys.stderr, flush=True)
+        print(traceback.format_exc(), file=sys.stderr, flush=True)
+        # Don't fail app startup if seeding fails, but log the error clearly
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -132,11 +161,17 @@ def create_app(config_class=Config):
                 return []
         return value if isinstance(value, list) else []
     
-    # Create database tables
+    # Create database tables and seed users
     with app.app_context():
+        import sys
+        print("INFO: Initializing database...", file=sys.stderr, flush=True)
         db.create_all()
+        print("INFO: Database tables created/verified", file=sys.stderr, flush=True)
+        
         # Auto-seed demo users if they don't exist (for production deployment)
+        print("INFO: Checking if demo users need seeding...", file=sys.stderr, flush=True)
         seed_demo_users_if_needed()
+        print("INFO: User seeding check completed", file=sys.stderr, flush=True)
     
     # Register blueprints
     from app.routes.auth import auth_bp
