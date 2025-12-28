@@ -1,0 +1,30 @@
+# Exclude documentation and meta files
+docs/
+README.md
+LICENSE
+deployment/
+render.yaml
+.renderignore
+
+# Exclude scripts and tools
+scripts/
+tests/
+*.pyc
+__pycache__/
+
+# Exclude local environment and IDE files
+venv/
+.venv/
+.vscode/
+.idea/
+.git/
+
+# Exclude instances and temporary databases
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Exclude all uploads (they take a lot of space and are ephemeral anyway)
+app/static/uploads/
+!app/static/uploads/.gitkeep
