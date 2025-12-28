@@ -216,3 +216,32 @@ PROJECT: SMART AGRICULTURE SUPPORT SYSTEM
 ================================================================================
                                   END OF LOG
 ================================================================================
+
+================================================================================
+4. DEPLOYMENT ANALYSIS (Dec 28, 2025)
+================================================================================
+
+[X] VERCEL DEPLOYMENT ATTEMPT & RESULTS
+   - OBJECTIVE: Enable high-speed, global edge deployment for the Farmers Portal.
+   - PROCESS: 
+     1. Created app.py as root entry point.
+     2. Configured vercel.json for serverless routing.
+     3. Updated numpy to 1.26.4 to resolve dependency conflicts with pandas.
+     4. Optimized package size via .vercelignore to exclude local assets/docs.
+
+   - OUTCOME: X Deployment unsuccessful due to Vercel's platform-specific constraints.
+   - CRITICAL LIMITATION: 'Serverless Function has exceeded the unzipped maximum size of 250 MB.'
+   - ROOT CAUSE: This project is a feature-rich Agriculture System that uses heavy Machine Learning and Data Science libraries (scikit-learn, pandas, numpy). These libraries are essential for its core logic but exceed the size limits of Vercel's Serverless environment.
+
+[Y] FINAL DECISION: RENDER OVER VERCEL
+   - PRIMARY CHOICE: Render (Live & Production Ready).
+   - REASONING:
+     1. Infrastructure: Render uses long-running Docker-style containers rather than ephemeral Serverless functions. This allows it to host 'heavy' projects with complex ML dependencies without any size restrictions.
+     2. Stability: Since the project is near submission (1 week away), Render provides a more stable, traditional server environment that matches the developer's local setup perfectly.
+     3. Isolation: All Vercel-specific files have been removed to keep the repository clean and minimize confusion for reviewers.
+
+   - STATUS: Check Project reverted to its original, perfect working state. Render remains the primary deployment platform.
+
+================================================================================
+                                  END OF LOG
+================================================================================
