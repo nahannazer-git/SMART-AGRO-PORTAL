@@ -1,0 +1,472 @@
+Slide 1: Title
+Farmers Portal — Smart Agriculture Assistant
+Team: [Your Names]  •  Course: [Course Name]  •  Date: 15/01/26
+
+Slide 2: Problem & Objective
+- Problem: Farmers need faster pest/disease diagnosis, yield estimates, and marketplace access.
+- Objective: Provide AI-assisted diagnosis, yield prediction, expert support, marketplace, and officer coordination.
+
+Slide 3: Key Features
+- AI disease diagnosis (image + symptoms)
+- Yield prediction using weather + farm data
+- Expert–farmer chat with ratings
+- Marketplace for farmer products
+- Krishi Bhavan officer notices & product distribution
+
+Slide 4: System Architecture
+- Frontend: Server-rendered templates (Jinja2) + static assets (HTML/CSS/JS)
+- Backend: Flask app with route handlers in `app/routes/`
+- Storage: SQL database via SQLAlchemy + file uploads for images & datasets
+- ML: scikit-learn models loaded with `joblib` for inference
+
+Slide 5: Technology Stack
+- Backend: Flask, Flask-SQLAlchemy, Flask-Login
+- Database: SQLite (local) / PostgreSQL (production) via `SQLALCHEMY_DATABASE_URI`
+- ML: scikit-learn, numpy, joblib
+- Utilities: Pillow, pandas, requests, bcrypt
+- Deployment: gunicorn, psycopg2-binary
+
+Slide 6: Database Tables — Overview
+Core tables implemented:
+- users, crop_issues, yield_predictions, notices, product_requests,
+  chat_messages, farmer_products, diagnosis_reports, expert_ratings,
+  products, product_stock_history, ml_datasets, model_trainings, model_performance
+
+Slide 7: Table — `users`
+field | type | short description
+- id | Integer PK | Primary key
+- username | String(80) | Unique login name
+- email | String(120) | Unique email
+- password_hash | String(255) | Bcrypt hashed password
+- role | String(50) | Role: farmer/expert/admin/officer
+- full_name | String(100) | User's full name
+- phone | String(20) | Contact number
+- address | Text | Address/details
+- is_active | Boolean | Account active flag
+- created_at | DateTime | Account created timestamp
+- last_login | DateTime | Last login timestamp
+- farm_size | Float | Farmer: farm size (acres)
+- farm_location | String(200) | Farmer: location
+- expertise_area | String(100) | Expert: domain
+- qualifications | Text | Expert: qualifications
+- years_of_experience | Integer | Expert: experience years
+- officer_id | String(50) | Officer unique id
+- designation | String(100) | Officer designation
+- department | String(100) | Officer department
+
+Slide 8: Table — `crop_issues`
+field | type | short description
+- id | Integer PK | Primary key
+- farmer_id | Integer FK -> users.id | Reporter (farmer)
+- crop_type | String(100) | Crop name
+- crop_variety | String(100) | Variety
+- planting_date | Date | Planting date
+- issue_description | Text | Farmer's issue description
+- symptoms | Text | JSON/text of selected symptoms
+- image_path | String(255) | Uploaded image file path
+- location | String(200) | Farm/location
+- status | String(20) | pending/reviewed/resolved
+- ai_prediction | Text | AI disease prediction (JSON/text)
+- expert_response | Text | Expert's notes
+- expert_id | Integer FK -> users.id | Assigned expert
+- created_at | DateTime | Created timestamp
+- updated_at | DateTime | Last update timestamp
+
+Slide 9: Table — `yield_predictions`
+field | type | short description
+- id | Integer PK | Primary key
+- farmer_id | Integer FK -> users.id | Farmer requesting prediction
+- crop_type | String(100) | Crop name
+- crop_variety | String(100) | Variety
+- soil_type | String(50) | Soil classification
+- irrigation_type | String(50) | Irrigation used
+- fertilizer_type | String(50) | Fertilizer used
+- planting_date | Date | Planting date
+- expected_harvest_date | Date | Expected harvest
+- temperature | Float | Auto-fetched temperature
+- rainfall | Float | Auto-fetched rainfall
+- farm_size | Float | Size in acres
+- location | String(200) | Farm location
+- predicted_yield | Float | Prediction result (tons/acre)
+- confidence_score | Float | Model confidence
+- ai_model_used | String(50) | Model identifier
+- created_at | DateTime | Timestamp
+
+Slide 10: Table — `notices`
+field | type | short description
+- id | Integer PK | Primary key
+- title | String(200) | Notice title
+- content | Text | Notice content
+- category | String(50) | subsidy/scheme/alert/general
+- priority | String(20) | high/normal/low
+- posted_by | Integer FK -> users.id | Officer who posted
+- target_audience | String(50) | all/farmers/experts
+- is_active | Boolean | Active flag
+- created_at | DateTime | Posted timestamp
+- expires_at | DateTime | Optional expiry
+
+Slide 11: Table — `product_requests`
+field | type | short description
+- id | Integer PK | Primary key
+- farmer_id | Integer FK -> users.id | Requesting farmer
+- product_name | String(200) | Name
+- product_type | String(50) | seed/fertilizer/etc.
+- quantity | Integer | Requested qty
+- unit | String(20) | kg/liter/piece
+- purpose | Text | Reason for request
+- status | String(20) | pending/approved/rejected/distributed
+- approved_by | Integer FK -> users.id | Officer approver
+- approval_date | DateTime | Approval timestamp
+- rejection_reason | Text | If rejected
+- created_at | DateTime | Created timestamp
+- updated_at | DateTime | Updated timestamp
+
+Slide 12: Table — `chat_messages`
+field | type | short description
+- id | Integer PK | Primary key
+- farmer_id | Integer FK -> users.id | Farmer in chat
+- expert_id | Integer FK -> users.id | Expert in chat
+- message | Text | Message body
+- sender_role | String(20) | farmer/expert
+- is_read | Boolean | Read status
+- related_issue_id | Integer FK -> crop_issues.id | Related issue
+- image_path | String(255) | Optional image
+- created_at | DateTime | Timestamp
+
+Slide 13: Table — `farmer_products`
+field | type | short description
+- id | Integer PK | Primary key
+- farmer_id | Integer FK -> users.id | Owner farmer
+- product_name | String(150) | Product title
+- category | String(100) | Vegetables/Fruits/Grains
+- description | Text | Product description
+- quantity | Float | Stock amount
+- unit | String(50) | Unit (kg, liter)
+- price_per_unit | Float | Price in rupees
+- product_image_path | String(255) | Image path
+- location | String(200) | Farm/location
+- is_available | Boolean | Active listing
+- created_at | DateTime | Created
+- updated_at | DateTime | Updated
+
+Slide 14: Table — `diagnosis_reports`
+field | type | short description
+- id | Integer PK | Primary key
+- crop_issue_id | Integer FK -> crop_issues.id | Related issue (unique)
+- expert_id | Integer FK -> users.id | Expert who diagnosed
+- diagnosis | Text | Diagnosis details
+- disease_identified | String(200) | Disease name
+- severity | String(20) | Low/Medium/High/Critical
+- treatment_plan | Text | Steps to treat
+- preventive_measures | Text | Prevention steps
+- recommended_products | Text | JSON list of products
+- ai_prediction_used | Boolean | Whether AI was used
+- confidence_level | String(20) | High/Medium/Low
+- created_at | DateTime | Timestamp
+- updated_at | DateTime | Timestamp
+
+Slide 15: Table — `expert_ratings`
+field | type | short description
+- id | Integer PK | Primary key
+- expert_id | Integer FK -> users.id | Rated expert
+- farmer_id | Integer FK -> users.id | Rating farmer
+- crop_issue_id | Integer FK -> crop_issues.id | Related issue
+- rating | Integer | 1-5 stars
+- comment | Text | Optional feedback
+- created_at | DateTime | Timestamp
+
+Slide 16: Table — `products` (Officer inventory)
+field | type | short description
+- id | Integer PK | Primary key
+- name | String(200) | Product name
+- product_type | String(50) | seed/fertilizer/pesticide/etc.
+- description | Text | Details
+- image_path | String(255) | Image
+- stock_quantity | Integer | Current stock
+- unit | String(20) | Unit type
+- price_per_unit | Float | Price
+- is_free | Boolean | Free flag
+- category | String(50) | government_subsidy/etc.
+- supplier | String(200) | Supplier name
+- expiry_date | Date | Expiry (if applicable)
+- is_active | Boolean | Active flag
+- created_by | Integer FK -> users.id | Creator (officer)
+- created_at | DateTime | Timestamp
+- updated_at | DateTime | Timestamp
+
+Slide 17: Table — `product_stock_history`
+field | type | short description
+- id | Integer PK | Primary key
+- product_id | Integer FK -> products.id | Related product
+- quantity_change | Integer | +ve add / -ve deduction
+- previous_stock | Integer | Before change
+- new_stock | Integer | After change
+- reason | String(200) | restock/distribution/etc.
+- changed_by | Integer FK -> users.id | Officer who changed
+- created_at | DateTime | Timestamp
+
+Slide 18: Table — `ml_datasets`
+field | type | short description
+- id | Integer PK | Primary key
+- name | String(200) | Dataset name
+- description | Text | Short description
+- file_path | String(500) | File storage path
+- file_size | Integer | Size in bytes
+- dataset_type | String(50) | disease/yield/general
+- uploaded_by | Integer FK -> users.id | Uploader
+- record_count | Integer | Rows/records
+- status | String(20) | active/archived
+- created_at | DateTime | Timestamp
+
+Slide 19: Table — `model_trainings`
+field | type | short description
+- id | Integer PK | Primary key
+- model_name | String(200) | Name/identifier
+- model_type | String(50) | disease/yield
+- dataset_id | Integer FK -> ml_datasets.id | Dataset used
+- training_status | String(20) | pending/training/completed/failed
+- accuracy | Float | Training accuracy
+- loss | Float | Training loss
+- training_duration | Integer | Seconds
+- epochs | Integer | Epochs used
+- batch_size | Integer | Batch size
+- trained_by | Integer FK -> users.id | Trainer
+- model_path | String(500) | Stored model file
+- notes | Text | Notes
+- created_at | DateTime | Timestamp
+- completed_at | DateTime | Completed timestamp
+
+Slide 20: Table — `model_performance`
+field | type | short description
+- id | Integer PK | Primary key
+- model_type | String(50) | disease/yield
+- model_version | String(50) | Version tag
+- total_predictions | Integer | Count predictions
+- correct_predictions | Integer | Correct count
+- accuracy | Float | Observed accuracy
+- avg_confidence | Float | Avg confidence score
+- last_updated | DateTime | Last updated timestamp
+
+Slide 21: ML Components & Data Flow
+- Disease model(s): image classifier(s) in `ml/` loaded by `joblib`
+- Yield model: tabular regressor using weather + farm features
+- Data: ML datasets stored under `static/uploads/ml_datasets` and tracked in `ml_datasets`
+- Training metadata: `model_trainings`, performance: `model_performance`
+
+Slide 22: Progress Timeline (approx. 1 month)
+- Week 1: Project setup, DB models, auth & roles — Completed
+- Week 2: Farmer flows (issue posting, uploads) — Completed
+- Week 3: Expert flows, chat, ML inference — In progress
+- Week 4: Marketplace, officer features, testing & docs — Pending
+
+Slide 23: Demo Plan (short)
+1) Login as farmer → create Crop Issue + upload image
+2) Show AI prediction output on issue page
+3) Expert diagnosis & chat flow
+4) Yield prediction form → show predicted value
+5) Marketplace: add listing → view listing
+
+Slide 24: Scrum Book Extract (one page)
+- Sprint Goal: Core farmer workflows + AI inference + marketplace
+- Duration: 4 weeks
+- Completed: Scaffold, auth, DB models, farmer flows
+- In Progress: Expert UI, ML inference tuning, tests
+- Pending: Deployment, model monitoring, UX polish
+- Blockers: Dataset labeling time, image validation edge-cases
+
+Slide 25: Rehearsal Checklist
+- Laptop + charger, demo accounts prepared (farmer/expert/admin)
+- Local app running or screenshots ready
+- Scrum book printed (`docs/SCRUM_BOOK.txt`) or accessible
+- Time: 7–10 min presentation + 3–5 min Q&A
+
+Slide 26: Q&A / Next Steps
+- Improve ML accuracy (more data & augmentation)
+- Add model monitoring & CI for model updates
+- Deploy to Render with PostgreSQL and background training jobs
+
+---END---
+
+Slide 1: Title
+Farmers Portal — Smart Agriculture Assistant
+Team: [Your Names]  •  Course: [Course Name]  •  Date: 15/01/26
+
+Slide 2: Problem & Objective
+- Problem: Farmers need faster, reliable pest/disease advice, accurate yield estimates, and market access.
+- Objective: Provide a trusted platform for reporting issues, AI-assisted diagnosis, yield prediction, expert help, and marketplace services.
+
+Slide 3: Existing System vs Proposed System
+- Existing (manual): Local visits, ad-hoc advice (calls/WhatsApp), inconsistent record-keeping, informal marketplace.
+- Proposed (this project): Structured issue reporting, AI-assisted initial diagnosis, stored predictions, expert chat, marketplace, and officer-managed inventory.
+
+Slide 4: Key Features (high level)
+- AI disease diagnosis (image + symptoms) for quick triage
+- Yield prediction using farm data + weather
+- Expert–farmer chat with ratings and treatment reports
+- Marketplace for farmer products with listings and stock
+- Officer portal for notices and product distribution
+
+Slide 5: Role-based Features & User Stories
+- Farmer:
+    - Report crop issues with images and symptoms.
+    - Request yield predictions and view history.
+    - List products for sale and manage listings.
+- Expert:
+    - View assigned issues, provide diagnosis and treatment plans.
+    - Communicate via chat and receive ratings.
+- Krishi Bhavan Officer:
+    - Post official notices, manage product inventory and approve requests.
+    - Audit stock changes and distribution history.
+- Admin:
+    - Manage users, ML datasets, model training records, and system settings.
+
+Slide 6: System Architecture (concise)
+- Frontend: Server-rendered templates (Jinja2) plus static JS/CSS for interactivity.
+- Backend: Flask app (routes in `app/routes/`), business logic and authentication.
+- Storage: SQL database via SQLAlchemy (SQLite locally, PostgreSQL in production) + file storage for uploads.
+- ML: Models stored in `ml/` and loaded with `joblib` for inference.
+
+Slide 7: Technology Stack (concise)
+- Backend: Flask, Flask-SQLAlchemy, Flask-Login
+- Database: SQLite (dev) / PostgreSQL (prod)
+- ML & Data: scikit-learn, numpy, joblib, pandas
+- Utilities: Pillow (images), requests, bcrypt (passwords)
+- Deployment: gunicorn, psycopg2-binary (Postgres driver)
+
+Slide 8: ML Algorithms — What & Why (simple)
+- Disease diagnosis (images): Transfer learning with a lightweight CNN (e.g., MobileNet/ResNet via transfer learning).
+    - Why: Learns visual features; transfer learning works well with modest datasets and reduces training time.
+- Yield prediction (tabular): Ensemble regressors (Random Forest / Gradient Boosting) or linear regression depending on dataset.
+    - Why: Ensembles handle mixed features and reduce overfitting; they also give feature importance for explanations.
+- Deployment note: Tabular models use `scikit-learn`; image models can be exported as lightweight artifacts for inference.
+
+Slide 9: Database Overview (concise)
+- Main entities: `users`, `crop_issues`, `yield_predictions`, `diagnosis_reports`, `chat_messages`, `farmer_products`, `products`, and ML tables (`ml_datasets`, `model_trainings`, `model_performance`).
+- Relationships: Users (roles) create issues & predictions; experts produce diagnosis reports linked to issues; officers manage `products` and requests.
+
+Slide 10: Condensed Table — `users` (key fields)
+- id (Integer PK) — Primary key
+- username, email (String) — Login and contact
+- password_hash (String) — Bcrypt hashed password
+- role (String) — farmer | expert | admin | officer
+- full_name, phone (String) — Identification & contact
+- farm_size, farm_location (Float/String) — Farmer-specific
+
+Slide 11: Condensed Table — `crop_issues`
+- id (PK), farmer_id (FK -> users.id)
+- crop_type, issue_description — What and symptoms
+- image_path — Uploaded image for AI/expert review
+- status — pending / reviewed / resolved
+- ai_prediction — AI initial result (short text/JSON)
+
+Slide 12: Condensed Table — `diagnosis_reports` & `expert_ratings`
+- `diagnosis_reports`: id, crop_issue_id (FK), expert_id (FK), diagnosis, treatment_plan, confidence_level
+- `expert_ratings`: id, expert_id, farmer_id, rating (1-5), comment
+
+Slide 13: Condensed Table — `yield_predictions`
+- id, farmer_id (FK), crop_type, planting_date, farm_size, location
+- predicted_yield, confidence_score, ai_model_used, created_at
+
+Slide 14: Condensed Table — `chat_messages` & `farmer_products`
+- `chat_messages`: id, farmer_id, expert_id, message, sender_role, created_at
+- `farmer_products`: id, farmer_id, product_name, quantity, unit, price_per_unit, is_available
+
+Slide 15: Condensed Table — Officer inventory (`products`, `product_stock_history`)
+- `products`: id, name, product_type, stock_quantity, unit, is_free, created_by
+- `product_stock_history`: id, product_id, quantity_change, previous_stock, new_stock, changed_by, reason
+
+Slide 16: Condensed Table — ML metadata (`ml_datasets`, `model_trainings`, `model_performance`)
+- `ml_datasets`: id, name, file_path, dataset_type, uploaded_by, record_count
+- `model_trainings`: id, model_name, model_type, dataset_id, training_status, accuracy, model_path
+- `model_performance`: id, model_type, model_version, total_predictions, correct_predictions, accuracy
+
+Slide 17: Progress Timeline (approx. 1 month)
+- Week 1: Project setup, DB models, auth & roles — Completed
+- Week 2: Farmer flows (issue posting, uploads) — Completed
+- Week 3: Expert flows, chat, ML inference integration — In progress
+- Week 4: Marketplace, officer features, testing & docs — Pending
+
+Slide 18: Demo Plan (short)
+1) Login as farmer → create Crop Issue + upload image
+2) Show AI prediction output and expert response
+3) Yield prediction form → show predicted value
+4) Marketplace: add listing → view listing
+5) Officer: post notice and view product stock
+
+Slide 19: Scrum Book Extract (one page)
+- Sprint Goal: Deliver core farmer workflows + AI inference + marketplace
+- Duration: 4 weeks
+- Completed: Scaffold, auth, DB models, farmer flows
+- In Progress: Expert UI, ML inference tuning, tests
+- Pending: Deployment, model monitoring, UX polish
+- Blockers: Dataset labeling time, image validation edge-cases
+
+Slide 20: Rehearsal Checklist
+- Laptop + charger, sample accounts (farmer/expert/admin) ready
+- Local app running or screenshots available
+- `docs/SCRUM_BOOK.txt` printed or open
+- Time: 7–10 min presentation + 3–5 min Q&A
+
+Slide 21: Future Scope
+- Model monitoring (drift detection) and scheduled retraining pipelines
+- Collect more labeled images and augment data for better disease detection
+- Add notifications, secure marketplace orders, and payments
+
+Slide 22: Conclusion & Trustworthiness
+- Farmers Portal centralizes reporting, speeds diagnostics, and connects stakeholders.
+- Trust features: role-based access, officer verification for notices, inventory audit logs.
+- Next steps: improve data quality, add model monitoring, deploy with PostgreSQL and background jobs.
+
+Slide 23: Q&A / Next Steps (closing)
+- Be ready to answer dataset size, current model accuracy, and deployment plan.
+- Offer contact and demo follow-up details.
+
+---END---
+
+Notes: This file is the sorted, concise text PPT. Each "Slide N" maps to a single slide.
+
+Slide 27: Role-based Features & User Stories
+- Farmer (user stories):
+    - As a farmer, I can report crop issues with images so experts can diagnose remotely.
+    - As a farmer, I can request yield estimates using my farm details and weather data.
+    - As a farmer, I can list products on the marketplace to sell excess produce.
+- Expert (user stories):
+    - As an expert, I can view assigned crop issues, provide diagnosis and treatment plans.
+    - As an expert, I can rate and comment on farmer issues to improve service quality.
+- Krishi Bhavan Officer (user stories):
+    - As an officer, I can post notices, manage government product inventory and approve requests.
+    - As an officer, I can see product stock history and audit changes.
+- Admin (user stories):
+    - As an admin, I can manage users (farmers, experts, officers), ML datasets, and system settings.
+    - As an admin, I can view model training jobs and performance metrics.
+
+Slide 28: Existing System vs Proposed System
+- Existing (typical manual context):
+    - Farmers rely on local visits, phone calls, or scattered WhatsApp images for advice.
+    - Yield estimates are ad-hoc and often inaccurate; record-keeping is minimal.
+    - Marketplace interactions are informal and hard to scale.
+- Proposed (our Farmers Portal):
+    - Structured issue reporting with images and symptoms, AI-assisted initial diagnosis.
+    - Automated yield predictions using farm + weather data, stored results for comparison.
+    - Integrated marketplace, chat between farmers and experts, and officer-managed distributions.
+    - Centralized admin controls for datasets, model training and monitoring.
+
+Slide 29: Learning Algorithms — Types & Why
+- Disease diagnosis (images):
+    - Type: Convolutional Neural Network (CNN) / Transfer Learning (e.g., MobileNet, ResNet).
+    - Why: CNNs learn visual patterns (leaf spots, discoloration) automatically; transfer learning gives good accuracy with limited data and is fast to fine-tune.
+- Yield prediction (tabular):
+    - Type: Ensemble regressors (Random Forest, Gradient Boosting) or linear models depending on data.
+    - Why: Ensemble methods handle mixed feature types, reduce overfitting, and provide robust predictions with interpretable feature importance.
+- Practical note: For quick prototyping we use `scikit-learn` for tabular models; for image models we recommend lightweight transfer learning and `joblib`/serialized model artifacts for deployment.
+
+Slide 30: Future Scope
+- Add model monitoring (drift detection) and automatic retraining pipelines.
+- Use more labeled image data + augmentation to improve disease model accuracy.
+- Add push notifications for urgent officer alerts and in-app scheduling for product distributions.
+- Expand marketplace features: orders, secure payments, ratings for buyers/sellers.
+
+Slide 31: Conclusion & Trustworthiness
+- Conclusion: Farmers Portal centralizes reporting, speeds up diagnostics, and connects farmers to experts and officers.
+- Trustworthiness: role-based access control, officer verification for public notices, and audit logs for inventory changes increase reliability.
+- Call to action: Focus next on data quality (labeling), model monitoring, and production deployment with PostgreSQL.

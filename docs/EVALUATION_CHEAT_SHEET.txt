@@ -1,0 +1,77 @@
+================================================================================
+                    SMART AGRO PORTAL - EVALUATION CHEAT SHEET
+================================================================================
+
+1. PROJECT OVERVIEW & ARCHITECTURE
+----------------------------------
+- Overall Project Idea (Bridging Farmer-Expert-Government gap)
+- Technology Stack (Python, Flask, Bootstrap, SQLite/PostgreSQL)
+- MVC Pattern (Models, Views/Routes, Templates/Settings)
+- Folder Structure (app, routes, ml, static, templates, instance)
+
+2. MACHINE LEARNING (AI)
+------------------------
+- Libraries Used (Scikit-Learn, NumPy, Pandas)
+- Disease Prediction Model (Random Forest Classifier)
+- Yield Prediction Model (Random Forest Regressor)
+- Data Generation (Synthetic patterns & reproducible Seeding)
+- Model Serialization (Saving/Loading .pkl files with Joblib)
+
+3. BACKEND & DATA SCIENCE LIBRARIES
+-----------------------------------
+- Pandas (Data manipulation & DataFrames)
+- NumPy (High-speed math & arrays)
+- Scikit-Learn (AI algorithms & Preprocessing)
+
+4. DATABASE (SQLITE)
+--------------------
+- SQLite vs Standard SQL (File-based vs Server-based)
+- Limitations (Concurrency/Locking, Security, Alter commands)
+- Database Keys (Primary Key vs Foreign Key)
+- Relationships (One-to-Many & Joins via SQLAlchemy)
+- DB Browser for SQLite (Visualization & Debugging)
+
+5. PYTHON BASICS & ADVANCED LOGIC
+---------------------------------
+- Data Structures (Lists, Tuples, Dictionaries)
+- Flow Control (For loops, While loops, If-Else logic)
+- Functions (def) & Decorators (@app.route)
+- Lambda Functions (One-line anonymous functions)
+- Exception Handling (Try...Except for robustness)
+
+6. OOPS CONCEPTS
+----------------
+- Classes & Objects (Blueprints vs Realizations)
+- Inheritance (Extending base models)
+- Encapsulation (Protecting logic inside classes)
+- Abstraction (Simplifying complex interfaces)
+- Polymorphism (Treating different roles as a 'User')
+- Access Specifiers (Public, Private, Protected)
+
+7. API & NETWORKING
+-------------------
+- REST API (Architecture & Communication)
+- HTTP Methods (GET for fetching, POST for creating)
+- JSON (The data interchange format)
+- External API Integration (OpenWeatherMap)
+- Internal API (AJAX Polling for real-time chat)
+
+8. FRONTEND & UI DESIGN
+-----------------------
+- Bootstrap 5 (Responsive Framework vs Pre-made template)
+- Semantic HTML (Div vs Nav tags)
+- Custom CSS (Gradients, Hover animations, Cards)
+- Responsive Design (Mobile-first grid system)
+
+9. TOOLS & DEPLOYMENT
+---------------------
+- Pip (Package Installer for Python)
+- Virtual Environments (venv) (Project isolation)
+- Git & GitHub (Version Control: Add, Commit, Push)
+- Render (Cloud hosting & Continuous Deployment)
+- run.py / manage.py (Entry point of the application)
+- __init__.py (Package initialization)
+
+================================================================================
+                 GOOD LUCK WITH YOUR PROJECT EVALUATION! 🚀
+================================================================================
