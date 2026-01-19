@@ -65,6 +65,23 @@ def dashboard():
                          recent_notices=recent_notices,
                          marketplace_inquiries_count=marketplace_inquiries_count)
 
+@farmer_bp.route('/weather')
+@login_required
+def get_weather_api():
+    """API endpoint to get weather by lat/lon or default location"""
+    if not current_user.is_farmer():
+        return jsonify({'error': 'Access denied'}), 403
+        
+    lat = request.args.get('lat')
+    lon = request.args.get('lon')
+    
+    location = current_user.farm_location or "Kerala, India"
+    
+    from app.utils.weather import get_weather
+    weather_data = get_weather(location=location, lat=lat, lon=lon)
+    
+    return jsonify(weather_data)
+
 # ==================== CROP ISSUE SUBMISSION ====================
 
 @farmer_bp.route('/crop-issue/new', methods=['GET', 'POST'])
@@ -661,21 +678,24 @@ def marketplace_inquiries():
     
     inquiries_list = query.all()
     
+    # Get all orders
+    from app.models import MarketplaceOrder
+    orders = MarketplaceOrder.query.filter_by(farmer_id=current_user.id)\
+                                  .order_by(MarketplaceOrder.created_at.desc()).all()
+    
     # Parse inquiry data from message format: "[Public Inquiry] {name} ({phone}): {message}"
     parsed_inquiries = []
     for inquiry in inquiries_list:
+        # ... (same parsing logic as before)
         message_text = inquiry.message
-        # Parse the message format
         if message_text.startswith("[Public Inquiry]"):
             try:
-                # Extract name, phone, and message
                 parts = message_text.replace("[Public Inquiry]", "").strip()
                 if "(" in parts and "):" in parts:
                     name_part = parts.split("(")[0].strip()
                     phone_part = parts.split("(")[1].split(")")[0].strip()
                     message_part = parts.split("):", 1)[1].strip() if "):" in parts else ""
                 else:
-                    # Fallback parsing
                     name_part = "Guest"
                     phone_part = "N/A"
                     message_part = parts
@@ -689,7 +709,6 @@ def marketplace_inquiries():
                     'is_read': inquiry.is_read
                 })
             except:
-                # If parsing fails, show raw message
                 parsed_inquiries.append({
                     'id': inquiry.id,
                     'name': 'Guest',
@@ -699,7 +718,6 @@ def marketplace_inquiries():
                     'is_read': inquiry.is_read
                 })
         else:
-            # Handle cases where format might be different
             parsed_inquiries.append({
                 'id': inquiry.id,
                 'name': 'Guest',
@@ -718,6 +736,7 @@ def marketplace_inquiries():
     
     return render_template('farmer/marketplace_inquiries.html',
                          inquiries=parsed_inquiries,
+                         orders=orders,
                          sort_by=sort_by,
                          unread_count=unread_count)
 

@@ -20,7 +20,7 @@
 
     .product-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
 
     .product-image {
@@ -136,9 +136,14 @@
 
 <!-- Marketplace Header -->
 <div class="marketplace-header">
-    <div class="container">
-        <h1><i class="bi bi-shop"></i> Agro Marketplace</h1>
-        <p class="mb-0">Buy fresh agricultural products directly from farmers</p>
+    <div class="container text-center">
+        <h1>Fresh From Farm to Your Table</h1>
+        <p class="lead">Support local farmers and get high-quality produce delivered to your doorstep.</p>
+        <div class="mt-3">
+            <a href="{{ url_for('marketplace.track_order') }}" class="btn btn-outline-light">
+                <i class="bi bi-geo-alt"></i> Track My Order
+            </a>
+        </div>
     </div>
 </div>
 
@@ -160,7 +165,7 @@
                 <select class="form-select" name="category">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
-                    <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                    <option value="{{ cat }}" {% if cat==selected_category %}selected{% endif %}>{{ cat }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -209,9 +214,8 @@
                     <p class="product-stock">
                         <i class="bi bi-box2"></i>
                         Stock: {{ "%.2f"|format(product.quantity) }} {{ product.unit }}
-                        {% if product.quantity < 5 %}
-                        <span class="badge bg-warning">Low Stock</span>
-                        {% endif %}
+                        {% if product.quantity < 5 %} <span class="badge bg-warning">Low Stock</span>
+                            {% endif %}
                     </p>
 
                     <!-- Farmer Info -->
@@ -248,7 +252,8 @@
         <ul class="pagination justify-content-center">
             {% if products.has_prev %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for('marketplace.index', page=products.prev_num, search=search, category=selected_category) }}">
+                <a class="page-link"
+                    href="{{ url_for('marketplace.index', page=products.prev_num, search=search, category=selected_category) }}">
                     Previous
                 </a>
             </li>

@@ -78,7 +78,7 @@
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background-color: rgba(255,255,255,0.2);
+        background-color: rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -187,14 +187,14 @@
         <div class="col-md-8">
             <!-- Product Image -->
             {% if product.product_image_path %}
-            <img src="{{ url_for('static', filename=product.product_image_path) }}"
-                class="product-image-large" alt="{{ product.product_name }}"
+            <img src="{{ url_for('static', filename=product.product_image_path) }}" class="product-image-large"
+                alt="{{ product.product_name }}"
                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%25%27 height=%27400%27%3E%3Crect fill=%27%23ddd%27 width=%27100%25%27 height=%27400%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2714%27 fill=%27%23999%27%3ENo Image Available%3C/text%3E%3C/svg%3E'">
             {% else %}
             <svg class="product-image-large" xmlns="http://www.w3.org/2000/svg" width="100%" height="400">
                 <rect fill="#ddd" width="100%" height="400" />
-                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial"
-                    font-size="14" fill="#999">No Image Available</text>
+                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="14"
+                    fill="#999">No Image Available</text>
             </svg>
             {% endif %}
 
@@ -209,14 +209,14 @@
                         <span class="detail-label"><i class="bi bi-box2"></i> Stock Available</span>
                         <span class="detail-value">
                             {{ "%.2f"|format(product.quantity) }} {{ product.unit }}
-                            {% if product.quantity < 5 %}
-                            <span class="badge bg-warning">Low Stock</span>
-                            {% endif %}
+                            {% if product.quantity < 5 %} <span class="badge bg-warning">Low Stock</span>
+                        {% endif %}
                         </span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label"><i class="bi bi-cash-coin"></i> Price</span>
-                        <span class="detail-value">₹{{ "%.2f"|format(product.price_per_unit) }}/{{ product.unit }}</span>
+                        <span class="detail-value">₹{{ "%.2f"|format(product.price_per_unit) }}/{{ product.unit
+                            }}</span>
                     </div>
                     {% if product.location %}
                     <div class="detail-item">
@@ -247,7 +247,8 @@
                 <div class="price-label">Price per {{ product.unit }}</div>
                 <div class="price-value">₹{{ "%.2f"|format(product.price_per_unit) }}</div>
                 <p class="mb-0">
-                    <small>Total for {{ product.quantity }} {{ product.unit }}: <strong>₹{{ "%.2f"|format(product.price_per_unit * product.quantity) }}</strong></small>
+                    <small>Total for {{ product.quantity }} {{ product.unit }}: <strong>₹{{
+                            "%.2f"|format(product.price_per_unit * product.quantity) }}</strong></small>
                 </p>
             </div>
 
@@ -300,6 +301,12 @@
                     <i class="bi bi-whatsapp"></i> WhatsApp
                 </a>
                 {% endif %}
+
+                <!-- Buy Now Button -->
+                <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}"
+                    class="btn btn-primary w-100 mt-3 py-2 fw-bold">
+                    <i class="bi bi-cart-check"></i> Buy Now (Online Order)
+                </a>
             </div>
 
             <!-- Inquiry Form -->
@@ -316,7 +323,10 @@
 
                     <div class="mb-3">
                         <label for="visitor_phone" class="form-label">Your Phone</label>
-                        <input type="tel" class="form-control" id="visitor_phone" name="visitor_phone" required>
+                        <input type="tel" class="form-control" id="visitor_phone" name="visitor_phone" required
+                            pattern="[0-9]{10}" maxlength="10" title="Please enter a valid 10-digit mobile number"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
+                        <small class="text-muted">Enter 10-digit mobile number</small>
                     </div>
 
                     <div class="mb-3">
@@ -338,6 +348,12 @@
     // Handle inquiry form submission
     document.getElementById('inquiryForm').addEventListener('submit', function (e) {
         e.preventDefault();
+
+        const visitorPhone = document.getElementById('visitor_phone').value;
+        if (visitorPhone.length !== 10) {
+            alert('Please enter a valid 10-digit mobile number.');
+            return;
+        }
 
         const formData = new FormData(this);
 

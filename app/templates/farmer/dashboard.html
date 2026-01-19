@@ -8,34 +8,42 @@
         transition: transform 0.2s, box-shadow 0.2s;
         cursor: pointer;
     }
+
     .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
     }
+
     .stat-card .card-body {
         padding: 1.5rem;
     }
+
     .weather-widget {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 15px;
     }
+
     .card-header {
         font-weight: 600;
-        border-bottom: 2px solid rgba(0,0,0,0.1);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.1);
     }
+
     .list-group-item {
         border-left: none;
         border-right: none;
         transition: background-color 0.2s;
     }
+
     .list-group-item:hover {
         background-color: #f8f9fa;
     }
+
     .list-group-item:first-child {
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
+
     .list-group-item:last-child {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -62,9 +70,12 @@
                         Services
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_crop_issue') }}">Report Crop Issue</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_yield_prediction') }}">Yield Prediction</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_product_request') }}">Request Product</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_crop_issue') }}">Report Crop Issue</a>
+                        </li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_yield_prediction') }}">Yield
+                                Prediction</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.new_product_request') }}">Request
+                                Product</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -73,14 +84,14 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ url_for('marketplace.my_products') }}">
-                            <i class="bi bi-box-seam"></i> My Products
-                        </a></li>
+                                <i class="bi bi-box-seam"></i> My Products
+                            </a></li>
                         <li><a class="dropdown-item" href="{{ url_for('farmer.marketplace_inquiries') }}">
-                            <i class="bi bi-envelope-check"></i> Inquiries
-                            {% if marketplace_inquiries_count and marketplace_inquiries_count > 0 %}
-                            <span class="badge bg-warning ms-2">{{ marketplace_inquiries_count }}</span>
-                            {% endif %}
-                        </a></li>
+                                <i class="bi bi-envelope-check"></i> Inquiries
+                                {% if marketplace_inquiries_count and marketplace_inquiries_count > 0 %}
+                                <span class="badge bg-warning ms-2">{{ marketplace_inquiries_count }}</span>
+                                {% endif %}
+                            </a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -90,9 +101,13 @@
                     <a class="nav-link position-relative" href="{{ url_for('farmer.chat_list') }}">
                         Chat with Expert
                         {% if total_unread and total_unread > 0 %}
-                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem;">{{ total_unread }}</span>
+                        <span id="chatUnreadBadge"
+                            class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+                            style="font-size: 0.65rem;">{{ total_unread }}</span>
                         {% else %}
-                        <span id="chatUnreadBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle" style="font-size: 0.65rem; display: none;">0</span>
+                        <span id="chatUnreadBadge"
+                            class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+                            style="font-size: 0.65rem; display: none;">0</span>
                         {% endif %}
                     </a>
                 </li>
@@ -102,7 +117,8 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ url_for('farmer.history_issues') }}">Crop Issues</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('farmer.history_predictions') }}">Yield Predictions</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('farmer.history_predictions') }}">Yield
+                                Predictions</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -200,49 +216,52 @@
         <!-- Weather Widget -->
         <div class="col-md-4 mb-4">
             <div class="card weather-widget shadow-lg border-0">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="bi bi-cloud-sun"></i> Weather
-                    </h5>
-                    <div class="mb-3">
-                        <h2 class="mb-0">{{ weather.temperature }}°C</h2>
-                        <p class="mb-0">{{ weather.description or weather.condition }}</p>
-                        <small>{{ weather.location }}</small>
-                    </div>
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <i class="bi bi-droplet"></i>
-                            <p class="mb-0">{{ weather.humidity }}%</p>
-                            <small>Humidity</small>
+                <div class="card-body" id="weatherWidget">
+                    <div id="weatherContent">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-cloud-sun"></i> Weather
+                        </h5>
+                        <div class="mb-3">
+                            <h2 class="mb-0">{{ weather.temperature }}°C</h2>
+                            <p class="mb-0">{{ weather.description or weather.condition }}</p>
+                            <small>{{ weather.location }}</small>
                         </div>
-                        <div class="col-4">
-                            <i class="bi bi-wind"></i>
-                            <p class="mb-0">{{ weather.wind_speed }} km/h</p>
-                            <small>Wind</small>
-                        </div>
-                        <div class="col-4">
-                            <i class="bi bi-cloud-rain"></i>
-                            <p class="mb-0">{{ (weather.rain_chance * 100)|round(0) }}%</p>
-                            <small>Rain</small>
-                        </div>
-                    </div>
-                    {% if weather.forecast %}
-                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
-                    <div class="forecast-preview">
-                        <small class="d-block mb-2"><strong>5-Day Forecast:</strong></small>
-                        <div class="row g-2">
-                            {% for day in weather.forecast[:3] %}
-                            <div class="col-4 text-center">
-                                <small class="d-block">{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1] }}</small>
-                                <small class="d-block">{{ day.temperature }}°C</small>
-                                <small class="d-block text-white-50">{{ day.condition }}</small>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="bi bi-droplet"></i>
+                                <p class="mb-0">{{ weather.humidity }}%</p>
+                                <small>Humidity</small>
                             </div>
-                            {% endfor %}
+                            <div class="col-4">
+                                <i class="bi bi-wind"></i>
+                                <p class="mb-0">{{ weather.wind_speed }} km/h</p>
+                                <small>Wind</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="bi bi-cloud-rain"></i>
+                                <p class="mb-0">{{ (weather.rain_chance * 100)|round(0) }}%</p>
+                                <small>Rain</small>
+                            </div>
                         </div>
+                        {% if weather.forecast %}
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                        <div class="forecast-preview">
+                            <small class="d-block mb-2"><strong>5-Day Forecast:</strong></small>
+                            <div class="row g-2">
+                                {% for day in weather.forecast[:3] %}
+                                <div class="col-4 text-center">
+                                    <small class="d-block">{{ day.date.split('-')[2] }}/{{ day.date.split('-')[1]
+                                        }}</small>
+                                    <small class="d-block">{{ day.temperature }}°C</small>
+                                    <small class="d-block text-white-50">{{ day.condition }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                        <small class="text-white-50">Updated: {{ weather.last_updated }}</small>
                     </div>
-                    {% endif %}
-                    <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
-                    <small class="text-white-50">Updated: {{ weather.last_updated }}</small>
                 </div>
             </div>
         </div>
@@ -255,23 +274,23 @@
                 </div>
                 <div class="card-body">
                     {% if recent_issues %}
-                        <div class="list-group list-group-flush">
-                            {% for issue in recent_issues %}
-                            <a href="{{ url_for('farmer.view_disease_prediction', issue_id=issue.id) }}" 
-                               class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ issue.crop_type }}</h6>
-                                    <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
-                                        {{ issue.status }}
-                                    </span>
-                                </div>
-                                <p class="mb-1 small text-muted">{{ issue.issue_description[:50] }}...</p>
-                                <small>{{ issue.created_at.strftime('%Y-%m-%d') }}</small>
-                            </a>
-                            {% endfor %}
-                        </div>
+                    <div class="list-group list-group-flush">
+                        {% for issue in recent_issues %}
+                        <a href="{{ url_for('farmer.view_disease_prediction', issue_id=issue.id) }}"
+                            class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ issue.crop_type }}</h6>
+                                <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
+                                    {{ issue.status }}
+                                </span>
+                            </div>
+                            <p class="mb-1 small text-muted">{{ issue.issue_description[:50] }}...</p>
+                            <small>{{ issue.created_at.strftime('%Y-%m-%d') }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                        <p class="text-muted text-center">No issues yet</p>
+                    <p class="text-muted text-center">No issues yet</p>
                     {% endif %}
                     <a href="{{ url_for('farmer.new_crop_issue') }}" class="btn btn-sm btn-primary w-100 mt-2">
                         <i class="bi bi-plus-circle"></i> Report New Issue
@@ -288,21 +307,20 @@
                 </div>
                 <div class="card-body">
                     {% if recent_notices %}
-                        <div class="list-group list-group-flush">
-                            {% for notice in recent_notices %}
-                            <a href="{{ url_for('farmer.notices') }}" 
-                               class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ notice.title }}</h6>
-                                    <span class="badge bg-info">{{ notice.category }}</span>
-                                </div>
-                                <p class="mb-1 small text-muted">{{ notice.content[:50] }}...</p>
-                                <small>{{ notice.created_at.strftime('%Y-%m-%d') }}</small>
-                            </a>
-                            {% endfor %}
-                        </div>
+                    <div class="list-group list-group-flush">
+                        {% for notice in recent_notices %}
+                        <a href="{{ url_for('farmer.notices') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ notice.title }}</h6>
+                                <span class="badge bg-info">{{ notice.category }}</span>
+                            </div>
+                            <p class="mb-1 small text-muted">{{ notice.content[:50] }}...</p>
+                            <small>{{ notice.created_at.strftime('%Y-%m-%d') }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
                     {% else %}
-                        <p class="text-muted text-center">No notices</p>
+                    <p class="text-muted text-center">No notices</p>
                     {% endif %}
                     <a href="{{ url_for('farmer.notices') }}" class="btn btn-sm btn-success w-100 mt-2">
                         <i class="bi bi-eye"></i> View All Notices
@@ -327,7 +345,8 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-2">
-                            <a href="{{ url_for('farmer.new_yield_prediction') }}" class="btn btn-outline-success w-100">
+                            <a href="{{ url_for('farmer.new_yield_prediction') }}"
+                                class="btn btn-outline-success w-100">
                                 <i class="bi bi-graph-up"></i><br>Predict Yield
                             </a>
                         </div>
@@ -349,3 +368,100 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                updateWeather(lat, lon);
+            }, function (error) {
+                console.log("Geolocation error:", error.message);
+                // If denied or error, we stick with the default server-side location
+            });
+        }
+
+        function updateWeather(lat, lon) {
+            fetch(`/farmer/weather?lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherContent = document.getElementById('weatherContent');
+
+                    let forecastHtml = '';
+                    if (data.forecast && data.forecast.length > 0) {
+                        forecastHtml = `
+                            <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                            <div class="forecast-preview">
+                                <small class="d-block mb-2"><strong>5-Day Forecast:</strong></small>
+                                <div class="row g-2">
+                                    ${data.forecast.slice(0, 3).map(day => {
+                            const dateParts = day.date.split('-');
+                            return `
+                                            <div class="col-4 text-center">
+                                                <small class="d-block">${dateParts[2]}/${dateParts[1]}</small>
+                                                <small class="d-block">${day.temperature}°C</small>
+                                                <small class="d-block text-white-50">${day.condition}</small>
+                                            </div>
+                                        `;
+                        }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    weatherContent.innerHTML = `
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-cloud-sun"></i> Weather
+                        </h5>
+                        <div class="mb-3">
+                            <h2 class="mb-0">${data.temperature}°C</h2>
+                            <p class="mb-0">${data.description || data.condition}</p>
+                            <small>${data.location}</small>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <i class="bi bi-droplet"></i>
+                                <p class="mb-0">${data.humidity}%</p>
+                                <small>Humidity</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="bi bi-wind"></i>
+                                <p class="mb-0">${data.wind_speed} km/h</p>
+                                <small>Wind</small>
+                            </div>
+                            <div class="col-4">
+                                <i class="bi bi-cloud-rain"></i>
+                                <p class="mb-0">${Math.round(data.rain_chance * 100)}%</p>
+                                <small>Rain</small>
+                            </div>
+                        </div>
+                        ${forecastHtml}
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.3);">
+                        <small class="text-white-50">Updated: ${data.last_updated} (Auto-located)</small>
+                    `;
+                })
+                .catch(error => console.error('Error updating weather:', error));
+        }
+    });
+
+    // Handle Unread Badge for Chat from dashboard
+    function updateChatBadge() {
+        const badge = document.getElementById('chatUnreadBadge');
+        if (!badge) return;
+
+        fetch('/farmer/chat/unread-count')
+            .then(response => response.json())
+            .then(data => {
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            });
+    }
+    // Update every minute on dashboard
+    setInterval(updateChatBadge, 60000);
+</script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Track Your Order - Agro Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    .track-container {
+        max-width: 600px;
+        margin: 50px auto;
+    }
+
+    .status-timeline {
+        position: relative;
+        padding-left: 50px;
+        margin-top: 30px;
+    }
+
+    .status-item {
+        position: relative;
+        padding-bottom: 30px;
+    }
+
+    .status-item::before {
+        content: '';
+        position: absolute;
+        left: -35px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        z-index: 2;
+    }
+
+    .status-item::after {
+        content: '';
+        position: absolute;
+        left: -26px;
+        top: 20px;
+        width: 2px;
+        height: 100%;
+        background-color: #e9ecef;
+        z-index: 1;
+    }
+
+    .status-item.active::before {
+        background-color: #27ae60;
+        box-shadow: 0 0 0 5px rgba(39, 174, 96, 0.2);
+    }
+
+    .status-item.active::after {
+        background-color: #27ae60;
+    }
+
+    .status-item:last-child::after {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="track-container">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4 text-center">
+                <i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i>
+                <h2 class="fw-bold mt-2">Track Your Order</h2>
+                <p class="text-muted">Enter your order details to see the current status</p>
+
+                <form method="POST" class="mt-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Order ID</label>
+                        <input type="text" name="order_id" class="form-control form-control-lg"
+                            placeholder="e.g., ORD-123 or 123" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control form-control-lg"
+                            placeholder="10-digit mobile number" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">
+                        Track Shipment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if order %}
+        <div class="card shadow border-0 overflow-hidden">
+            <div class="bg-primary p-3 text-white d-flex justify-content-between">
+                <span>Order #{{ order.id }}</span>
+                <span class="fw-bold">{{ order.order_status|upper }}</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Product</small>
+                        <strong>{{ order.product.product_name }}</strong>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small class="text-muted d-block">Expected Status</small>
+                        <strong>{{ order.order_status|capitalize }}</strong>
+                    </div>
+                </div>
+
+                <div class="status-timeline">
+                    <!-- Pending -->
+                    <div class="status-item active">
+                        <h6 class="mb-0">Order Placed</h6>
+                        <small class="text-muted">Paid on {{ order.created_at.strftime('%d %b, %Y') }}</small>
+                    </div>
+
+                    <!-- Shipped -->
+                    <div class="status-item {% if order.order_status in ['shipped', 'delivered'] %}active{% endif %}">
+                        <h6 class="mb-0">Shipped</h6>
+                        {% if order.order_status in ['shipped', 'delivered'] %}
+                        <small class="text-muted">Item is on its way</small>
+                        {% else %}
+                        <small class="text-muted">Waiting for farmer to ship</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Delivered -->
+                    <div class="status-item {% if order.order_status == 'delivered' %}active{% endif %}">
+                        <h6 class="mb-0">Delivered</h6>
+                        {% if order.order_status == 'delivered' %}
+                        <small class="text-muted">Package reached destination</small>
+                        {% else %}
+                        <small class="text-muted">Pending delivery</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <small class="text-muted d-block mb-1">Shipping to:</small>
+                    <p class="mb-0 small">{{ order.shipping_address }}, {{ order.city }} - {{ order.postal_code }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

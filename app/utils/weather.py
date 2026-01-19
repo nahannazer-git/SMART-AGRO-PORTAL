@@ -10,12 +10,14 @@ try:
 except:
     _has_flask_context = False
 
-def get_weather(location="Kerala, India"):
+def get_weather(location="Kerala, India", lat=None, lon=None):
     """
     Fetch weather data for a location using OpenWeatherMap API.
     
     Args:
         location: Location string (e.g., "Kerala, India" or "Kochi, IN")
+        lat: Latitude (float/str)
+        lon: Longitude (float/str)
     
     Returns:
         dict: {
@@ -48,7 +50,10 @@ def get_weather(location="Kerala, India"):
     
     # If no API key, return mock data
     if not api_key:
-        return _get_mock_weather(location)
+        mock_location = location
+        if lat and lon:
+            mock_location = f"Current Location ({lat}, {lon})"
+        return _get_mock_weather(mock_location)
     
     try:
         # Get current weather
@@ -61,10 +66,15 @@ def get_weather(location="Kerala, India"):
             weather_url = 'https://api.openweathermap.org/data/2.5/weather'
         
         params = {
-            'q': location,
             'appid': api_key,
             'units': 'metric'  # Get temperature in Celsius
         }
+        
+        if lat and lon:
+            params['lat'] = lat
+            params['lon'] = lon
+        else:
+            params['q'] = location
         
         response = requests.get(weather_url, params=params, timeout=5)
         
@@ -89,7 +99,7 @@ def get_weather(location="Kerala, India"):
             
             # Get forecast (next 5 days, 3-hour intervals)
             try:
-                forecast = _get_forecast(location, api_key)
+                forecast = _get_forecast(location, api_key, lat=lat, lon=lon)
             except:
                 forecast = []
             
@@ -112,7 +122,7 @@ def get_weather(location="Kerala, India"):
         # Error fetching weather, return mock data
         return _get_mock_weather(location)
 
-def _get_forecast(location, api_key):
+def _get_forecast(location, api_key, lat=None, lon=None):
     """Get 5-day weather forecast"""
     try:
         try:
@@ -124,10 +134,15 @@ def _get_forecast(location, api_key):
             forecast_url = 'https://api.openweathermap.org/data/2.5/forecast'
         
         params = {
-            'q': location,
             'appid': api_key,
             'units': 'metric'
         }
+        
+        if lat and lon:
+            params['lat'] = lat
+            params['lon'] = lon
+        else:
+            params['q'] = location
         
         response = requests.get(forecast_url, params=params, timeout=5)
         

@@ -148,3 +148,45 @@ class FarmerProduct(db.Model):
         return self.price_per_unit * qty
 
 
+class MarketplaceOrder(db.Model):
+    """
+    Model for tracking orders placed on the Farmer Marketplace.
+    Includes shipping info, payment status, and delivery status.
+    """
+    __tablename__ = 'marketplace_orders'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('farmer_products.id'), nullable=False)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # Buyer Information
+    buyer_name = db.Column(db.String(150), nullable=False)
+    buyer_phone = db.Column(db.String(20), nullable=False)
+    shipping_address = db.Column(db.Text, nullable=False)
+    postal_code = db.Column(db.String(20), nullable=False)
+    city = db.Column(db.String(100))
+    
+    # Order Details
+    quantity = db.Column(db.Float, nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+    
+    # Status tracking
+    payment_status = db.Column(db.String(20), default='pending')  # pending, paid
+    order_status = db.Column(db.String(20), default='pending')    # pending, shipped, delivered, cancelled
+    
+    # Payment Info
+    transaction_id = db.Column(db.String(100))
+    payment_method = db.Column(db.String(50), default='Demo Card')
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    product = db.relationship('FarmerProduct', backref='orders')
+    farmer = db.relationship('User', backref='marketplace_orders')
+    
+    def __repr__(self):
+        return f'<Order {self.id} - {self.product.product_name}>'
+
+
+

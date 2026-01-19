@@ -4,11 +4,11 @@
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import db, FarmerProduct, User, ChatMessage
-from werkzeug.utils import secure_filename
+from app.models import db, FarmerProduct, User, ChatMessage, MarketplaceOrder
 import os
 from datetime import datetime
 from flask import current_app
+import uuid
 
 marketplace_bp = Blueprint('marketplace', __name__, url_prefix='/marketplace')
 
@@ -83,6 +83,10 @@ def contact_farmer():
     if not message:
         return jsonify({'status': 'error', 'message': 'Message cannot be empty'}), 400
     
+    # Validate phone number (exactly 10 digits)
+    if not visitor_phone or len(visitor_phone) != 10 or not visitor_phone.isdigit():
+        return jsonify({'status': 'error', 'message': 'Please enter a valid 10-digit mobile number'}), 400
+    
     product = FarmerProduct.query.get_or_404(product_id)
     
     try:
@@ -110,6 +114,98 @@ def contact_farmer():
         db.session.rollback()
         print(f"Error sending inquiry: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@marketplace_bp.route('/checkout/<int:product_id>', methods=['GET', 'POST'])
+def checkout(product_id):
+    """Checkout page for a product"""
+    product = FarmerProduct.query.get_or_404(product_id)
+    
+    if not product.is_available or product.quantity <= 0:
+        flash('Sorry, this product is no longer available.', 'warning')
+        return redirect(url_for('marketplace.index'))
+    
+    if request.method == 'POST':
+        try:
+            name = request.form.get('buyer_name')
+            phone = request.form.get('buyer_phone')
+            address = request.form.get('shipping_address')
+            postal_code = request.form.get('postal_code')
+            city = request.form.get('city')
+            qty = request.form.get('quantity', type=float)
+            
+            if not all([name, phone, address, postal_code, qty]):
+                flash('Please fill all required fields.', 'danger')
+                return render_template('marketplace/checkout.html', product=product)
+            
+            if qty > product.quantity:
+                flash(f'Only {product.quantity} {product.unit} available.', 'danger')
+                return render_template('marketplace/checkout.html', product=product)
+            
+            total_price = product.price_per_unit * qty
+            
+            # Create Order
+            order = MarketplaceOrder(
+                product_id=product.id,
+                farmer_id=product.farmer_id,
+                buyer_name=name,
+                buyer_phone=phone,
+                shipping_address=address,
+                postal_code=postal_code,
+                city=city,
+                quantity=qty,
+                total_price=total_price,
+                payment_status='pending',
+                order_status='pending'
+            )
+            
+            db.session.add(order)
+            db.session.commit()
+            
+            return redirect(url_for('marketplace.payment', order_id=order.id))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred: {str(e)}', 'danger')
+            return render_template('marketplace/checkout.html', product=product)
+            
+    return render_template('marketplace/checkout.html', product=product)
+
+
+@marketplace_bp.route('/payment/<int:order_id>', methods=['GET', 'POST'])
+def payment(order_id):
+    """Demo payment portal"""
+    order = MarketplaceOrder.query.get_or_404(order_id)
+    
+    if order.payment_status == 'paid':
+        flash('This order is already paid.', 'info')
+        return redirect(url_for('marketplace.index'))
+    
+    if request.method == 'POST':
+        # Simulate payment success
+        try:
+            # Update order
+            order.payment_status = 'paid'
+            order.transaction_id = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+            
+            # Update product stock
+            product = FarmerProduct.query.get(order.product_id)
+            if product.quantity >= order.quantity:
+                product.quantity -= order.quantity
+                if product.quantity <= 0:
+                    product.is_available = False
+            
+            db.session.commit()
+            
+            flash('Payment successful! Your order has been placed.', 'success')
+            return render_template('marketplace/payment_success.html', order=order)
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Payment failed: {str(e)}', 'danger')
+            
+    return render_template('marketplace/payment.html', order=order)
+
 
 
 # ============================================================================
@@ -303,3 +399,64 @@ def toggle_availability(product_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@marketplace_bp.route('/farmer/orders')
+@login_required
+def farmer_orders():
+    """Farmer's view of orders received for their products"""
+    if not current_user.is_farmer():
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    orders = MarketplaceOrder.query.filter_by(farmer_id=current_user.id)\
+                                  .order_by(MarketplaceOrder.created_at.desc()).all()
+    
+    return render_template('marketplace/farmer_orders.html', orders=orders)
+
+
+@marketplace_bp.route('/orders/<int:order_id>/update-status', methods=['POST'])
+@login_required
+def update_order_status(order_id):
+    """Update order shipping status (Farmer only)"""
+    order = MarketplaceOrder.query.get_or_404(order_id)
+    
+    if order.farmer_id != current_user.id:
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 403
+    
+    new_status = request.form.get('status')
+    if new_status not in ['pending', 'shipped', 'delivered', 'cancelled']:
+        return jsonify({'status': 'error', 'message': 'Invalid status'}), 400
+        
+    try:
+        order.order_status = new_status
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': f'Order status updated to {new_status}'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@marketplace_bp.route('/track', methods=['GET', 'POST'])
+def track_order():
+    """Public order tracking page"""
+    order = None
+    if request.method == 'POST':
+        order_id = request.form.get('order_id')
+        phone = request.form.get('phone')
+        
+        if order_id and phone:
+            # Clean order ID (remove 'ORD-' prefix if entered)
+            clean_id = order_id.upper().replace('ORD-', '')
+            try:
+                order = MarketplaceOrder.query.filter_by(id=int(clean_id), buyer_phone=phone).first()
+                if not order:
+                    flash('No order found with those details. Please check your Order ID and Phone Number.', 'danger')
+            except ValueError:
+                flash('Invalid Order ID format.', 'danger')
+        else:
+            flash('Please enter both Order ID and Phone Number.', 'warning')
+            
+    return render_template('marketplace/track.html', order=order)
+
+

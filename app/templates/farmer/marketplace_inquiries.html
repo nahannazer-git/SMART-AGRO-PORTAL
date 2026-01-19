@@ -8,20 +8,24 @@
         transition: transform 0.2s, box-shadow 0.2s;
         border-left: 4px solid #28a745;
     }
+
     .inquiry-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     }
+
     .inquiry-card.unread {
         border-left-color: #ffc107;
         background-color: #fff9e6;
     }
+
     .contact-badge {
         display: inline-block;
         padding: 4px 8px;
         border-radius: 4px;
         font-size: 0.85rem;
     }
+
     .sort-buttons {
         display: flex;
         gap: 10px;
@@ -49,86 +53,159 @@
                 </div>
                 <div class="sort-buttons">
                     <span class="text-muted">Sort by:</span>
-                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='latest') }}" 
-                       class="btn btn-sm btn-{{ 'primary' if sort_by == 'latest' else 'outline-primary' }}">
+                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='latest') }}"
+                        class="btn btn-sm btn-{{ 'primary' if sort_by == 'latest' else 'outline-primary' }}">
                         <i class="bi bi-sort-down"></i> Latest
                     </a>
-                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='oldest') }}" 
-                       class="btn btn-sm btn-{{ 'primary' if sort_by == 'oldest' else 'outline-primary' }}">
+                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='oldest') }}"
+                        class="btn btn-sm btn-{{ 'primary' if sort_by == 'oldest' else 'outline-primary' }}">
                         <i class="bi bi-sort-up"></i> Oldest
                     </a>
                 </div>
             </div>
 
-            {% if unread_count > 0 %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> You have <strong>{{ unread_count }}</strong> unread inquiry/inquiries.
-            </div>
-            {% endif %}
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-pills mb-4" id="marketplaceTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="enquiries-tab" data-bs-toggle="pill" data-bs-target="#enquiries"
+                        type="button" role="tab">
+                        <i class="bi bi-chat-left-text"></i> General Enquiries
+                        {% if unread_count > 0 %}
+                        <span class="badge bg-danger ms-1">{{ unread_count }}</span>
+                        {% endif %}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders"
+                        type="button" role="tab">
+                        <i class="bi bi-cart-check"></i> Paid Orders
+                        {% if orders %}
+                        <span class="badge bg-primary ms-1 text-white">{{ orders|length }}</span>
+                        {% endif %}
+                    </button>
+                </li>
+            </ul>
 
-            {% if inquiries %}
-                <div class="row">
-                    {% for inquiry in inquiries %}
-                    <div class="col-12 mb-3">
-                        <div class="card inquiry-card shadow-sm {% if not inquiry.is_read %}unread{% endif %}">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="flex-grow-1">
-                                        <h5 class="card-title mb-2">
-                                            <i class="bi bi-person-circle"></i> {{ inquiry.name }}
-                                            {% if not inquiry.is_read %}
-                                            <span class="badge bg-warning ms-2">New</span>
-                                            {% endif %}
-                                        </h5>
-                                        <div class="mb-2">
-                                            <span class="contact-badge bg-light text-dark">
-                                                <i class="bi bi-telephone"></i> {{ inquiry.phone }}
-                                            </span>
-                                            <span class="contact-badge bg-light text-dark ms-2">
-                                                <i class="bi bi-clock"></i> {{ inquiry.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                            </span>
+            <div class="tab-content" id="marketplaceTabsContent">
+                <!-- Enquiries Tab -->
+                <div class="tab-pane fade show active" id="enquiries" role="tabpanel">
+                    {% if inquiries %}
+                    <div class="row">
+                        {% for inquiry in inquiries %}
+                        <div class="col-12 mb-3">
+                            <div class="card inquiry-card shadow-sm {% if not inquiry.is_read %}unread{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="flex-grow-1">
+                                            <h5 class="card-title mb-2">
+                                                <i class="bi bi-person-circle"></i> {{ inquiry.name }}
+                                                {% if not inquiry.is_read %}
+                                                <span class="badge bg-warning ms-2">New</span>
+                                                {% endif %}
+                                            </h5>
+                                            <div class="mb-2">
+                                                <span class="contact-badge bg-light text-dark">
+                                                    <i class="bi bi-telephone"></i> {{ inquiry.phone }}
+                                                </span>
+                                                <span class="contact-badge bg-light text-dark ms-2">
+                                                    <i class="bi bi-clock"></i> {{ inquiry.created_at.strftime('%Y-%m-%d
+                                                    %H:%M') }}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    {% if not inquiry.is_read %}
-                                    <button type="button" 
-                                            class="btn btn-sm btn-outline-secondary mark-read-btn" 
+                                        {% if not inquiry.is_read %}
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mark-read-btn"
                                             data-inquiry-id="{{ inquiry.id }}">
-                                        <i class="bi bi-check"></i> Mark as Read
-                                    </button>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="inquiry-message bg-light p-3 rounded mb-3">
-                                    <p class="mb-0">{{ inquiry.message }}</p>
-                                </div>
-                                
-                                <div class="d-flex gap-2">
-                                    {% if inquiry.phone != 'N/A' %}
-                                    <a href="tel:{{ inquiry.phone }}" class="btn btn-sm btn-success">
-                                        <i class="bi bi-telephone"></i> Call
-                                    </a>
-                                    <a href="https://wa.me/91{{ inquiry.phone|replace(' ', '')|replace('-', '') }}" 
-                                       target="_blank" 
-                                       class="btn btn-sm btn-success">
-                                        <i class="bi bi-whatsapp"></i> WhatsApp
-                                    </a>
-                                    {% endif %}
+                                            <i class="bi bi-check"></i> Mark as Read
+                                        </button>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="inquiry-message bg-light p-3 rounded mb-3">
+                                        <p class="mb-0">{{ inquiry.message }}</p>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        {% if inquiry.phone != 'N/A' %}
+                                        <a href="tel:{{ inquiry.phone }}" class="btn btn-sm btn-success">
+                                            <i class="bi bi-telephone"></i> Call
+                                        </a>
+                                        <a href="https://wa.me/91{{ inquiry.phone|replace(' ', '')|replace('-', '') }}"
+                                            target="_blank" class="btn btn-sm btn-success">
+                                            <i class="bi bi-whatsapp"></i> WhatsApp
+                                        </a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    {% else %}
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No inquiries yet</h5>
+                        <p class="mb-0">General inquiries about your products will appear here.</p>
+                    </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="alert alert-info text-center py-5">
-                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">No inquiries yet</h5>
-                    <p class="mb-0">Inquiries from public users about your marketplace products will appear here.</p>
-                    <a href="{{ url_for('marketplace.my_products') }}" class="btn btn-success mt-3">
-                        <i class="bi bi-shop"></i> View My Products
-                    </a>
+
+                <!-- Orders Tab -->
+                <div class="tab-pane fade" id="orders" role="tabpanel">
+                    {% if orders %}
+                    <div class="row">
+                        {% for order in orders %}
+                        <div class="col-12 mb-3">
+                            <div class="card shadow-sm border-0 border-start border-primary border-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Order #{{ order.id }} - <span class="text-success">₹{{
+                                                "%.2f"|format(order.total_price) }}</span></h5>
+                                        <span
+                                            class="badge bg-{{ 'success' if order.order_status == 'delivered' else 'primary' }}">
+                                            {{ order.order_status|upper }}
+                                        </span>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 border-end">
+                                            <h6 class="small fw-bold text-uppercase text-muted">Product Info</h6>
+                                            <p class="mb-1"><strong>{{ order.product.product_name }}</strong></p>
+                                            <p class="small text-muted mb-0">Qty: {{ order.quantity }} {{
+                                                order.product.unit }}</p>
+                                            <p class="small text-muted">Paid on: {{ order.created_at.strftime('%Y-%m-%d
+                                                %H:%M') }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="small fw-bold text-uppercase text-muted">Customer & Shipping</h6>
+                                            <p class="mb-1"><strong>{{ order.buyer_name }}</strong> ({{
+                                                order.buyer_phone }})</p>
+                                            <p class="small text-muted mb-0">{{ order.shipping_address }}</p>
+                                            <p class="small text-muted">{{ order.city }} - {{ order.postal_code }}</p>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    <div class="d-flex justify-content-end">
+                                        <a href="{{ url_for('marketplace.farmer_orders') }}"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Manage Fulfillment <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-cash-stack" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No paid orders yet</h5>
+                        <p class="mb-0">Completed sales with buyer shipping info will appear here.</p>
+                    </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -136,64 +213,63 @@
 <script>
     // Handle mark as read button clicks
     document.querySelectorAll('.mark-read-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const inquiryId = this.dataset.inquiryId;
             const button = this;
             const card = this.closest('.inquiry-card');
-            
+
             // Disable button during request
             button.disabled = true;
             button.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
-            
+
             fetch(`/farmer/marketplace-inquiries/${inquiryId}/mark-read`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Remove unread styling
-                    card.classList.remove('unread');
-                    
-                    // Remove "New" badge
-                    const badge = card.querySelector('.badge.bg-warning');
-                    if (badge) {
-                        badge.remove();
-                    }
-                    
-                    // Remove the button
-                    button.remove();
-                    
-                    // Update unread count if displayed
-                    const unreadAlert = document.querySelector('.alert-info');
-                    if (unreadAlert) {
-                        const countMatch = unreadAlert.textContent.match(/(\d+)/);
-                        if (countMatch) {
-                            const currentCount = parseInt(countMatch[1]);
-                            const newCount = currentCount - 1;
-                            if (newCount > 0) {
-                                unreadAlert.innerHTML = `<i class="bi bi-info-circle"></i> You have <strong>${newCount}</strong> unread inquiry/inquiries.`;
-                            } else {
-                                unreadAlert.remove();
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Remove unread styling
+                        card.classList.remove('unread');
+
+                        // Remove "New" badge
+                        const badge = card.querySelector('.badge.bg-warning');
+                        if (badge) {
+                            badge.remove();
+                        }
+
+                        // Remove the button
+                        button.remove();
+
+                        // Update unread count if displayed
+                        const unreadAlert = document.querySelector('.alert-info');
+                        if (unreadAlert) {
+                            const countMatch = unreadAlert.textContent.match(/(\d+)/);
+                            if (countMatch) {
+                                const currentCount = parseInt(countMatch[1]);
+                                const newCount = currentCount - 1;
+                                if (newCount > 0) {
+                                    unreadAlert.innerHTML = `<i class="bi bi-info-circle"></i> You have <strong>${newCount}</strong> unread inquiry/inquiries.`;
+                                } else {
+                                    unreadAlert.remove();
+                                }
                             }
                         }
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to mark as read'));
+                        button.disabled = false;
+                        button.innerHTML = '<i class="bi bi-check"></i> Mark as Read';
                     }
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to mark as read'));
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to mark as read. Please try again.');
                     button.disabled = false;
                     button.innerHTML = '<i class="bi bi-check"></i> Mark as Read';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to mark as read. Please try again.');
-                button.disabled = false;
-                button.innerHTML = '<i class="bi bi-check"></i> Mark as Read';
-            });
+                });
         });
     });
 </script>
 {% endblock %}
-

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - {{ product.product_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .order-summary {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .product-thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .step-badge {
+        width: 30px;
+        height: 30px;
+        background-color: #27ae60;
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="checkout-container">
+        <h2 class="mb-4 text-center">Checkout</h2>
+
+        <div class="row">
+            <!-- Order Form -->
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h5 class="mb-4"><span class="step-badge">1</span>Shipping Information</h5>
+
+                        <form method="POST">
+                            <div class="mb-3">
+                                <label for="buyer_name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="buyer_name" name="buyer_name" required
+                                    placeholder="Enter your full name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="buyer_phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="buyer_phone" name="buyer_phone" required
+                                    pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="shipping_address" class="form-label">Shipping Address</label>
+                                <textarea class="form-control" id="shipping_address" name="shipping_address" rows="3"
+                                    required placeholder="House No, Street, Landmark"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="city" class="form-label">City/Town</label>
+                                    <input type="text" class="form-control" id="city" name="city" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="postal_code" class="form-label">Postal Code (PIN)</label>
+                                    <input type="text" class="form-control" id="postal_code" name="postal_code"
+                                        required>
+                                </div>
+                            </div>
+
+                            <h5 class="mt-4 mb-3"><span class="step-badge">2</span>Order Quantity</h5>
+                            <div class="mb-4">
+                                <label for="quantity" class="form-label">Quantity to Purchase ({{ product.unit
+                                    }})</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" id="quantity" name="quantity"
+                                        value="1" min="0.01" max="{{ product.quantity }}" required
+                                        oninput="calculateTotal()">
+                                    <span class="input-group-text">{{ product.unit }}</span>
+                                </div>
+                                <small class="text-muted">Available stock: {{ product.quantity }} {{ product.unit
+                                    }}</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-3 fw-bold mt-2">
+                                Proceed to Payment <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-md-5 mt-4 mt-md-0">
+                <div class="order-summary shadow-sm">
+                    <h5 class="mb-4">Order Summary</h5>
+
+                    <div class="d-flex align-items-center mb-4">
+                        {% if product.product_image_path %}
+                        <img src="{{ url_for('static', filename=product.product_image_path) }}"
+                            class="product-thumb me-3" alt="{{ product.product_name }}">
+                        {% else %}
+                        <div
+                            class="product-thumb bg-secondary d-flex align-items-center justify-content-center text-white me-3">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0">{{ product.product_name }}</h6>
+                            <small class="text-muted">Sold by: {{ product.farmer.full_name }}</small>
+                            <div class="fw-bold text-success mt-1">₹{{ "%.2f"|format(product.price_per_unit) }} / {{
+                                product.unit }}</div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Price</span>
+                        <span id="displayPrice">₹{{ "%.2f"|format(product.price_per_unit) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Quantity</span>
+                        <span id="displayQty">1.00 {{ product.unit }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-muted">
+                        <span>Shipping Fee</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total amount</span>
+                        <span class="text-primary" id="displayTotal">₹{{ "%.2f"|format(product.price_per_unit) }}</span>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-white rounded border">
+                        <small class="text-muted d-block mb-1"><i class="bi bi-shield-check"></i> Secure
+                            Checkout</small>
+                        <small class="text-muted d-block"><i class="bi bi-truck"></i> Direct from farm to home</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const pricePerUnit = {{ product.price_per_unit }};
+    const unit = "{{ product.unit }}";
+
+    function calculateTotal() {
+        const qty = parseFloat(document.getElementById('quantity').value) || 0;
+        const total = pricePerUnit * qty;
+
+        document.getElementById('displayQty').innerText = qty.toFixed(2) + " " + unit;
+        document.getElementById('displayTotal').innerText = "₹" + total.toFixed(2);
+    }
+</script>
+{% endblock %}

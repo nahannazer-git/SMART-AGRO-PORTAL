@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - Agro Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-card {
+        max-width: 500px;
+        margin: 50px auto;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .card-element {
+        border: 1px solid #ced4da;
+        padding: 12px;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    .payment-logos i {
+        font-size: 2rem;
+        margin: 0 10px;
+        color: #7f8c8d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card payment-card shadow-lg">
+        <div class="payment-header">
+            <h4 class="mb-0">Secure Payment</h4>
+            <p class="mb-0 opacity-75">Order #ORD-{{ order.id }}</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <div class="display-6 fw-bold">₹{{ "%.2f"|format(order.total_price) }}</div>
+                <div class="text-muted">Amount to pay</div>
+            </div>
+
+            <form method="POST" id="paymentForm">
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-uppercase">Card Holder Name</label>
+                    <input type="text" class="form-control card-element" value="{{ order.buyer_name }}" readonly>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-uppercase">Card Number (Demo)</label>
+                    <div class="input-group">
+                        <span class="input-group-text card-element bg-white border-end-0"><i
+                                class="bi bi-credit-card"></i></span>
+                        <input type="text" class="form-control card-element border-start-0" value="4242 4242 4242 4242"
+                            readonly>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-4">
+                        <label class="form-label small fw-bold text-uppercase">Expiry</label>
+                        <input type="text" class="form-control card-element" value="12/28" readonly>
+                    </div>
+                    <div class="col-6 mb-4">
+                        <label class="form-label small fw-bold text-uppercase">CVC</label>
+                        <input type="text" class="form-control card-element" value="***" readonly>
+                    </div>
+                </div>
+
+                <div class="payment-logos text-center mb-4">
+                    <i class="bi bi-credit-card-2-front"></i>
+                    <i class="bi bi-paypal"></i>
+                    <i class="bi bi-google"></i>
+                    <i class="bi bi-apple"></i>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100 py-3 fw-bold mb-3" id="payBtn">
+                    <span id="btnText">Pay Now</span>
+                    <span id="loadingSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+
+                <p class="text-center small text-muted mb-0">
+                    <i class="bi bi-shield-fill-check text-success"></i>
+                    Your payment information is encrypted and secure.
+                </p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('paymentForm').addEventListener('submit', function (e) {
+        document.getElementById('payBtn').disabled = true;
+        document.getElementById('btnText').innerText = "Processing...";
+        document.getElementById('loadingSpinner').classList.remove('d-none');
+    });
+</script>
+{% endblock %}
