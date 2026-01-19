@@ -249,78 +249,80 @@
                 </h5>
                 {% if disease_frequency %}
                 {% set max_count = disease_frequency.values()|max %}
-                {% for disease, count in disease_frequency.items()|list[:5] %}
-                <div class="simple-bar">
+                {% for disease, count in disease_frequency.items()|sort(attribute=1, reverse=True) %}
+                {% if loop.index <= 5 %} <div class="simple-bar">
                     <div class="bar-label">{{ disease }}</div>
                     <div class="bar-container">
                         <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
                             <span class="bar-value">{{ count }}</span>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <p class="text-muted text-center">No disease data available</p>
-                {% endif %}
             </div>
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <p class="text-muted text-center">No disease data available</p>
+            {% endif %}
         </div>
+    </div>
 
-        <!-- Region Stats -->
-        <div class="col-lg-6">
-            <div class="chart-card">
-                <h5 class="chart-title">
-                    <i class="bi bi-geo-alt-fill me-2"></i>Top Active Regions
-                </h5>
-                {% if region_stats %}
-                {% set max_count = region_stats.values()|max %}
-                {% for region, count in region_stats.items()|list[:5] %}
-                <div class="simple-bar">
-                    <div class="bar-label">{{ region }}</div>
-                    <div class="bar-container">
-                        <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
-                            <span class="bar-value">{{ count }}</span>
-                        </div>
+    <!-- Region Stats -->
+    <div class="col-lg-6">
+        <div class="chart-card">
+            <h5 class="chart-title">
+                <i class="bi bi-geo-alt-fill me-2"></i>Top Active Regions
+            </h5>
+            {% if region_stats %}
+            {% set max_count = region_stats.values()|max %}
+            {% for region, count in region_stats.items()|sort(attribute=1, reverse=True) %}
+            {% if loop.index <= 5 %} <div class="simple-bar">
+                <div class="bar-label">{{ region }}</div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
+                        <span class="bar-value">{{ count }}</span>
                     </div>
                 </div>
-                {% endfor %}
-                {% else %}
-                <p class="text-muted text-center">No region data available</p>
-                {% endif %}
-            </div>
         </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <p class="text-muted text-center">No region data available</p>
+        {% endif %}
     </div>
+</div>
+</div>
 
-    <!-- Quick Links -->
-    <div class="row g-4">
-        <div class="col-12">
-            <h4 class="fw-bold text-dark mb-4">
-                <i class="bi bi-lightning-charge-fill text-danger me-2"></i>Quick Actions
-            </h4>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('admin.manage_farmers') }}" class="quick-link">
-                <i class="bi bi-people fs-4 text-danger me-2"></i>
-                <span class="fw-bold text-dark">Manage Farmers</span>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('admin.manage_experts') }}" class="quick-link">
-                <i class="bi bi-person-badge fs-4 text-danger me-2"></i>
-                <span class="fw-bold text-dark">Manage Experts</span>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('admin.disease_statistics') }}" class="quick-link">
-                <i class="bi bi-graph-up fs-4 text-danger me-2"></i>
-                <span class="fw-bold text-dark">View Statistics</span>
-            </a>
-        </div>
-        <div class="col-md-3">
-            <a href="{{ url_for('admin.model_monitoring') }}" class="quick-link">
-                <i class="bi bi-cpu fs-4 text-danger me-2"></i>
-                <span class="fw-bold text-dark">ML Monitoring</span>
-            </a>
-        </div>
+<!-- Quick Links -->
+<div class="row g-4">
+    <div class="col-12">
+        <h4 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightning-charge-fill text-danger me-2"></i>Quick Actions
+        </h4>
     </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_farmers') }}" class="quick-link">
+            <i class="bi bi-people fs-4 text-danger me-2"></i>
+            <span class="fw-bold text-dark">Manage Farmers</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.manage_experts') }}" class="quick-link">
+            <i class="bi bi-person-badge fs-4 text-danger me-2"></i>
+            <span class="fw-bold text-dark">Manage Experts</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.disease_statistics') }}" class="quick-link">
+            <i class="bi bi-graph-up fs-4 text-danger me-2"></i>
+            <span class="fw-bold text-dark">View Statistics</span>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin.model_monitoring') }}" class="quick-link">
+            <i class="bi bi-cpu fs-4 text-danger me-2"></i>
+            <span class="fw-bold text-dark">ML Monitoring</span>
+        </a>
+    </div>
+</div>
 </div>
 {% endblock %}
