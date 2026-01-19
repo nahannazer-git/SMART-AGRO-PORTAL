@@ -93,29 +93,30 @@
 
 <div class="container pb-5">
     <div class="mt-5">
-        {% if models %}
-        {% for model in models %}
+        <!-- Disease Model -->
+        {% if disease_model %}
         <div class="model-card">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="d-flex align-items-start gap-3">
                         <div class="model-icon">
-                            <i class="bi bi-diagram-3-fill"></i>
+                            <i class="bi bi-bug-fill"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <h5 class="fw-bold text-dark mb-2">{{ model.name }}</h5>
+                            <h5 class="fw-bold text-dark mb-2">Disease Detection Model</h5>
                             <p class="text-muted small mb-2">
-                                <i class="bi bi-calendar3 me-1"></i> Trained: {{ model.trained_at.strftime('%b %d, %Y')
-                                if model.trained_at else 'N/A' }}
+                                <i class="bi bi-calendar3 me-1"></i> Last trained: {{
+                                disease_model.last_trained.strftime('%b %d, %Y') if disease_model.last_trained else
+                                'N/A' }}
                             </p>
                             <p class="text-muted small mb-0">
-                                <i class="bi bi-clock-history me-1"></i> Version: {{ model.version or '1.0' }}
+                                <i class="bi bi-clock-history me-1"></i> Version: {{ disease_model.version or '1.0' }}
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 text-center">
-                    {% set accuracy = model.accuracy * 100 if model.accuracy else 0 %}
+                    {% set accuracy = (disease_model.accuracy * 100) if disease_model.accuracy else 0 %}
                     <div class="accuracy-meter {{ 'high' if accuracy > 80 else 'medium' if accuracy > 60 else '' }}">
                         {{ accuracy|round(0)|int }}%
                     </div>
@@ -124,17 +125,58 @@
                 <div class="col-md-3 text-end">
                     <div class="mb-3">
                         <p class="metric-label mb-1">Total Predictions</p>
-                        <p class="metric-value mb-0">{{ model.prediction_count or 0 }}</p>
+                        <p class="metric-value mb-0">{{ disease_model.total_predictions or 0 }}</p>
                     </div>
-                    <span
-                        class="badge {{ 'bg-success' if model.is_active else 'bg-secondary' }} rounded-pill px-3 py-2">
-                        {{ 'Active' if model.is_active else 'Inactive' }}
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        Active
                     </span>
                 </div>
             </div>
         </div>
-        {% endfor %}
-        {% else %}
+        {% endif %}
+
+        <!-- Yield Model -->
+        {% if yield_model %}
+        <div class="model-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="model-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2">Yield Prediction Model</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-calendar3 me-1"></i> Last trained: {{
+                                yield_model.last_trained.strftime('%b %d, %Y') if yield_model.last_trained else 'N/A' }}
+                            </p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock-history me-1"></i> Version: {{ yield_model.version or '1.0' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    {% set accuracy = (yield_model.accuracy * 100) if yield_model.accuracy else 0 %}
+                    <div class="accuracy-meter {{ 'high' if accuracy > 80 else 'medium' if accuracy > 60 else '' }}">
+                        {{ accuracy|round(0)|int }}%
+                    </div>
+                    <p class="metric-label mt-2 mb-0">Accuracy</p>
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="mb-3">
+                        <p class="metric-label mb-1">Total Predictions</p>
+                        <p class="metric-value mb-0">{{ yield_model.total_predictions or 0 }}</p>
+                    </div>
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        Active
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not disease_model and not yield_model %}
         <div class="text-center py-5">
             <div class="bg-light p-4 rounded-circle d-inline-block mb-4">
                 <i class="bi bi-cpu fs-1 text-muted"></i>

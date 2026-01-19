@@ -100,22 +100,22 @@
             <div class="col-md-4">
                 <div class="stat-summary">
                     <i class="bi bi-bug-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ disease_frequency.values()|sum if disease_frequency else 0 }}</div>
-                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Cases</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-summary">
-                    <i class="bi bi-list-check fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ disease_frequency|length if disease_frequency else 0 }}</div>
+                    <div class="stat-number">{{ disease_freq|length if disease_freq else 0 }}</div>
                     <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Disease Types</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
-                    <i class="bi bi-exclamation-triangle-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ disease_frequency.values()|max if disease_frequency else 0 }}</div>
+                    <i class="bi bi-list-check fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_freq[0].count if disease_freq else 0 }}</div>
                     <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Highest Count</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-exclamation-triangle-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_freq[-1].count if disease_freq else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Lowest Count</p>
                 </div>
             </div>
         </div>
@@ -125,17 +125,17 @@
             <h5 class="chart-title">
                 <i class="bi bi-bar-chart-line-fill me-2"></i>Disease Frequency Distribution
             </h5>
-            {% if disease_frequency %}
-            {% set max_count = disease_frequency.values()|max %}
-            {% for disease, count in disease_frequency.items()|sort(attribute=1, reverse=True) %}
+            {% if disease_freq %}
+            {% set max_count = disease_freq[0].count %}
+            {% for item in disease_freq %}
             <div class="simple-bar">
                 <div class="bar-label">
-                    <span>{{ disease }}</span>
-                    <span class="text-muted small">{{ count }} cases</span>
+                    <span>{{ item.disease_identified }}</span>
+                    <span class="text-muted small">{{ item.count }} cases</span>
                 </div>
                 <div class="bar-container">
-                    <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
-                        <span class="bar-count">{{ count }}</span>
+                    <div class="bar-fill" style="width: {{ (item.count / max_count * 100)|round }}%;">
+                        <span class="bar-count">{{ item.count }}</span>
                     </div>
                 </div>
             </div>
