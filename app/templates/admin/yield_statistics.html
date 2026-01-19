@@ -59,6 +59,10 @@
         padding-left: 20px;
     }
 
+    .bar-fill.blue {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    }
+
     .bar-count {
         color: white;
         font-weight: 700;
@@ -99,53 +103,91 @@
             <div class="col-md-4">
                 <div class="stat-summary">
                     <i class="bi bi-clipboard-data-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ crop_yields.values()|sum|round(0) if crop_yields else 0 }}</div>
+                    {% set total_predictions = yield_by_crop|sum(attribute='count') if yield_by_crop else 0 %}
+                    <div class="stat-number">{{ total_predictions|round(0)|int }}</div>
                     <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Predictions</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
                     <i class="bi bi-bar-chart-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ avg_yield|round(2) if avg_yield else 0 }}</div>
-                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Avg Yield (tons)</p>
+                    <div class="stat-number">{{ yield_by_crop|length if yield_by_crop else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Crop Types</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
-                    <i class="bi bi-graph-up fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ crop_yields.values()|max|round(0) if crop_yields else 0 }}</div>
-                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Highest Yield</p>
+                    <i class="bi bi-geo-alt-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ yield_by_region|length if yield_by_region else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Active Regions</p>
                 </div>
             </div>
         </div>
 
-        <!-- Crop Yields Chart -->
-        <div class="chart-card">
-            <h5 class="chart-title">
-                <i class="bi bi-bar-chart-line-fill me-2"></i>Yield by Crop Type
-            </h5>
-            {% if crop_yields %}
-            {% set max_yield = crop_yields.values()|max %}
-            {% for crop, yield_val in crop_yields.items()|sort(attribute=1, reverse=True) %}
-            <div class="simple-bar">
-                <div class="bar-label">
-                    <span>{{ crop }}</span>
-                    <span class="text-muted small">{{ yield_val|round(2) }} tons</span>
+        <!-- Charts Row -->
+        <div class="row g-4">
+            <!-- Yield by Crop Chart -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="chart-title">
+                        <i class="bi bi-bar-chart-line-fill me-2"></i>Average Yield by Crop
+                    </h5>
+                    {% if yield_by_crop %}
+                    {% set max_yield = yield_by_crop[0].avg_yield %}
+                    {% for item in yield_by_crop %}
+                    {% if loop.index <= 10 %} <div class="simple-bar">
+                        <div class="bar-label">
+                            <span>{{ item.crop_type }}</span>
+                            <span class="text-muted small">{{ item.avg_yield|round(2) }} tons</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: {{ (item.avg_yield / max_yield * 100)|round }}%;">
+                                <span class="bar-count">{{ item.avg_yield|round(1) }}</span>
+                            </div>
+                        </div>
                 </div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: {{ (yield_val / max_yield * 100)|round }}%;">
-                        <span class="bar-count">{{ yield_val|round(1) }}</span>
-                    </div>
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">No crop yield data available</p>
                 </div>
+                {% endif %}
             </div>
+        </div>
+
+        <!-- Yield by Region Chart -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-geo-fill me-2"></i>Yield by Region
+                </h5>
+                {% if yield_by_region %}
+                {% set max_yield = yield_by_region[0].avg_yield %}
+                {% for item in yield_by_region %}
+                {% if loop.index <= 10 %} <div class="simple-bar">
+                    <div class="bar-label">
+                        <span>{{ item.location }}</span>
+                        <span class="text-muted small">{{ item.avg_yield|round(2) }} tons</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill blue" style="width: {{ (item.avg_yield / max_yield * 100)|round }}%;">
+                            <span class="bar-count">{{ item.avg_yield|round(1) }}</span>
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
             {% endfor %}
             {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-                <p class="text-muted">No yield data available</p>
+                <p class="text-muted">No regional yield data available</p>
             </div>
             {% endif %}
         </div>
     </div>
+</div>
+</div>
 </div>
 {% endblock %}

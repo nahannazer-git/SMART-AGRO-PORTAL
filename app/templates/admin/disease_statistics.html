@@ -60,6 +60,10 @@
         padding-left: 20px;
     }
 
+    .bar-fill.green {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    }
+
     .bar-count {
         color: white;
         font-weight: 700;
@@ -113,40 +117,77 @@
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
-                    <i class="bi bi-exclamation-triangle-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ disease_freq[-1].count if disease_freq else 0 }}</div>
-                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Lowest Count</p>
+                    <i class="bi bi-layers-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_by_crop|length if disease_by_crop else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Crop-Disease Combos</p>
                 </div>
             </div>
         </div>
 
-        <!-- Disease Frequency Chart -->
-        <div class="chart-card">
-            <h5 class="chart-title">
-                <i class="bi bi-bar-chart-line-fill me-2"></i>Disease Frequency Distribution
-            </h5>
-            {% if disease_freq %}
-            {% set max_count = disease_freq[0].count %}
-            {% for item in disease_freq %}
-            <div class="simple-bar">
-                <div class="bar-label">
-                    <span>{{ item.disease_identified }}</span>
-                    <span class="text-muted small">{{ item.count }} cases</span>
+        <!-- Charts Row -->
+        <div class="row g-4">
+            <!-- Disease Frequency Chart -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="chart-title">
+                        <i class="bi bi-bar-chart-line-fill me-2"></i>Top Diseases Reported
+                    </h5>
+                    {% if disease_freq %}
+                    {% set max_count = disease_freq[0].count %}
+                    {% for item in disease_freq %}
+                    {% if loop.index <= 10 %} <div class="simple-bar">
+                        <div class="bar-label">
+                            <span>{{ item.disease_identified }}</span>
+                            <span class="text-muted small">{{ item.count }} cases</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: {{ (item.count / max_count * 100)|round }}%;">
+                                <span class="bar-count">{{ item.count }}</span>
+                            </div>
+                        </div>
                 </div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: {{ (item.count / max_count * 100)|round }}%;">
-                        <span class="bar-count">{{ item.count }}</span>
-                    </div>
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">No disease data available</p>
                 </div>
+                {% endif %}
             </div>
+        </div>
+
+        <!-- Disease by Crop Chart -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-grid-fill me-2"></i>Disease by Crop Type
+                </h5>
+                {% if disease_by_crop %}
+                {% set max_count = disease_by_crop[0][2] %}
+                {% for item in disease_by_crop %}
+                {% if loop.index <= 10 %} <div class="simple-bar">
+                    <div class="bar-label">
+                        <span>{{ item[0] }} - {{ item[1] }}</span>
+                        <span class="text-muted small">{{ item[2] }} cases</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill green" style="width: {{ (item[2] / max_count * 100)|round }}%;">
+                            <span class="bar-count">{{ item[2] }}</span>
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
             {% endfor %}
             {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-                <p class="text-muted">No disease data available</p>
+                <p class="text-muted">No crop-disease data available</p>
             </div>
             {% endif %}
         </div>
     </div>
+</div>
+</div>
 </div>
 {% endblock %}

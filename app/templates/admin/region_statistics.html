@@ -59,6 +59,10 @@
         padding-left: 20px;
     }
 
+    .bar-fill.green {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    }
+
     .bar-count {
         color: white;
         font-weight: 700;
@@ -99,53 +103,91 @@
             <div class="col-md-4">
                 <div class="stat-summary">
                     <i class="bi bi-geo-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ region_stats|length if region_stats else 0 }}</div>
+                    <div class="stat-number">{{ region_issues|length if region_issues else 0 }}</div>
                     <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Active Regions</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
-                    <i class="bi bi-people-fill fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ region_stats.values()|sum if region_stats else 0 }}</div>
-                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Activities</p>
+                    <i class="bi bi-bug-fill fs-1 text-danger mb-3 d-block"></i>
+                    {% set total_issues = region_issues|sum(attribute='total_issues') if region_issues else 0 %}
+                    <div class="stat-number">{{ total_issues }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Issues</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-summary">
                     <i class="bi bi-graph-up-arrow fs-1 text-danger mb-3 d-block"></i>
-                    <div class="stat-number">{{ region_stats.values()|max if region_stats else 0 }}</div>
+                    <div class="stat-number">{{ region_issues[0].total_issues if region_issues else 0 }}</div>
                     <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Most Active</p>
                 </div>
             </div>
         </div>
 
-        <!-- Region Activity Chart -->
-        <div class="chart-card">
-            <h5 class="chart-title">
-                <i class="bi bi-map-fill me-2"></i>Regional Activity Distribution
-            </h5>
-            {% if region_stats %}
-            {% set max_count = region_stats.values()|max %}
-            {% for region, count in region_stats.items()|sort(attribute=1, reverse=True) %}
-            <div class="simple-bar">
-                <div class="bar-label">
-                    <span><i class="bi bi-geo-alt me-2"></i>{{ region }}</span>
-                    <span class="text-muted small">{{ count }} activities</span>
+        <!-- Charts Row -->
+        <div class="row g-4">
+            <!-- Regional Issues Chart -->
+            <div class="col-lg-6">
+                <div class="chart-card">
+                    <h5 class="chart-title">
+                        <i class="bi bi-map-fill me-2"></i>Issues by Region
+                    </h5>
+                    {% if region_issues %}
+                    {% set max_count = region_issues[0].total_issues %}
+                    {% for item in region_issues %}
+                    {% if loop.index <= 10 %} <div class="simple-bar">
+                        <div class="bar-label">
+                            <span><i class="bi bi-geo-alt me-2"></i>{{ item.location }}</span>
+                            <span class="text-muted small">{{ item.total_issues }} issues</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar-fill" style="width: {{ (item.total_issues / max_count * 100)|round }}%;">
+                                <span class="bar-count">{{ item.total_issues }}</span>
+                            </div>
+                        </div>
                 </div>
-                <div class="bar-container">
-                    <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
-                        <span class="bar-count">{{ count }}</span>
-                    </div>
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">No region issue data available</p>
                 </div>
+                {% endif %}
             </div>
+        </div>
+
+        <!-- Regional Yields Chart -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-graph-up me-2"></i>Yield by Region
+                </h5>
+                {% if region_yields %}
+                {% set max_yield = region_yields[0].avg_yield %}
+                {% for item in region_yields %}
+                {% if loop.index <= 10 %} <div class="simple-bar">
+                    <div class="bar-label">
+                        <span><i class="bi bi-geo-alt me-2"></i>{{ item.location }}</span>
+                        <span class="text-muted small">{{ item.avg_yield|round(2) }} tons avg</span>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-fill green" style="width: {{ (item.avg_yield / max_yield * 100)|round }}%;">
+                            <span class="bar-count">{{ item.avg_yield|round(1) }}</span>
+                        </div>
+                    </div>
+            </div>
+            {% endif %}
             {% endfor %}
             {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
-                <p class="text-muted">No region data available</p>
+                <p class="text-muted">No regional yield data available</p>
             </div>
             {% endif %}
         </div>
     </div>
+</div>
+</div>
 </div>
 {% endblock %}
