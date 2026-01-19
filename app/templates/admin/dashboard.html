@@ -1,165 +1,238 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - Smart Agriculture Support System{% endblock %}
+{% block title %}Admin Dashboard - System Control{% endblock %}
 
 {% block extra_css %}
 <style>
+    .admin-hero {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -40px;
+    }
+
     .stat-card {
-        transition: transform 0.2s;
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #ffe4e6;
+        transition: all 0.3s;
+        height: 100%;
     }
+
     .stat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(225, 29, 72, 0.15);
     }
-    .chart-container {
+
+    .stat-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        color: #9f1239;
+        margin-bottom: 20px;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #9f1239;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        color: #881337;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ffe4e6;
+        margin-bottom: 30px;
+    }
+
+    .chart-title {
+        font-weight: 700;
+        color: #9f1239;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+
+    .simple-bar {
+        margin-bottom: 15px;
+    }
+
+    .bar-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 5px;
+    }
+
+    .bar-container {
+        height: 30px;
+        background: #f1f5f9;
+        border-radius: 100px;
+        overflow: hidden;
         position: relative;
-        height: 300px;
+    }
+
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        border-radius: 100px;
+        transition: width 1s ease;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 15px;
+    }
+
+    .bar-value {
+        color: white;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    .welcome-banner {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-link {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s;
+        border: 1px solid #ffe4e6;
+    }
+
+    .quick-link:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(225, 29, 72, 0.1);
+        text-decoration: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
-            <i class="bi bi-shield-lock"></i> Admin Portal
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Users
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.manage_farmers') }}">Manage Farmers</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.manage_experts') }}">Manage Experts</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Statistics
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.region_statistics') }}">Region Statistics</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.disease_statistics') }}">Disease Frequency</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.yield_statistics') }}">Yield Statistics</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        ML & Models
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.ml_datasets') }}">ML Datasets</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.model_monitoring') }}">Model Monitoring</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Reports
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><h6 class="dropdown-header">System Reports</h6></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.system_report_pdf') }}">System Report (PDF)</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.system_report_csv') }}">System Report (CSV)</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">Regional Reports</h6></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.report_region_wise_pdf') }}">Region-Wise Report (PDF)</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.report_region_wise_csv') }}">Region-Wise Report (CSV)</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><h6 class="dropdown-header">User Reports</h6></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.users_report_pdf') }}">Users Report (PDF)</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('admin.users_report_csv') }}">Users Report (CSV)</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<div class="container-fluid px-3 px-md-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h2 class="mb-1"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
-                    <p class="text-muted mb-0">System overview and analytics</p>
+<div class="admin-hero">
+    <div class="container">
+        <div class="welcome-banner mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="fw-bold mb-2">
+                        <i class="bi bi-shield-lock-fill me-3"></i>Admin Control Center
+                    </h1>
+                    <p class="opacity-90 mb-0">System overview and global management</p>
                 </div>
-                <div class="mt-2 mt-md-0">
-                    <span class="badge bg-success fs-6">{{ total_farmers + total_experts }} Total Users</span>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-light rounded-pill px-4 py-2">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Key Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Farmers</h6>
-                            <h3 class="mb-0">{{ total_farmers }}</h3>
-                        </div>
-                        <div class="text-success" style="font-size: 2.5rem;">
-                            <i class="bi bi-people"></i>
-                        </div>
+<div class="container pb-5">
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-5 mt-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-value">{{ total_farmers|default(0) }}</div>
+                <div class="stat-label">Total Farmers</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <div class="stat-value">{{ total_experts|default(0) }}</div>
+                <div class="stat-label">Agro Experts</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                <div class="stat-value">{{ total_officers|default(0) }}</div>
+                <div class="stat-label">Officers</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div class="stat-value text-success">{{ active_users|default(0) }}</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                        <i class="bi bi-bug-fill"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="font-size: 2rem;">{{ total_issues|default(0) }}</div>
+                        <div class="stat-label">Crop Issues</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Experts</h6>
-                            <h3 class="mb-0">{{ total_experts }}</h3>
-                        </div>
-                        <div class="text-info" style="font-size: 2.5rem;">
-                            <i class="bi bi-person-badge"></i>
-                        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="font-size: 2rem;">{{ total_yield_predictions|default(0) }}</div>
+                        <div class="stat-label">Yield Predictions</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Crop Issues</h6>
-                            <h3 class="mb-0">{{ total_issues }}</h3>
-                            <small class="text-warning">{{ pending_issues }} pending</small>
-                        </div>
-                        <div class="text-warning" style="font-size: 2.5rem;">
-                            <i class="bi bi-bug"></i>
-                        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                        <i class="bi bi-clipboard-check-fill"></i>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Yield Predictions</h6>
-                            <h3 class="mb-0">{{ total_yield_predictions }}</h3>
-                            <small class="text-muted">Avg: {{ avg_yield }} tons/acre</small>
-                        </div>
-                        <div class="text-primary" style="font-size: 2.5rem;">
-                            <i class="bi bi-graph-up"></i>
-                        </div>
+                    <div>
+                        <div class="stat-value" style="font-size: 2rem;">{{ pending_requests|default(0) }}</div>
+                        <div class="stat-label">Pending Requests</div>
                     </div>
                 </div>
             </div>
@@ -167,261 +240,87 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Crop Type Distribution</h5>
+    <div class="row g-4 mb-5">
+        <!-- Disease Frequency -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-bar-chart-fill me-2"></i>Top Diseases Reported
+                </h5>
+                {% if disease_frequency %}
+                {% set max_count = disease_frequency.values()|max %}
+                {% for disease, count in disease_frequency.items()|list[:5] %}
+                <div class="simple-bar">
+                    <div class="bar-label">{{ disease }}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
+                            <span class="bar-value">{{ count }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="cropChart" class="chart-container"></canvas>
-                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted text-center">No disease data available</p>
+                {% endif %}
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Disease Frequency (Top 10)</h5>
+
+        <!-- Region Stats -->
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5 class="chart-title">
+                    <i class="bi bi-geo-alt-fill me-2"></i>Top Active Regions
+                </h5>
+                {% if region_stats %}
+                {% set max_count = region_stats.values()|max %}
+                {% for region, count in region_stats.items()|list[:5] %}
+                <div class="simple-bar">
+                    <div class="bar-label">{{ region }}</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
+                            <span class="bar-value">{{ count }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <canvas id="diseaseChart" class="chart-container"></canvas>
-                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted text-center">No region data available</p>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Region Statistics (Top 10)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="regionChart" class="chart-container"></canvas>
-                </div>
-            </div>
+    <!-- Quick Links -->
+    <div class="row g-4">
+        <div class="col-12">
+            <h4 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightning-charge-fill text-danger me-2"></i>Quick Actions
+            </h4>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Monthly Issues Trend</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="monthlyChart" class="chart-container"></canvas>
-                </div>
-            </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_farmers') }}" class="quick-link">
+                <i class="bi bi-people fs-4 text-danger me-2"></i>
+                <span class="fw-bold text-dark">Manage Farmers</span>
+            </a>
         </div>
-    </div>
-
-    <!-- Additional Stats -->
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-success">{{ total_diagnoses }}</h3>
-                    <p class="text-muted mb-0">Total Diagnoses</p>
-                </div>
-            </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.manage_experts') }}" class="quick-link">
+                <i class="bi bi-person-badge fs-4 text-danger me-2"></i>
+                <span class="fw-bold text-dark">Manage Experts</span>
+            </a>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-info">{{ total_product_requests }}</h3>
-                    <p class="text-muted mb-0">Product Requests</p>
-                    <small class="text-warning">{{ pending_requests }} pending</small>
-                </div>
-            </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.disease_statistics') }}" class="quick-link">
+                <i class="bi bi-graph-up fs-4 text-danger me-2"></i>
+                <span class="fw-bold text-dark">View Statistics</span>
+            </a>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-primary">{{ active_users }}</h3>
-                    <p class="text-muted mb-0">Active Users</p>
-                </div>
-            </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('admin.model_monitoring') }}" class="quick-link">
+                <i class="bi bi-cpu fs-4 text-danger me-2"></i>
+                <span class="fw-bold text-dark">ML Monitoring</span>
+            </a>
         </div>
     </div>
 </div>
-
-<script>
-// Chart.js Configuration
-Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-Chart.defaults.font.size = 12;
-Chart.defaults.color = '#333';
-
-// Crop Distribution Chart
-const cropCtx = document.getElementById('cropChart').getContext('2d');
-new Chart(cropCtx, {
-    type: 'doughnut',
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 15,
-                    usePointStyle: true
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12,
-                titleFont: { size: 14 },
-                bodyFont: { size: 12 }
-            }
-        }
-    },
-    data: {
-        labels: Object.keys({{ crop_distribution|tojson }}),
-        datasets: [{
-            data: Object.values({{ crop_distribution|tojson }}),
-            backgroundColor: [
-                '#0d6efd', '#198754', '#ffc107', '#dc3545', 
-                '#0dcaf0', '#6610f2', '#fd7e14', '#20c997'
-            ]
-        }]
-    }
-});
-
-// Disease Frequency Chart
-const diseaseCtx = document.getElementById('diseaseChart').getContext('2d');
-const diseaseData = {{ disease_frequency|tojson }};
-new Chart(diseaseCtx, {
-    type: 'bar',
-    data: {
-        labels: Object.keys(diseaseData).slice(0, 10),
-        datasets: [{
-            label: 'Frequency',
-            data: Object.values(diseaseData).slice(0, 10),
-            backgroundColor: 'rgba(25, 135, 84, 0.8)',
-            borderColor: '#198754',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        indexAxis: 'y',
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12
-            }
-        },
-        scales: {
-            x: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0,0,0,0.05)'
-                }
-            },
-            y: {
-                grid: {
-                    color: 'rgba(0,0,0,0.05)'
-                }
-            }
-        }
-    }
-});
-
-// Region Chart
-const regionCtx = document.getElementById('regionChart').getContext('2d');
-const regionData = {{ region_stats|tojson }};
-new Chart(regionCtx, {
-    type: 'bar',
-    data: {
-        labels: Object.keys(regionData).slice(0, 10),
-        datasets: [{
-            label: 'Issues',
-            data: Object.values(regionData).slice(0, 10),
-            backgroundColor: 'rgba(13, 202, 240, 0.8)',
-            borderColor: '#0dcaf0',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0,0,0,0.05)'
-                }
-            },
-            x: {
-                grid: {
-                    display: false
-                }
-            }
-        }
-    }
-});
-
-// Monthly Trend Chart
-const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-const monthlyData = {{ monthly_issues|tojson }};
-new Chart(monthlyCtx, {
-    type: 'line',
-    data: {
-        labels: Object.keys(monthlyData).reverse(),
-        datasets: [{
-            label: 'Issues',
-            data: Object.values(monthlyData).reverse(),
-            borderColor: '#ffc107',
-            backgroundColor: 'rgba(255, 193, 7, 0.1)',
-            tension: 0.4,
-            fill: true,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            pointBackgroundColor: '#ffc107',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top'
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0,0,0,0.8)',
-                padding: 12,
-                mode: 'index',
-                intersect: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0,0,0,0.05)'
-                }
-            },
-            x: {
-                grid: {
-                    display: false
-                }
-            }
-        }
-    }
-});
-</script>
 {% endblock %}
-

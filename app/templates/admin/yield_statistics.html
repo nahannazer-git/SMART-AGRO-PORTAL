@@ -4,121 +4,148 @@
 
 {% block extra_css %}
 <style>
-    .chart-container {
-        position: relative;
-        height: 400px;
+    .admin-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ffe4e6;
+        margin-bottom: 30px;
+    }
+
+    .chart-title {
+        font-weight: 700;
+        color: #9f1239;
+        margin-bottom: 25px;
+        font-size: 1.2rem;
+    }
+
+    .simple-bar {
+        margin-bottom: 20px;
+    }
+
+    .bar-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .bar-container {
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 100px;
+        overflow: hidden;
+    }
+
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 100px;
+        transition: width 1s ease;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    .bar-count {
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .stat-summary {
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #9f1239;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="admin-hero">
+    <div class="container">
+        <a href="{{ url_for('admin.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
+        <h1 class="fw-bold"><i class="bi bi-graph-up-arrow me-2"></i>Yield Statistics</h1>
+        <p class="opacity-75 mb-0">Analyze crop yield predictions and trends</p>
     </div>
-</nav>
+</div>
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h3><i class="bi bi-graph-up"></i> Yield Statistics</h3>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Yield by Crop Type</h5>
+<div class="container pb-5">
+    <div class="mt-5">
+        <!-- Summary Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-clipboard-data-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ crop_yields.values()|sum|round(0) if crop_yields else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Predictions</p>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Crop Type</th>
-                                    <th>Avg Yield (tons/acre)</th>
-                                    <th>Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for crop in yield_by_crop %}
-                                <tr>
-                                    <td><strong>{{ crop.crop_type }}</strong></td>
-                                    <td>{{ crop.avg_yield|round(2) }}</td>
-                                    <td>{{ crop.count }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-bar-chart-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ avg_yield|round(2) if avg_yield else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Avg Yield (tons)</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-graph-up fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ crop_yields.values()|max|round(0) if crop_yields else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Highest Yield</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Yield by Region</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Region</th>
-                                    <th>Avg Yield (tons/acre)</th>
-                                    <th>Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for region in yield_by_region %}
-                                <tr>
-                                    <td><strong>{{ region.location }}</strong></td>
-                                    <td>{{ region.avg_yield|round(2) }}</td>
-                                    <td>{{ region.count }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Yield Trends (Monthly)</h5>
+        <!-- Crop Yields Chart -->
+        <div class="chart-card">
+            <h5 class="chart-title">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>Yield by Crop Type
+            </h5>
+            {% if crop_yields %}
+            {% set max_yield = crop_yields.values()|max %}
+            {% for crop, yield_val in crop_yields.items()|sort(attribute=1, reverse=True) %}
+            <div class="simple-bar">
+                <div class="bar-label">
+                    <span>{{ crop }}</span>
+                    <span class="text-muted small">{{ yield_val|round(2) }} tons</span>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th>Average Yield (tons/acre)</th>
-                                    <th>Prediction Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for trend in yield_trends %}
-                                <tr>
-                                    <td><strong>{{ trend.month }}</strong></td>
-                                    <td>{{ trend.avg_yield|round(2) }}</td>
-                                    <td>{{ trend.count }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: {{ (yield_val / max_yield * 100)|round }}%;">
+                        <span class="bar-count">{{ yield_val|round(1) }}</span>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                <p class="text-muted">No yield data available</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
-

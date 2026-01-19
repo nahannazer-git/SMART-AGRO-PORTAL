@@ -1,179 +1,148 @@
 {% extends "base.html" %}
 
-{% block title %}Model Monitoring - Admin Portal{% endblock %}
+{% block title %}ML Model Monitoring - Admin Portal{% endblock %}
 
 {% block extra_css %}
 <style>
-    .model-card {
-        transition: transform 0.2s;
+    .admin-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
     }
+
+    .model-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ffe4e6;
+        margin-bottom: 25px;
+        transition: all 0.3s;
+    }
+
     .model-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(225, 29, 72, 0.15);
+    }
+
+    .model-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        color: #9f1239;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .accuracy-meter {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 6px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #9f1239;
+        position: relative;
+    }
+
+    .accuracy-meter.high {
+        border-color: #22c55e;
+        color: #166534;
+    }
+
+    .accuracy-meter.medium {
+        border-color: #f59e0b;
+        color: #92400e;
+    }
+
+    .metric-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #6b7280;
+        letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #111827;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="admin-hero">
+    <div class="container">
+        <a href="{{ url_for('admin.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
+        <h1 class="fw-bold"><i class="bi bi-cpu-fill me-2"></i>ML Model Monitoring</h1>
+        <p class="opacity-75 mb-0">Monitor machine learning model performance</p>
     </div>
-</nav>
+</div>
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3><i class="bi bi-cpu"></i> Model Monitoring</h3>
-                <div>
-                    <span class="badge bg-success">{{ completed_trainings }} Completed</span>
-                    <span class="badge bg-danger">{{ failed_trainings }} Failed</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Model Performance Cards -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card model-card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-bug"></i> Disease Prediction Model</h5>
-                </div>
-                <div class="card-body">
-                    {% if disease_model %}
-                        <div class="mb-3">
-                            <p><strong>Version:</strong> {{ disease_model.model_version }}</p>
-                            <p><strong>Accuracy:</strong> 
-                                <span class="badge bg-{{ 'success' if disease_model.accuracy >= 0.9 else 'warning' if disease_model.accuracy >= 0.8 else 'danger' }}">
-                                    {{ (disease_model.accuracy * 100)|round(1) if disease_model.accuracy else 'N/A' }}%
-                                </span>
+<div class="container pb-5">
+    <div class="mt-5">
+        {% if models %}
+        {% for model in models %}
+        <div class="model-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="model-icon">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2">{{ model.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-calendar3 me-1"></i> Trained: {{ model.trained_at.strftime('%b %d, %Y')
+                                if model.trained_at else 'N/A' }}
                             </p>
-                            <p><strong>Total Predictions:</strong> {{ disease_model.total_predictions }}</p>
-                            <p><strong>Correct Predictions:</strong> {{ disease_model.correct_predictions }}</p>
-                            <p><strong>Avg Confidence:</strong> {{ (disease_model.avg_confidence * 100)|round(1) if disease_model.avg_confidence else 'N/A' }}%</p>
-                            <p><strong>Last Updated:</strong> {{ disease_model.last_updated.strftime('%Y-%m-%d %H:%M') if disease_model.last_updated else 'N/A' }}</p>
-                        </div>
-                        <form method="POST" action="{{ url_for('admin.retrain_model') }}" class="d-inline">
-                            <input type="hidden" name="model_type" value="disease">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-arrow-clockwise"></i> Retrain Model
-                            </button>
-                        </form>
-                    {% else %}
-                        <p class="text-muted">No model performance data available.</p>
-                        <form method="POST" action="{{ url_for('admin.retrain_model') }}" class="d-inline">
-                            <input type="hidden" name="model_type" value="disease">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-play-circle"></i> Train Initial Model
-                            </button>
-                        </form>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6 mb-4">
-            <div class="card model-card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Yield Prediction Model</h5>
-                </div>
-                <div class="card-body">
-                    {% if yield_model %}
-                        <div class="mb-3">
-                            <p><strong>Version:</strong> {{ yield_model.model_version }}</p>
-                            <p><strong>Accuracy:</strong> 
-                                <span class="badge bg-{{ 'success' if yield_model.accuracy >= 0.9 else 'warning' if yield_model.accuracy >= 0.8 else 'danger' }}">
-                                    {{ (yield_model.accuracy * 100)|round(1) if yield_model.accuracy else 'N/A' }}%
-                                </span>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock-history me-1"></i> Version: {{ model.version or '1.0' }}
                             </p>
-                            <p><strong>Total Predictions:</strong> {{ yield_model.total_predictions }}</p>
-                            <p><strong>Correct Predictions:</strong> {{ yield_model.correct_predictions }}</p>
-                            <p><strong>Avg Confidence:</strong> {{ (yield_model.avg_confidence * 100)|round(1) if yield_model.avg_confidence else 'N/A' }}%</p>
-                            <p><strong>Last Updated:</strong> {{ yield_model.last_updated.strftime('%Y-%m-%d %H:%M') if yield_model.last_updated else 'N/A' }}</p>
                         </div>
-                        <form method="POST" action="{{ url_for('admin.retrain_model') }}" class="d-inline">
-                            <input type="hidden" name="model_type" value="yield">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-arrow-clockwise"></i> Retrain Model
-                            </button>
-                        </form>
-                    {% else %}
-                        <p class="text-muted">No model performance data available.</p>
-                        <form method="POST" action="{{ url_for('admin.retrain_model') }}" class="d-inline">
-                            <input type="hidden" name="model_type" value="yield">
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-play-circle"></i> Train Initial Model
-                            </button>
-                        </form>
-                    {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    {% set accuracy = model.accuracy * 100 if model.accuracy else 0 %}
+                    <div class="accuracy-meter {{ 'high' if accuracy > 80 else 'medium' if accuracy > 60 else '' }}">
+                        {{ accuracy|round(0)|int }}%
+                    </div>
+                    <p class="metric-label mt-2 mb-0">Accuracy</p>
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="mb-3">
+                        <p class="metric-label mb-1">Total Predictions</p>
+                        <p class="metric-value mb-0">{{ model.prediction_count or 0 }}</p>
+                    </div>
+                    <span
+                        class="badge {{ 'bg-success' if model.is_active else 'bg-secondary' }} rounded-pill px-3 py-2">
+                        {{ 'Active' if model.is_active else 'Inactive' }}
+                    </span>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Training History -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Training History</h5>
-                </div>
-                <div class="card-body">
-                    {% if recent_trainings %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Model Name</th>
-                                        <th>Type</th>
-                                        <th>Status</th>
-                                        <th>Accuracy</th>
-                                        <th>Loss</th>
-                                        <th>Epochs</th>
-                                        <th>Duration</th>
-                                        <th>Trained By</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for training in recent_trainings %}
-                                    <tr>
-                                        <td>{{ training.model_name }}</td>
-                                        <td><span class="badge bg-secondary">{{ training.model_type }}</span></td>
-                                        <td>
-                                            <span class="badge bg-{{ 'success' if training.training_status == 'completed' else 'warning' if training.training_status == 'training' else 'danger' }}">
-                                                {{ training.training_status|title }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if training.accuracy %}
-                                                {{ (training.accuracy * 100)|round(1) }}%
-                                            {% else %}
-                                                N/A
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ training.loss|round(3) if training.loss else 'N/A' }}</td>
-                                        <td>{{ training.epochs or 'N/A' }}</td>
-                                        <td>{{ (training.training_duration // 60) if training.training_duration else 'N/A' }} min</td>
-                                        <td>{{ training.trainer.full_name }}</td>
-                                        <td>{{ training.created_at.strftime('%Y-%m-%d') }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle"></i> No training history available.
-                        </div>
-                    {% endif %}
-                </div>
+        {% endfor %}
+        {% else %}
+        <div class="text-center py-5">
+            <div class="bg-light p-4 rounded-circle d-inline-block mb-4">
+                <i class="bi bi-cpu fs-1 text-muted"></i>
             </div>
+            <h4 class="fw-bold text-dark">No Models Available</h4>
+            <p class="text-muted">Train machine learning models to see them here</p>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
-

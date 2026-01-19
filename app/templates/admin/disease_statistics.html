@@ -4,96 +4,149 @@
 
 {% block extra_css %}
 <style>
-    .chart-container {
+    .admin-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ffe4e6;
+        margin-bottom: 30px;
+    }
+
+    .chart-title {
+        font-weight: 700;
+        color: #9f1239;
+        margin-bottom: 25px;
+        font-size: 1.2rem;
+    }
+
+    .simple-bar {
+        margin-bottom: 20px;
+    }
+
+    .bar-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .bar-container {
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 100px;
+        overflow: hidden;
         position: relative;
-        height: 400px;
+    }
+
+    .bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        border-radius: 100px;
+        transition: width 1s ease;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    .bar-count {
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .stat-summary {
+        background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%);
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #9f1239;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('admin.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="admin-hero">
+    <div class="container">
+        <a href="{{ url_for('admin.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
+        <h1 class="fw-bold"><i class="bi bi-bug-fill me-2"></i>Disease Statistics</h1>
+        <p class="opacity-75 mb-0">Analyze crop disease patterns and trends</p>
     </div>
-</nav>
+</div>
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h3><i class="bi bi-bug"></i> Disease Frequency Statistics</h3>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0">Disease Frequency</h5>
+<div class="container pb-5">
+    <div class="mt-5">
+        <!-- Summary Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-bug-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_frequency.values()|sum if disease_frequency else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Total Cases</p>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Disease</th>
-                                    <th>Frequency</th>
-                                    <th>Average Severity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for disease in disease_freq %}
-                                <tr>
-                                    <td><strong>{{ disease.disease_identified }}</strong></td>
-                                    <td>{{ disease.count }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ 'danger' if disease.avg_severity >= 3 else 'warning' if disease.avg_severity >= 2 else 'info' }}">
-                                            {{ disease.avg_severity|round(1) if disease.avg_severity else 'N/A' }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-list-check fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_frequency|length if disease_frequency else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Disease Types</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-summary">
+                    <i class="bi bi-exclamation-triangle-fill fs-1 text-danger mb-3 d-block"></i>
+                    <div class="stat-number">{{ disease_frequency.values()|max if disease_frequency else 0 }}</div>
+                    <p class="mb-0 fw-bold text-uppercase small" style="color: #881337;">Highest Count</p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">Disease by Crop Type</h5>
+        <!-- Disease Frequency Chart -->
+        <div class="chart-card">
+            <h5 class="chart-title">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>Disease Frequency Distribution
+            </h5>
+            {% if disease_frequency %}
+            {% set max_count = disease_frequency.values()|max %}
+            {% for disease, count in disease_frequency.items()|sort(attribute=1, reverse=True) %}
+            <div class="simple-bar">
+                <div class="bar-label">
+                    <span>{{ disease }}</span>
+                    <span class="text-muted small">{{ count }} cases</span>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Crop Type</th>
-                                    <th>Disease</th>
-                                    <th>Count</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in disease_by_crop %}
-                                <tr>
-                                    <td><strong>{{ item.crop_type }}</strong></td>
-                                    <td>{{ item.disease_identified }}</td>
-                                    <td>{{ item[2] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: {{ (count / max_count * 100)|round }}%;">
+                        <span class="bar-count">{{ count }}</span>
                     </div>
                 </div>
             </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                <p class="text-muted">No disease data available</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 {% endblock %}
-
