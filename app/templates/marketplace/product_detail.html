@@ -4,359 +4,347 @@
 
 {% block extra_css %}
 <style>
-    .product-detail-header {
-        background-color: #f8f9fa;
-        padding: 30px 0;
-        margin-bottom: 30px;
+    .detail-nav {
+        background: white;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+        sticky-top: true;
+    }
+
+    .product-hero {
+        padding: 40px 0;
+        background: #f8fafc;
+    }
+
+    .main-image-wrap {
+        background: white;
+        border-radius: 32px;
+        padding: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
     }
 
     .product-image-large {
         width: 100%;
-        height: 400px;
+        height: 500px;
         object-fit: cover;
-        border-radius: 10px;
-        background-color: #e9ecef;
+        border-radius: 24px;
     }
 
-    .price-section {
-        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        color: white;
+    .price-card {
+        background: white;
+        border-radius: 32px;
         padding: 30px;
-        border-radius: 10px;
-        margin-bottom: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        position: sticky;
+        top: 100px;
     }
 
-    .price-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        margin-bottom: 10px;
-    }
-
-    .price-value {
+    .price-big {
         font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 20px;
+        font-weight: 800;
+        color: #10b981;
+        letter-spacing: -1px;
     }
 
-    .product-details {
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        border: 1px solid #e9ecef;
-    }
-
-    .detail-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 15px 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
+    .unit-label {
+        color: #64748b;
         font-weight: 600;
-        color: #34495e;
-        min-width: 150px;
-    }
-
-    .detail-value {
-        color: #7f8c8d;
-    }
-
-    .farmer-card {
-        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-        color: white;
-        padding: 30px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-    }
-
-    .farmer-avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-    }
-
-    .farmer-name-large {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
-    .contact-section {
-        background-color: #f8f9fa;
-        padding: 30px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-    }
-
-    .contact-method {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-
-    .contact-method-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #27ae60;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        font-size: 1.5rem;
-    }
-
-    .contact-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .contact-label {
         font-size: 0.9rem;
-        color: #7f8c8d;
     }
 
-    .contact-value {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .inquiry-form {
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        border: 1px solid #e9ecef;
-    }
-
-    .btn-contact {
-        background-color: #27ae60;
+    .buy-btn {
+        background: #10b981;
         color: white;
         border: none;
-        padding: 12px 30px;
-        font-size: 1.1rem;
-        border-radius: 5px;
+        padding: 16px;
+        border-radius: 18px;
         width: 100%;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
     }
 
-    .btn-contact:hover {
-        background-color: #229954;
+    .buy-btn:hover {
+        background: #059669;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(16, 185, 129, 0.3);
         color: white;
     }
 
-    .back-button {
-        margin-bottom: 20px;
+    .wa-btn {
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #d1fae5;
+        padding: 12px;
+        border-radius: 18px;
+        width: 100%;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        text-decoration: none;
     }
 
-    .badge-category {
-        background-color: #27ae60;
+    .wa-btn:hover {
+        background: #d1fae5;
+        color: #15803d;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 25px;
+    }
+
+    .info-chip {
+        background: #f8fafc;
+        padding: 12px 15px;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .farmer-profile {
+        background: #f1f5f9;
+        border-radius: 24px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .farmer-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        background: #10b981;
         color: white;
-        padding: 8px 15px;
-        border-radius: 20px;
-        display: inline-block;
-        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .section-title {
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: #10b981;
+        border-radius: 10px;
+    }
+
+    .inquiry-box {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        border: 1px solid #f1f5f9;
+        margin-top: 30px;
+    }
+
+    .form-control {
+        border-radius: 14px;
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .form-control:focus {
+        background: white;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.05);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Back Buttons -->
-    <div class="d-flex gap-2 mb-3">
-        <a href="{{ url_for('main.index') }}" class="btn btn-light">
-            <i class="bi bi-house-door"></i> Back to Portal
+<div class="detail-nav sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="{{ url_for('marketplace.index') }}" class="text-decoration-none text-muted fw-bold small">
+            <i class="bi bi-chevron-left"></i> BACK TO MARKETPLACE
         </a>
-        <a href="{{ url_for('marketplace.index') }}" class="btn btn-light">
-            <i class="bi bi-arrow-left"></i> Back to Marketplace
-        </a>
+        <div class="d-none d-md-flex gap-3">
+            <a href="tel:{{ farmer.phone }}" class="text-decoration-none text-dark fw-bold small">
+                <i class="bi bi-telephone text-success me-1"></i> Support
+            </a>
+        </div>
     </div>
+</div>
 
-    <div class="row">
-        <!-- Product Image & Details -->
-        <div class="col-md-8">
-            <!-- Product Image -->
-            {% if product.product_image_path %}
-            <img src="{{ url_for('static', filename=product.product_image_path) }}" class="product-image-large"
-                alt="{{ product.product_name }}"
-                onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%25%27 height=%27400%27%3E%3Crect fill=%27%23ddd%27 width=%27100%25%27 height=%27400%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Arial%27 font-size=%2714%27 fill=%27%23999%27%3ENo Image Available%3C/text%3E%3C/svg%3E'">
-            {% else %}
-            <svg class="product-image-large" xmlns="http://www.w3.org/2000/svg" width="100%" height="400">
-                <rect fill="#ddd" width="100%" height="400" />
-                <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="14"
-                    fill="#999">No Image Available</text>
-            </svg>
-            {% endif %}
-
-            <!-- Product Info -->
-            <div class="mt-4">
-                <div class="badge-category">{{ product.category }}</div>
-                <h1 class="mb-3">{{ product.product_name }}</h1>
-
-                <!-- Product Details Table -->
-                <div class="product-details">
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="bi bi-box2"></i> Stock Available</span>
-                        <span class="detail-value">
-                            {{ "%.2f"|format(product.quantity) }} {{ product.unit }}
-                            {% if product.quantity < 5 %} <span class="badge bg-warning">Low Stock</span>
-                        {% endif %}
-                        </span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="bi bi-cash-coin"></i> Price</span>
-                        <span class="detail-value">₹{{ "%.2f"|format(product.price_per_unit) }}/{{ product.unit
-                            }}</span>
-                    </div>
-                    {% if product.location %}
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="bi bi-geo-alt"></i> Location</span>
-                        <span class="detail-value">{{ product.location }}</span>
+<div class="product-hero">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Left Side: Image & Description -->
+            <div class="col-lg-7">
+                <div class="main-image-wrap">
+                    {% if product.product_image_path %}
+                    <img src="{{ url_for('static', filename=product.product_image_path) }}" class="product-image-large"
+                        alt="{{ product.product_name }}">
+                    {% else %}
+                    <div class="product-image-large bg-light d-flex align-items-center justify-content-center">
+                        <i class="bi bi-image text-muted opacity-25 display-1"></i>
                     </div>
                     {% endif %}
-                    <div class="detail-item">
-                        <span class="detail-label"><i class="bi bi-calendar"></i> Listed On</span>
-                        <span class="detail-value">{{ product.created_at.strftime('%B %d, %Y') }}</span>
-                    </div>
                 </div>
 
-                <!-- Product Description -->
-                {% if product.description %}
-                <div class="mt-4">
-                    <h5>Description</h5>
-                    <p class="text-muted">{{ product.description }}</p>
-                </div>
-                {% endif %}
-            </div>
-        </div>
+                <div class="mt-5">
+                    <span class="badge bg-soft-emerald text-emerald rounded-pill px-3 py-2 mb-3 text-uppercase fw-bold"
+                        style="letter-spacing: 1px;">{{ product.category }}</span>
+                    <h1 class="display-5 fw-bold text-dark mb-4">{{ product.product_name }}</h1>
 
-        <!-- Sidebar - Farmer Info & Contact -->
-        <div class="col-md-4">
-            <!-- Price Section -->
-            <div class="price-section">
-                <div class="price-label">Price per {{ product.unit }}</div>
-                <div class="price-value">₹{{ "%.2f"|format(product.price_per_unit) }}</div>
-                <p class="mb-0">
-                    <small>Total for {{ product.quantity }} {{ product.unit }}: <strong>₹{{
-                            "%.2f"|format(product.price_per_unit * product.quantity) }}</strong></small>
-                </p>
-            </div>
+                    <h5 class="section-title">Product Description</h5>
+                    <p class="text-muted lead" style="line-height: 1.8;">
+                        {{ product.description or 'No detailed description provided for this farm product.' }}
+                    </p>
 
-            <!-- Farmer Card -->
-            <div class="farmer-card">
-                <div class="farmer-avatar">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <div class="farmer-name-large">{{ farmer.full_name }}</div>
-                {% if farmer.location %}
-                <p class="mb-2">
-                    <i class="bi bi-geo-alt-fill"></i> {{ farmer.location }}
-                </p>
-                {% endif %}
-                <p class="small mb-0">Verified Farmer</p>
-            </div>
-
-            <!-- Contact Methods -->
-            <div class="contact-section">
-                <h5 class="mb-4">Contact Farmer</h5>
-
-                {% if farmer.phone %}
-                <div class="contact-method">
-                    <div class="contact-method-icon">
-                        <i class="bi bi-telephone-fill"></i>
-                    </div>
-                    <div class="contact-info">
-                        <span class="contact-label">Phone</span>
-                        <a href="tel:{{ farmer.phone }}" class="contact-value">{{ farmer.phone }}</a>
+                    <div class="row mt-5 g-4">
+                        <div class="col-md-6">
+                            <h5 class="section-title">Freshness Check</h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white p-3 rounded-4 shadow-sm border border-light">
+                                    <i class="bi bi-patch-check-fill text-success fs-3"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Farmer Verified</div>
+                                    <p class="small text-muted mb-0">Harvested directly from {{ farmer.location or
+                                        'local farm' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="section-title">Listed Since</h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white p-3 rounded-4 shadow-sm border border-light">
+                                    <i class="bi bi-calendar-check text-primary fs-3"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ product.created_at.strftime('%d %B, %Y') }}</div>
+                                    <p class="small text-muted mb-0">Direct from local grower</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {% endif %}
-
-                {% if farmer.email %}
-                <div class="contact-method">
-                    <div class="contact-method-icon">
-                        <i class="bi bi-envelope-fill"></i>
-                    </div>
-                    <div class="contact-info">
-                        <span class="contact-label">Email</span>
-                        <a href="mailto:{{ farmer.email }}" class="contact-value">{{ farmer.email }}</a>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- WhatsApp Link -->
-                {% if farmer.phone %}
-                <a href="https://wa.me/91{{ farmer.phone|replace(' ', '')|replace('-', '') }}" target="_blank"
-                    class="btn btn-success w-100 mt-3">
-                    <i class="bi bi-whatsapp"></i> WhatsApp
-                </a>
-                {% endif %}
-
-                <!-- Buy Now Button -->
-                <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}"
-                    class="btn btn-primary w-100 mt-3 py-2 fw-bold">
-                    <i class="bi bi-cart-check"></i> Buy Now (Online Order)
-                </a>
             </div>
 
-            <!-- Inquiry Form -->
-            <div class="inquiry-form">
-                <h5 class="mb-4">Send Inquiry</h5>
-                <form id="inquiryForm" method="POST" action="{{ url_for('marketplace.contact_farmer') }}">
-                    <input type="hidden" name="product_id" value="{{ product.id }}">
-                    <input type="hidden" name="farmer_id" value="{{ farmer.id }}">
-
-                    <div class="mb-3">
-                        <label for="visitor_name" class="form-label">Your Name</label>
-                        <input type="text" class="form-control" id="visitor_name" name="visitor_name" required>
+            <!-- Right Side: Action Card & Farmer Info -->
+            <div class="col-lg-5">
+                <div class="price-card">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <div class="unit-label">Price per {{ product.unit }}</div>
+                            <div class="price-big">₹{{ "%.0f"|format(product.price_per_unit) }}</div>
+                        </div>
+                        {% if product.quantity < 5 %} <span
+                            class="badge bg-soft-rose text-rose px-3 py-2 rounded-pill fw-bold">Low Stock!</span>
+                            {% endif %}
                     </div>
 
-                    <div class="mb-3">
-                        <label for="visitor_phone" class="form-label">Your Phone</label>
-                        <input type="tel" class="form-control" id="visitor_phone" name="visitor_phone" required
-                            pattern="[0-9]{10}" maxlength="10" title="Please enter a valid 10-digit mobile number"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);">
-                        <small class="text-muted">Enter 10-digit mobile number</small>
+                    <div class="info-grid mb-4">
+                        <div class="info-chip">
+                            <div class="info-label">Availability</div>
+                            <div class="info-value">{{ "%.2f"|format(product.quantity) }} {{ product.unit }}</div>
+                        </div>
+                        <div class="info-chip">
+                            <div class="info-label">Location</div>
+                            <div class="info-value">{{ product.location or 'Kerala' }}</div>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="message" class="form-label">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="4" required
-                            placeholder="Ask about pricing, delivery, quantity, etc."></textarea>
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('marketplace.checkout', product_id=product.id) }}" class="buy-btn">
+                            <i class="bi bi-cart-check-fill"></i> Buy Now (Online Order)
+                        </a>
+
+                        {% if farmer.phone %}
+                        <a href="https://wa.me/91{{ farmer.phone|replace(' ', '')|replace('-', '') }}" target="_blank"
+                            class="wa-btn">
+                            <i class="bi bi-whatsapp"></i> Chat on WhatsApp
+                        </a>
+                        {% endif %}
                     </div>
 
-                    <button type="submit" class="btn btn-contact">
-                        <i class="bi bi-send"></i> Send Inquiry
-                    </button>
-                </form>
+                    <!-- Farmer Quick Profile -->
+                    <div class="farmer-profile">
+                        <div class="farmer-icon">
+                            {{ farmer.full_name[0]|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold text-dark">{{ farmer.full_name }}</div>
+                            <div class="small text-muted"><i class="bi bi-patch-check-fill text-primary"></i> Verified
+                                Farmer</div>
+                        </div>
+                        <a href="tel:{{ farmer.phone }}" class="btn btn-white btn-sm border rounded-circle"
+                            style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-telephone"></i>
+                        </a>
+                    </div>
+
+                    <!-- Inquiry Form -->
+                    <div class="inquiry-box shadow-sm">
+                        <h6 class="fw-bold mb-3">Send Direct Inquiry</h6>
+                        <form id="inquiryForm" method="POST" action="{{ url_for('marketplace.contact_farmer') }}">
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="farmer_id" value="{{ farmer.id }}">
+
+                            <div class="mb-3">
+                                <input type="text" class="form-control" name="visitor_name" placeholder="Your Name"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="tel" class="form-control" id="visitor_phone" name="visitor_phone"
+                                    placeholder="Your WhatsApp Number" required pattern="[0-9]{10}">
+                            </div>
+                            <div class="mb-3">
+                                <textarea class="form-control" name="message" rows="3"
+                                    placeholder="I am interested in this product..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Send
+                                Inquiry</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Handle inquiry form submission
     document.getElementById('inquiryForm').addEventListener('submit', function (e) {
         e.preventDefault();
-
-        const visitorPhone = document.getElementById('visitor_phone').value;
-        if (visitorPhone.length !== 10) {
-            alert('Please enter a valid 10-digit mobile number.');
-            return;
-        }
-
         const formData = new FormData(this);
-
         fetch('{{ url_for("marketplace.contact_farmer") }}', {
             method: 'POST',
             body: formData
@@ -364,17 +352,12 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('✓ Your inquiry has been sent to the farmer! They will contact you soon.');
-                    document.getElementById('inquiryForm').reset();
+                    alert('✓ Your inquiry has been sent! The farmer will contact you soon.');
+                    this.reset();
                 } else {
                     alert('Error: ' + data.message);
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to send inquiry. Please try again.');
             });
     });
 </script>
-
 {% endblock %}

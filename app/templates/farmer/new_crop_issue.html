@@ -4,126 +4,285 @@
 
 {% block extra_css %}
 <style>
-    .image-preview {
+    .page-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .form-glass-card {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        position: relative;
+    }
+
+    .form-section-title {
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.1rem;
+    }
+
+    .form-section-title i {
+        color: #3b82f6;
+        font-size: 1.2rem;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 16px;
+        padding: 12px 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .symptom-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 12px 16px;
+        transition: all 0.2s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        user-select: none;
+    }
+
+    .symptom-card:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    input:checked+.symptom-card {
+        background: #3b82f6 !important;
+        color: white !important;
+        border-color: #3b82f6;
+    }
+
+    input:checked+.symptom-card i {
+        color: white !important;
+        opacity: 1 !important;
+    }
+
+    input:checked+.symptom-card i::before {
+        content: "\f272";
+    }
+
+    .file-drop-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 24px;
+        padding: 40px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+
+    .file-drop-zone:hover {
+        background: #eff6ff;
+        border-color: #3b82f6;
+    }
+
+    .preview-img {
         max-width: 100%;
         max-height: 300px;
-        margin-top: 10px;
-        border-radius: 8px;
+        border-radius: 20px;
+        display: none;
+        margin: 20px auto 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        border: none;
+        color: white;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        width: 100%;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(30, 58, 138, 0.3);
+    }
+
+    .required-dot {
+        color: #ef4444;
+        margin-left: 2px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="page-hero text-white">
+    <div class="container">
+        <a href="{{ url_for('farmer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
+        <h1 class="fw-bold">Report Crop Issue</h1>
+        <p class="opacity-75 mb-0">Get expert advice by sharing details and photos of your crop symptoms</p>
     </div>
-</nav>
+</div>
 
-<div class="container">
+<div class="container pb-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-bug"></i> Report Crop Issue</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="crop_type" class="form-label">Crop Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="crop_type" name="crop_type" required>
-                                    <option value="">Select Crop Type</option>
-                                    {% for crop in crop_types %}
-                                    <option value="{{ crop }}">{{ crop }}</option>
-                                    {% endfor %}
-                                </select>
+        <div class="col-lg-10">
+            <div class="form-glass-card">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-5">
+                        <!-- Left Pillar: Basic Details -->
+                        <div class="col-lg-6">
+                            <div class="form-section-title">
+                                <i class="bi bi-info-circle-fill"></i> Crop Details
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="crop_variety" class="form-label">Crop Variety</label>
-                                <input type="text" class="form-control" id="crop_variety" name="crop_variety" 
-                                       placeholder="e.g., Basmati, Hybrid">
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="planting_date" class="form-label">Planting Date</label>
-                                <input type="date" class="form-control" id="planting_date" name="planting_date">
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="location" class="form-label">Location</label>
-                                <input type="text" class="form-control" id="location" name="location" 
-                                       value="{{ current_user.farm_location or '' }}" 
-                                       placeholder="Farm location">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="issue_description" class="form-label">Issue Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="issue_description" name="issue_description" 
-                                      rows="4" required 
-                                      placeholder="Describe the problem you're experiencing with your crop..."></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Symptoms (Select all that apply)</label>
-                            <div class="row">
-                                {% for symptom in symptom_options %}
-                                <div class="col-md-4 mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="symptoms" 
-                                               value="{{ symptom }}" id="symptom_{{ loop.index }}">
-                                        <label class="form-check-label" for="symptom_{{ loop.index }}">
-                                            {{ symptom }}
-                                        </label>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Crop Type <span
+                                                class="required-dot text-danger">*</span></label>
+                                        <select class="form-select" name="crop_type" required>
+                                            <option value="">Select Crop</option>
+                                            {% for crop in crop_types %}
+                                            <option value="{{ crop }}">{{ crop }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Variety</label>
+                                        <input type="text" class="form-control" name="crop_variety"
+                                            placeholder="e.g., Basmati">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Planting Date</label>
+                                        <input type="date" class="form-control" name="planting_date">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Location</label>
+                                        <input type="text" class="form-control" name="location"
+                                            value="{{ current_user.farm_location or '' }}" placeholder="Farm location">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Description of Problem <span
+                                        class="required-dot text-danger">*</span></label>
+                                <textarea class="form-control" name="issue_description" rows="6"
+                                    placeholder="Describe the spots, wilting, or pest behavior you've noticed..."
+                                    required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Right Pillar: Symptoms & Image -->
+                        <div class="col-lg-6">
+                            <div class="form-section-title">
+                                <i class="bi bi-list-check"></i> Select Symptoms
+                            </div>
+
+                            <div class="row g-2 mb-4">
+                                {% for symptom in symptom_options %}
+                                <div class="col-6">
+                                    <input type="checkbox" name="symptoms" value="{{ symptom }}"
+                                        id="sym_{{ loop.index }}" style="display: none;">
+                                    <label class="symptom-card w-100" for="sym_{{ loop.index }}">
+                                        <i class="bi bi-check2-circle fs-5 opacity-50"></i>
+                                        <span class="small fw-bold">{{ symptom }}</span>
+                                    </label>
                                 </div>
                                 {% endfor %}
                             </div>
+
+                            <div class="form-section-title mt-4">
+                                <i class="bi bi-camera-fill"></i> Upload Visual Evidence
+                            </div>
+
+                            <div class="file-drop-zone" onclick="document.getElementById('imgI').click()">
+                                <div id="uploadPlaceholder">
+                                    <i class="bi bi-cloud-arrow-up display-3 text-muted"></i>
+                                    <p class="mt-3 text-muted fw-bold">Click to capture or upload photo</p>
+                                    <small class="text-muted opacity-50">Help experts by providing clear, close-up
+                                        photos.</small>
+                                </div>
+                                <img id="previewImg" class="preview-img">
+                                <input type="file" id="imgI" name="crop_image" class="d-none" accept="image/*">
+                            </div>
+
+                            <div class="mt-5">
+                                <button type="submit" class="btn-submit">
+                                    <i class="bi bi-send-fill me-2"></i> SUBMIT CASE FOR ANALYSIS
+                                </button>
+                                <p class="text-center text-muted small mt-3">
+                                    <i class="bi bi-shield-lock me-1"></i> Experts will review your case usually within
+                                    24 hours.
+                                </p>
+                            </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="crop_image" class="form-label">Upload Crop Image</label>
-                            <input type="file" class="form-control" id="crop_image" name="crop_image" 
-                                   accept="image/*" onchange="previewImage(this)">
-                            <small class="text-muted">Supported formats: JPG, PNG, GIF (Max 16MB)</small>
-                            <div id="imagePreview" class="mt-2"></div>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send"></i> Submit Issue
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
-    
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'image-preview';
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+    document.getElementById('imgI').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 25 * 1024 * 1024) {
+                alert('Image is too large! Maximum limit is 25MB.');
+                e.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (ex) {
+                document.getElementById('previewImg').src = ex.target.result;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle symptom card styling toggles if needed (CSS :checked does most)
 </script>
 {% endblock %}
-

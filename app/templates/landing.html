@@ -1,153 +1,236 @@
 {% extends "base.html" %}
 
-{% block title %}Krishi Bhavan Portal - Welcome{% endblock %}
+{% block title %}AgroPortal - Connecting Agriculture to the Future{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        padding: 120px 0 80px 0;
+        background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-title {
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 1.1;
+        color: #064e3b;
+    }
+
+    .accent-text {
+        color: #10b981;
+        position: relative;
+        display: inline-block;
+    }
+
+    .accent-text::after {
+        content: '';
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        width: 100%;
+        height: 12px;
+        background: rgba(16, 185, 129, 0.1);
+        z-index: -1;
+    }
+
+    .main-card {
+        border-radius: 40px;
+        border: none;
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: white;
+        height: 100%;
+    }
+
+    .main-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(6, 78, 59, 0.15);
+    }
+
+    .market-card-kb {
+        background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+    }
+
+    .market-card-agro {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+
+    .role-card {
+        background: white;
+        border-radius: 30px;
+        padding: 30px;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+        text-align: center;
+        height: 100%;
+    }
+
+    .role-card:hover {
+        border-color: #10b981;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transform: translateY(-5px);
+    }
+
+    .role-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 20px auto;
+        transition: all 0.3s ease;
+    }
+
+    .role-card:hover .role-icon {
+        transform: rotate(-10deg) scale(1.1);
+    }
+
+    .bg-soft-emerald {
+        background: #ecfdf5;
+        color: #10b981;
+    }
+
+    .bg-soft-blue {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+
+    .bg-soft-amber {
+        background: #fffbeb;
+        color: #f59e0b;
+    }
+
+    .bg-soft-rose {
+        background: #fff1f2;
+        color: #e11d48;
+    }
+
+    .glow-bg {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+        top: -200px;
+        right: -200px;
+        z-index: -1;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="landing-page position-relative overflow-hidden"
-    style="min-height: 100vh; background: linear-gradient(135deg, #f0fdf4 0%, #e6f7ed 100%);">
+<div class="hero-section">
+    <div class="glow-bg"></div>
+    <div class="container text-center">
+        <div class="badge bg-soft-emerald rounded-pill px-4 py-2 mb-4 fw-bold">
+            <i class="bi bi-shield-check me-2"></i> Kerala's Digital Agriculture Hub
+        </div>
+        <h1 class="hero-title display-2 mb-4">
+            The Future of <br>
+            <span class="accent-text">Smart Farming</span> is here.
+        </h1>
+        <p class="lead text-muted mx-auto mb-5" style="max-width: 700px;">
+            A unified ecosystem connecting farmers with experts, quality resources, and a direct-to-consumer
+            marketplace.
+        </p>
 
-    <!-- Decorative Circles -->
-    <div class="position-absolute translate-middle rounded-circle bg-success opacity-10"
-        style="width: 500px; height: 500px; top: 0; left: 0; filter: blur(80px);"></div>
-    <div class="position-absolute translate-middle rounded-circle bg-warning opacity-10"
-        style="width: 400px; height: 400px; bottom: 0; right: 0; filter: blur(80px);"></div>
+        <div class="row g-4 mb-5">
+            <!-- Public Krishi Bhavan Marketplace -->
+            <div class="col-lg-6">
+                <div class="card main-card market-card-kb p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-bank" style="font-size: 3rem;"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3">Krishi Bhavan Portal</h2>
+                    <p class="opacity-75 mb-4 px-lg-5">Access government subsidies, fertilizers, and certified farming
+                        equipment inventory.</p>
+                    <a href="{{ url_for('main.marketplace') }}"
+                        class="btn btn-light rounded-pill px-5 py-3 fw-bold mt-auto">
+                        View Subsidized Stock <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
 
-    <div class="container position-relative py-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold text-success mb-3">
-                <i class="bi bi-flower1 me-2"></i>Smart Agriculture Portal
-            </h1>
-            <p class="lead text-muted fs-4">Connecting Farmers, Experts, and Krishi Bhavan.</p>
+            <!-- Farmer-to-Consumer Marketplace -->
+            <div class="col-lg-6">
+                <div class="card main-card market-card-agro p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-shop-window" style="font-size: 3rem;"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3 text-white">Agro Marketplace</h2>
+                    <p class="opacity-75 mb-4 px-lg-5 text-white">Buy fresh organic produce directly from verified local
+                        farmers. No middleman, just quality.</p>
+                    <a href="{{ url_for('marketplace.index') }}"
+                        class="btn btn-primary rounded-pill px-5 py-3 fw-bold mt-auto border-0"
+                        style="background: #10b981;">
+                        Shop Fresh Produce <i class="bi bi-basket ms-2"></i>
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="row g-4 justify-content-center">
-
-            <!-- Public Krishi Bhavan Marketplace Card -->
-            <div class="col-md-8 col-lg-6 mb-4">
-                <div class="card border-0 shadow-lg h-100 bg-success text-white overflow-hidden landing-card">
-                    <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                        <div class="mb-4 p-3 rounded-circle bg-white bg-opacity-25">
-                            <i class="bi bi-shop-window" style="font-size: 3.5rem;"></i>
+        <!-- Login Section -->
+        <div class="mt-5 pt-5 border-top border-light">
+            <h4 class="fw-bold text-dark mb-5">Authorized Access</h4>
+            <div class="row g-4">
+                <!-- Farmer -->
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('auth.farmer_login') }}" class="text-decoration-none">
+                        <div class="role-card">
+                            <div class="role-icon bg-soft-emerald">
+                                <i class="bi bi-person-heart"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2">Farmer Portal</h6>
+                            <p class="small text-muted mb-0">Manage crops & sales</p>
                         </div>
-                        <h2 class="card-title fw-bold mb-3">Public Marketplace</h2>
-                        <p class="card-text fs-5 mb-4 opacity-75">
-                            View subsidized seeds, fertilizers, and equipment available at Krishi Bhavan. No login
-                            required.
-                        </p>
-                        <a href="{{ url_for('main.marketplace') }}"
-                            class="btn btn-light rounded-pill px-5 py-3 fw-bold stretched-link shadow-sm">
-                            <i class="bi bi-arrow-right-circle me-2"></i>Browse Catalog
-                        </a>
-                    </div>
+                    </a>
+                </div>
+                <!-- Expert -->
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('auth.expert_login') }}" class="text-decoration-none">
+                        <div class="role-card">
+                            <div class="role-icon bg-soft-blue">
+                                <i class="bi bi-mortarboard"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2">Agriculture Expert</h6>
+                            <p class="small text-muted mb-0">Consult & Diagnose</p>
+                        </div>
+                    </a>
+                </div>
+                <!-- Officer -->
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('auth.krishi_bhavan_officer_login') }}" class="text-decoration-none">
+                        <div class="role-card">
+                            <div class="role-icon bg-soft-amber">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2">Officer Login</h6>
+                            <p class="small text-muted mb-0">Inventory & Schemes</p>
+                        </div>
+                    </a>
+                </div>
+                <!-- Admin -->
+                <div class="col-md-6 col-lg-3">
+                    <a href="{{ url_for('auth.admin_login') }}" class="text-decoration-none">
+                        <div class="role-card">
+                            <div class="role-icon bg-soft-rose">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-2">System Admin</h6>
+                            <p class="small text-muted mb-0">Platform Settings</p>
+                        </div>
+                    </a>
                 </div>
             </div>
-
-            <!-- Agro Marketplace Card (NEW) -->
-            <div class="col-md-8 col-lg-6 mb-4">
-                <div class="card border-0 shadow-lg h-100 overflow-hidden landing-card"
-                    style="background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);">
-                    <div class="card-body p-5 text-center d-flex flex-column justify-content-center align-items-center">
-                        <div class="mb-4 p-3 rounded-circle bg-white bg-opacity-25">
-                            <i class="bi bi-bag-check-fill" style="font-size: 3.5rem;"></i>
-                        </div>
-                        <h2 class="card-title fw-bold mb-3 text-white">Agro Marketplace</h2>
-                        <p class="card-text fs-5 mb-4 opacity-75 text-white">
-                            Buy fresh farm products directly from farmers. Browse vegetables, fruits, grains, and more!
-                        </p>
-                        <a href="{{ url_for('marketplace.index') }}"
-                            class="btn btn-light rounded-pill px-5 py-3 fw-bold stretched-link shadow-sm">
-                            <i class="bi bi-shop me-2"></i>Explore Products
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Login Roles Section -->
-            <div class="col-12 text-center mb-4">
-                <h4 class="text-secondary fw-bold text-uppercase tracking-wider">Login to Your Account</h4>
-            </div>
-
-            <!-- Farmer Login -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 text-success">
-                            <i class="bi bi-person-badge" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Farmer Login</h5>
-                        <p class="text-muted small mb-4">Access dashboard, report issues, and chat with experts.</p>
-                        <a href="{{ url_for('auth.farmer_login') }}"
-                            class="btn btn-outline-success w-100 rounded-pill">Login</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Expert Login -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 text-primary">
-                            <i class="bi bi-mortarboard-fill" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Expert Login</h5>
-                        <p class="text-muted small mb-4">Review crops, diagnose diseases, and advise farmers.</p>
-                        <a href="{{ url_for('auth.expert_login') }}"
-                            class="btn btn-outline-primary w-100 rounded-pill">Login</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Officer Login -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 text-warning">
-                            <i class="bi bi-building-fill-gear" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Officer Login</h5>
-                        <p class="text-muted small mb-4">Manage inventory, approve requests, and system admin.</p>
-                        <a href="{{ url_for('auth.krishi_bhavan_officer_login') }}"
-                            class="btn btn-outline-warning w-100 rounded-pill text-dark">Login</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin Login -->
-            <div class="col-md-6 col-lg-3">
-                <div class="card border-0 shadow-sm h-100 hover-lift transition-all">
-                    <div class="card-body p-4 text-center">
-                        <div class="mb-3 text-danger">
-                            <i class="bi bi-shield-lock-fill" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h5 class="fw-bold mb-3">Admin Login</h5>
-                        <p class="text-muted small mb-4">System configuration, user management, and logs.</p>
-                        <a href="{{ url_for('auth.admin_login') }}"
-                            class="btn btn-outline-danger w-100 rounded-pill">Login</a>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-        <div class="text-center mt-5 mb-4">
-            <p class="text-muted small">New to the portal? <a href="{{ url_for('auth.farmer_register') }}"
-                    class="text-success fw-bold text-decoration-none">Register as a Farmer</a></p>
+        <div class="mt-5 py-4">
+            <p class="text-muted small">New to AgroPortal? <a href="{{ url_for('auth.farmer_register') }}"
+                    class="text-success fw-bold text-decoration-none">Create a Farmer Account</a></p>
         </div>
     </div>
 </div>
-
-<style>
-    .hover-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .landing-card {
-        background: radial-gradient(circle at top right, #198754, #146c43);
-    }
-</style>
 {% endblock %}

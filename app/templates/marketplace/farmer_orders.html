@@ -4,112 +4,187 @@
 
 {% block extra_css %}
 <style>
-    .order-card {
-        border-left: 5px solid #27ae60;
+    .orders-hero {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #059669 0%, #064e3b 100%), url('https://www.transparenttextures.com/patterns/leaf.png');
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -40px;
+    }
+
+    .order-card-modern {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .order-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .order-status-bar {
+        background: #f8fafc;
+        padding: 15px 25px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .status-badge {
-        font-size: 0.8rem;
-        padding: 5px 12px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 6px 16px;
+        border-radius: 100px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .order-header {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-bottom: 1px solid #eee;
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .product-thumb {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+
+    .action-btn-group .btn {
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+
+    .btn-shipped {
+        background: #eff6ff;
+        color: #3b82f6;
+        border: none;
+    }
+
+    .btn-shipped:hover {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-delivered {
+        background: #ecfdf5;
+        color: #10b981;
+        border: none;
+    }
+
+    .btn-delivered:hover {
+        background: #10b981;
+        color: white;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-person-badge"></i> Farmer Dashboard
-        </a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('marketplace.my_products') }}">My Products</a>
-                </li>
-            </ul>
+<div class="orders-hero">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <a href="{{ url_for('farmer.dashboard') }}"
+                    class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+                    <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+                </a>
+                <h1 class="fw-bold mb-0">Marketplace Orders</h1>
+                <p class="mb-0 opacity-75">Track and manage your customer purchases</p>
+            </div>
+            <div class="bg-white px-4 py-2 rounded-pill fw-bold shadow-sm" style="color: #059669;">
+                <i class="bi bi-bag-check-fill me-2"></i> {{ orders|length }} Total Orders
+            </div>
         </div>
     </div>
-</nav>
+</div>
 
-<div class="container pb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-bag-check"></i> Orders Received</h2>
-        <span class="badge bg-secondary">{{ orders|length }} Orders</span>
-    </div>
-
+<div class="container pb-5" style="margin-top: 10px;">
     {% if orders %}
-    <div class="row">
+    <div class="row g-4 mt-2">
         {% for order in orders %}
-        <div class="col-12 mb-4">
-            <div class="card order-card shadow-sm">
-                <div class="order-header d-flex justify-content-between align-items-center flex-wrap">
-                    <div>
-                        <span class="fw-bold fs-5">Order #{{ order.id }}</span>
-                        <span class="text-muted ms-2">| {{ order.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+        <div class="col-12">
+            <div class="order-card-modern">
+                <div class="order-status-bar">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="fw-bold text-dark">Order #{{ order.id }}</span>
+                        <span class="text-muted small">{{ order.created_at.strftime('%d %b %Y, %H:%M') }}</span>
                     </div>
-                    <div class="mt-2 mt-md-0">
-                        <span class="badge bg-success status-badge me-2">{{ order.payment_status|upper }}</span>
-                        <span id="status-badge-{{ order.id }}" class="badge bg-primary status-badge">
-                            {{ order.order_status|upper }}
+                    <div class="d-flex gap-2">
+                        <span class="status-badge bg-success bg-opacity-10 text-success">{{ order.payment_status
+                            }}</span>
+                        <span id="status-badge-{{ order.id }}"
+                            class="status-badge bg-primary bg-opacity-10 text-primary">
+                            {{ order.order_status }}
                         </span>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- Product Info -->
-                        <div class="col-md-4 border-end">
-                            <h6 class="text-muted text-uppercase small fw-bold">Items</h6>
-                            <div class="d-flex align-items-center">
+                <div class="card-body p-4">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-4">
+                            <div class="info-label">Product Details</div>
+                            <div class="d-flex align-items-center gap-3">
                                 {% if order.product.product_image_path %}
                                 <img src="{{ url_for('static', filename=order.product.product_image_path) }}"
-                                    class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    class="product-thumb">
+                                {% else %}
+                                <div class="product-thumb d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-image opacity-20 fs-2"></i>
+                                </div>
                                 {% endif %}
                                 <div>
-                                    <div class="fw-bold">{{ order.product.product_name }}</div>
-                                    <div class="small">Qty: {{ order.quantity }} {{ order.product.unit }}</div>
-                                    <div class="text-success fw-bold">Total: ₹{{ "%.2f"|format(order.total_price) }}
-                                    </div>
+                                    <div class="info-value">{{ order.product.product_name }}</div>
+                                    <div class="small text-muted">{{ order.quantity }} {{ order.product.unit }}</div>
+                                    <div class="text-success fw-bold">₹{{ "%.2f"|format(order.total_price) }}</div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Buyer Info -->
-                        <div class="col-md-4 border-end">
-                            <h6 class="text-muted text-uppercase small fw-bold">Customer</h6>
-                            <div class="fw-bold">{{ order.buyer_name }}</div>
-                            <div class="small"><i class="bi bi-telephone"></i> {{ order.buyer_phone }}</div>
-                            <div class="mt-2 small text-muted">
-                                <i class="bi bi-geo-alt"></i>
-                                {{ order.shipping_address }}, {{ order.city }} ({{ order.postal_code }})
+                        <div class="col-md-4 border-start ps-md-4">
+                            <div class="info-label">Customer Info</div>
+                            <div class="info-value">{{ order.buyer_name }}</div>
+                            <div class="small text-muted mb-2"><i class="bi bi-telephone"></i> {{ order.buyer_phone }}
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ order.shipping_address }}, {{ order.city }}
                             </div>
                         </div>
-
-                        <!-- Actions -->
-                        <div class="col-md-4 d-flex flex-column justify-content-center">
-                            <h6 class="text-muted text-uppercase small fw-bold mb-3">Update Order Status</h6>
-                            <div class="btn-group w-100" role="group">
-                                <button type="button"
-                                    class="btn btn-outline-primary btn-sm {% if order.order_status == 'shipped' %}active{% endif %}"
-                                    onclick="updateStatus({{ order.id }}, 'shipped')">
-                                    <i class="bi bi-truck"></i> Shipped
-                                </button>
-                                <button type="button"
-                                    class="btn btn-outline-success btn-sm {% if order.order_status == 'delivered' %}active{% endif %}"
-                                    onclick="updateStatus({{ order.id }}, 'delivered')">
-                                    <i class="bi bi-check-all"></i> Delivered
+                        <div class="col-md-4 border-start ps-md-4">
+                            <div class="info-label mb-3">Update Status</div>
+                            <div class="action-btn-group d-flex flex-column gap-2">
+                                <div class="d-flex gap-2">
+                                    <button
+                                        class="btn btn-shipped flex-grow-1 {% if order.order_status == 'shipped' %}bg-primary text-white{% endif %}"
+                                        onclick="updateStatus({{ order.id }}, 'shipped')">
+                                        <i class="bi bi-truck me-2"></i> Shipped
+                                    </button>
+                                    <button
+                                        class="btn btn-delivered flex-grow-1 {% if order.order_status == 'delivered' %}bg-success text-white{% endif %}"
+                                        onclick="updateStatus({{ order.id }}, 'delivered')">
+                                        <i class="bi bi-check-circle me-2"></i> Delivered
+                                    </button>
+                                </div>
+                                <button class="btn btn-link text-danger btn-sm text-decoration-none"
+                                    onclick="updateStatus({{ order.id }}, 'cancelled')">
+                                    <i class="bi bi-x-circle me-1"></i> Cancel Order
                                 </button>
                             </div>
-                            <button type="button" class="btn btn-link text-danger btn-sm mt-2"
-                                onclick="updateStatus({{ order.id }}, 'cancelled')">
-                                Cancel Order
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -118,10 +193,12 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
-        <h4 class="mt-3 text-muted">No orders received yet</h4>
-        <p class="text-muted">Orders for your products will appear here once customers pay.</p>
+    <div class="text-center py-5 mt-5">
+        <div class="bg-white p-5 rounded-5 shadow-sm d-inline-block">
+            <i class="bi bi-inbox text-muted display-1 opacity-25"></i>
+            <h3 class="fw-bold mt-4">No orders yet</h3>
+            <p class="text-muted">You'll see customer orders here once they're placed.</p>
+        </div>
     </div>
     {% endif %}
 </div>
@@ -140,17 +217,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message);
-                    const badge = document.getElementById(`status-badge-${orderId}`);
-                    badge.innerText = newStatus.toUpperCase();
-                    location.reload(); // Quick way to update styling
+                    location.reload();
                 } else {
                     alert('Error: ' + data.message);
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to update status.');
             });
     }
 </script>

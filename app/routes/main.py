@@ -95,7 +95,6 @@ def seed_users_manual():
 
         return jsonify({
             'status': 'success',
-            'message': 'Seeding completed. Check logs for details.',
             'total_users': len(users),
             'users': user_list,
             'seed_result': seed_result
@@ -107,4 +106,9 @@ def seed_users_manual():
             'message': str(e),
             'traceback': traceback.format_exc()
         }), 500
+
+@main_bp.app_errorhandler(413)
+def request_entity_too_large(error):
+    """Handle file too large errors globally"""
+    return render_template('errors/413.html'), 413
 

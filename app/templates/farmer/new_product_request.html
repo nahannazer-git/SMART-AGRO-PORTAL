@@ -1,82 +1,181 @@
 {% extends "base.html" %}
 
-{% block title %}Request Free Product - Farmer Portal{% endblock %}
+{% block title %}Govt. Support Request - Farmer Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .request-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%), url('https://www.transparenttextures.com/patterns/leaf.png');
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .form-glass-card {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 16px;
+        padding: 12px 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #f97316;
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+
+    .request-info-box {
+        background: #fff7ed;
+        border-radius: 24px;
+        padding: 25px;
+        border: 1px solid #ffedd5;
+        color: #9a3412;
+        margin-bottom: 30px;
+    }
+
+    .submit-btn-orange {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        border: none;
+        color: white;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.3s;
+        font-size: 1.1rem;
+    }
+
+    .submit-btn-orange:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(234, 88, 12, 0.3);
+    }
+
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f97316;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="request-hero">
+    <div class="container">
+        <a href="{{ url_for('farmer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
+        <h1 class="fw-bold"><i class="bi bi-gift-fill me-2"></i>Resource Assistance</h1>
+        <p class="opacity-75 mb-0">Apply for essential agricultural supplies provided by Krishi Bhavan</p>
     </div>
-</nav>
+</div>
 
-<div class="container">
+<div class="container pb-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Request Free Product</h4>
-                </div>
-                <div class="card-body p-4">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> 
-                        Submit a request for free agricultural products (seeds, fertilizers, pesticides, equipment) 
-                        from Krishi Bhavan. Your request will be reviewed by an officer.
+        <div class="col-lg-8 mt-5">
+            <div class="form-glass-card">
+                <div class="request-info-box d-flex gap-3 align-items-center">
+                    <div class="icon-box flex-shrink-0">
+                        <i class="bi bi-shield-fill-check"></i>
                     </div>
-                    
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="product_name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="product_name" name="product_name" 
-                                   required placeholder="e.g., Rice Seeds, Urea Fertilizer">
+                    <div>
+                        <div class="fw-bold">Free Government Allocation</div>
+                        <p class="mb-0 opacity-75 small">Your request will be prioritized based on farm size and crop
+                            history. Ensure all details are accurate for faster approval.</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="form-label">Search for Product</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 rounded-start-4"><i
+                                    class="bi bi-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" name="product_name" required
+                                placeholder="e.g., Urea Fertilizer, Organic Rice Seeds">
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="product_type" class="form-label">Product Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="product_type" name="product_type" required>
-                                    <option value="">Select Type</option>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Resource Category</label>
+                                <select class="form-select" name="product_type" required>
+                                    <option value="">Select Category</option>
                                     {% for ptype in product_types %}
                                     <option value="{{ ptype }}">{{ ptype }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
-                                <input type="number" min="1" class="form-control" id="quantity" name="quantity" required>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-4">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" min="1" class="form-control" name="quantity" required
+                                    placeholder="0">
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="unit" class="form-label">Unit</label>
-                                <select class="form-select" id="unit" name="unit">
+                        <div class="col-md-3">
+                            <div class="mb-4">
+                                <label class="form-label">Unit</label>
+                                <select class="form-select" name="unit">
                                     {% for u in units %}
-                                    <option value="{{ u }}" {{ 'selected' if u == 'kg' }}>{{ u }}</option>
+                                    <option value="{{ u }}" {{ 'selected' if u=='kg' }}>{{ u }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="purpose" class="form-label">Purpose/Reason</label>
-                            <textarea class="form-control" id="purpose" name="purpose" rows="3" 
-                                      placeholder="Explain why you need this product..."></textarea>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-warning">
-                                <i class="bi bi-send"></i> Submit Request
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label">Justification / Purpose</label>
+                        <textarea class="form-control" name="purpose" rows="4"
+                            placeholder="Briefly explain the current need on your farm (e.g., Upcoming monsoon planting, Soil nutrient deficiency)..."></textarea>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <button type="submit" class="submit-btn-orange">
+                            <i class="bi bi-send-check-fill me-2"></i> SUBMIT ASSISTANCE REQUEST
+                        </button>
+                        <a href="{{ url_for('farmer.dashboard') }}"
+                            class="btn btn-light rounded-4 py-3 fw-bold text-muted">
+                            LATER
+                        </a>
+                    </div>
+                </form>
             </div>
+            <p class="text-center text-muted small mt-4">
+                <i class="bi bi-clock-history me-1"></i> Processing usually takes 2-4 working days.
+            </p>
         </div>
     </div>
 </div>
 {% endblock %}
-

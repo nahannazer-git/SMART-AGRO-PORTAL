@@ -4,135 +4,191 @@
 
 {% block extra_css %}
 <style>
+    .add-product-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 35px;
+        padding: 45px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        border: 1px solid #fef3c7;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #78350f;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 16px;
+        padding: 12px 20px;
+        border: 1px solid #fde68a;
+        background: #fffbeb;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    }
+
     .image-preview {
         max-width: 100%;
         max-height: 300px;
-        margin-top: 10px;
-        border-radius: 8px;
+        border-radius: 20px;
+        margin-top: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 100px;
+        font-weight: 700;
+        color: white;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('officer.products') }}">
-            <i class="bi bi-arrow-left"></i> Back to Products
+<div class="add-product-hero">
+    <div class="container">
+        <a href="{{ url_for('officer.products') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO PRODUCTS
         </a>
+        <h1 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>Add New Product</h1>
+        <p class="opacity-75 mb-0">Register a new item in the inventory</p>
     </div>
-</nav>
+</div>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Add New Product</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="product_type" class="form-label">Product Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="product_type" name="product_type" required>
-                                    <option value="">Select Type</option>
-                                    {% for ptype in product_types %}
-                                    <option value="{{ ptype }}">{{ ptype }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+<div class="container pb-5">
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="form-card">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required>
                         </div>
-                        
-                        <div class="mb-3">
+
+                        <div class="col-md-6">
+                            <label for="product_type" class="form-label">Product Type <span
+                                    class="text-danger">*</span></label>
+                            <select class="form-select" id="product_type" name="product_type" required>
+                                <option value="">Select Type</option>
+                                {% for ptype in product_types %}
+                                <option value="{{ ptype }}">{{ ptype }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12">
                             <label for="description" class="form-label">Description</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
-                                <input type="number" min="0" class="form-control" id="stock_quantity" name="stock_quantity" required>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="unit" class="form-label">Unit</label>
-                                <select class="form-select" id="unit" name="unit">
-                                    {% for u in units %}
-                                    <option value="{{ u }}" {{ 'selected' if u == 'kg' }}>{{ u }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <input type="text" class="form-control" id="category" name="category" 
-                                       placeholder="e.g., Government Subsidy">
-                            </div>
+
+                        <div class="col-md-4">
+                            <label for="stock_quantity" class="form-label">Stock Quantity <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" min="0" class="form-control" id="stock_quantity" name="stock_quantity"
+                                required>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="supplier" class="form-label">Supplier</label>
-                                <input type="text" class="form-control" id="supplier" name="supplier">
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="expiry_date" class="form-label">Expiry Date</label>
-                                <input type="date" class="form-control" id="expiry_date" name="expiry_date">
-                            </div>
+
+                        <div class="col-md-4">
+                            <label for="unit" class="form-label">Unit</label>
+                            <select class="form-select" id="unit" name="unit">
+                                {% for u in units %}
+                                <option value="{{ u }}" {{ 'selected' if u=='kg' }}>{{ u }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        
-                        <div class="mb-3">
+
+                        <div class="col-md-4">
+                            <label for="category" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="category" name="category"
+                                placeholder="e.g., Government Subsidy">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="supplier" class="form-label">Supplier</label>
+                            <input type="text" class="form-control" id="supplier" name="supplier">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="expiry_date" class="form-label">Expiry Date</label>
+                            <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                        </div>
+
+                        <div class="col-12">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="is_free" name="is_free" checked>
-                                <label class="form-check-label" for="is_free">
+                                <label class="form-check-label fw-bold text-dark" for="is_free">
                                     Free Product (for distribution)
                                 </label>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
+
+                        <div class="col-12">
                             <label for="product_image" class="form-label">Product Image</label>
-                            <input type="file" class="form-control" id="product_image" name="product_image" 
-                                   accept="image/*" onchange="previewImage(this)">
+                            <input type="file" class="form-control" id="product_image" name="product_image"
+                                accept="image/*" onchange="previewImage(this)">
                             <small class="text-muted">Supported formats: JPG, PNG, GIF (Max 16MB)</small>
                             <div id="imagePreview" class="mt-2"></div>
                         </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('officer.products') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Add Product
-                            </button>
+
+                        <div class="col-12 mt-5">
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{{ url_for('officer.products') }}"
+                                    class="btn btn-light rounded-pill px-5 py-3 fw-bold">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="submit-btn">
+                                    <i class="bi bi-check-circle me-2"></i> Add Product
+                                </button>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
-    
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'image-preview';
-            preview.appendChild(img);
-        };
-        reader.readAsDataURL(input.files[0]);
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'image-preview';
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
-}
 </script>
 {% endblock %}
-

@@ -1,69 +1,185 @@
 {% extends "base.html" %}
 
-{% block title %}Farmer Login - Smart Agriculture Support System{% endblock %}
+{% block title %}Farmer Login - AgroPortal{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at top right, #10b981 0%, #064e3b 100%);
+        padding: 20px;
+        position: relative;
+    }
+
+    .login-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .glass-login-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 100%;
+        max-width: 450px;
+        padding: 40px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-header h2 {
+        font-weight: 800;
+        color: #064e3b;
+        letter-spacing: -1px;
+    }
+
+    .form-floating>.form-control:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 14px;
+        border-radius: 16px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .back-btn {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 100px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .back-btn:hover {
+        background: white;
+        color: #064e3b;
+    }
+
+    .role-switcher {
+        background: #f1f5f9;
+        border-radius: 20px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .role-link {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: color 0.2s;
+        display: block;
+        padding: 5px 0;
+    }
+
+    .role-link:hover {
+        color: #10b981;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center align-items-center min-vh-100">
-        <div class="col-md-5 col-lg-4">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="bi bi-person-circle text-primary" style="font-size: 3rem;"></i>
-                        <h2 class="mt-3 mb-1">Farmer Login</h2>
-                        <p class="text-muted">Access your farming account</p>
-                    </div>
+<div class="login-wrapper">
+    <a href="{{ url_for('main.index') }}" class="back-btn">
+        <i class="bi bi-arrow-left me-2"></i> Portal Home
+    </a>
 
-                    <form method="POST" action="{{ url_for('auth.farmer_login') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="username" name="username" required
-                                    autofocus>
-                            </div>
-                        </div>
+    <div class="glass-login-card">
+        <div class="login-header text-center mb-5">
+            <div class="bg-soft-emerald rounded-circle d-inline-flex p-3 mb-3">
+                <i class="bi bi-person-badge fs-1 text-success"></i>
+            </div>
+            <h2>Farmer Login</h2>
+            <p class="text-muted">Welcome back to your farm's digital home.</p>
+        </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                                <button class="btn btn-outline-secondary" type="button"
-                                    onclick="const p=document.getElementById('password');const i=this.querySelector('i');if(p.type==='password'){p.type='text';i.classList.replace('bi-eye','bi-eye-slash');}else{p.type='password';i.classList.replace('bi-eye-slash','bi-eye');}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
+        <form method="POST" action="{{ url_for('auth.farmer_login') }}">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required
+                    autofocus>
+                <label for="username">Username</label>
+            </div>
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">Remember me</label>
-                        </div>
+            <div class="form-floating mb-4">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                    required>
+                <label for="password">Password</label>
+                <button class="btn border-0 position-absolute end-0 top-50 translate-middle-y me-2" type="button"
+                    onclick="const p=document.getElementById('password'); if(p.type==='password'){p.type='text';this.innerHTML='<i class=\'bi bi-eye-slash\'></i>';}else{p.type='password';this.innerHTML='<i class=\'bi bi-eye\'></i>';}">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
 
-                        <button type="submit" class="btn btn-primary w-100 mb-3">
-                            <i class="bi bi-box-arrow-in-right"></i> Login
-                        </button>
-                    </form>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                    <label class="form-check-label small" for="remember">Keep me logged in</label>
+                </div>
+                <!-- <a href="#" class="small text-success fw-bold text-decoration-none">Forgot?</a> -->
+            </div>
 
-                    <div class="text-center">
-                        <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.farmer_register') }}">Register
-                                here</a></p>
-                    </div>
+            <button type="submit" class="btn btn-login btn-primary w-100 text-white mb-4">
+                Login to Dashboard <i class="bi bi-arrow-right-short ms-1"></i>
+            </button>
+        </form>
 
-                    <hr class="my-4">
+        <div class="text-center mb-4">
+            <p class="mb-0 small text-muted">Don't have a farmer account? <br>
+                <a href="{{ url_for('auth.farmer_register') }}"
+                    class="fw-bold text-success text-decoration-none">Register your farm here</a>
+            </p>
+        </div>
 
-                    <div class="text-center">
-                        <p class="text-muted small mb-2">Login as:</p>
-                        <div class="btn-group-vertical w-100" role="group">
-                            <a href="{{ url_for('auth.expert_login') }}"
-                                class="btn btn-outline-secondary btn-sm">Expert</a>
-                            <a href="{{ url_for('auth.admin_login') }}"
-                                class="btn btn-outline-secondary btn-sm">Admin</a>
-                            <a href="{{ url_for('auth.krishi_bhavan_officer_login') }}"
-                                class="btn btn-outline-secondary btn-sm">Krishi Bhavan Officer</a>
-                        </div>
-                    </div>
+        <div class="role-switcher text-center">
+            <h6 class="small fw-bold text-muted text-uppercase mb-3">Switch User Role</h6>
+            <div class="row g-2">
+                <div class="col-6">
+                    <a href="{{ url_for('auth.expert_login') }}" class="role-link border rounded-pill">Agriculture
+                        Expert</a>
+                </div>
+                <div class="col-6">
+                    <a href="{{ url_for('auth.krishi_bhavan_officer_login') }}" class="role-link border rounded-pill">KB
+                        Officer</a>
+                </div>
+                <div class="col-12 mt-2">
+                    <a href="{{ url_for('auth.admin_login') }}" class="role-link border rounded-pill">System
+                        Administrator</a>
                 </div>
             </div>
         </div>

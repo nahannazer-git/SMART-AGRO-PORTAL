@@ -1,99 +1,250 @@
 {% extends "base.html" %}
 
-{% block title %}Krishi Bhavan Marketplace{% endblock %}
+{% block title %}Krishi Bhavan Marketplace - Subsidized Resources{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-success">
-            <i class="bi bi-shop-window me-2"></i>Krishi Bhavan Marketplace
-        </h1>
-        <p class="lead text-muted">Subsidized seeds, fertilizers, and equipment for farmers.</p>
-    </div>
-
-    <!-- Product Grid -->
-    <div class="row g-4">
-        {% for product in products %}
-        <div class="col-md-6 col-lg-4 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                <div class="position-relative">
-                    {% if product.image_path %}
-                    <img src="{{ url_for('static', filename=product.image_path) }}"
-                        class="card-img-top object-fit-cover" alt="{{ product.name }}" style="height: 200px;">
-                    {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center text-muted"
-                        style="height: 200px;">
-                        <i class="bi bi-box-seam" style="font-size: 3rem;"></i>
-                    </div>
-                    {% endif %}
-
-                    {% if product.is_free %}
-                    <span class="position-absolute top-0 end-0 m-3 badge bg-success rounded-pill px-3 py-2 shadow-sm">
-                        FREE
-                    </span>
-                    {% else %}
-                    <span class="position-absolute top-0 end-0 m-3 badge bg-primary rounded-pill px-3 py-2 shadow-sm">
-                        ₹{{ "%.2f"|format(product.price_per_unit) }}/{{ product.unit }}
-                    </span>
-                    {% endif %}
-                </div>
-
-                <div class="card-body">
-                    <div class="mb-2">
-                        <span class="badge bg-light text-dark border">{{ product.product_type|title }}</span>
-                        {% if product.stock_quantity < 10 %} <span class="badge bg-danger ms-1">Low Stock: {{
-                            product.stock_quantity }}</span>
-                            {% else %}
-                            <span class="badge bg-success bg-opacity-10 text-success ms-1">In Stock: {{
-                                product.stock_quantity }}</span>
-                            {% endif %}
-                    </div>
-
-                    <h5 class="card-title fw-bold text-dark mb-2">{{ product.name }}</h5>
-                    <p class="card-text text-muted small mb-3 text-truncate-2" style="min-height: 40px;">
-                        {{ product.description }}
-                    </p>
-
-                    <div class="d-grid">
-                        <button class="btn btn-outline-success" disabled>
-                            <i class="bi bi-info-circle me-2"></i>Contact Officer
-                        </button>
-                    </div>
-                </div>
-                <div class="card-footer bg-white border-top-0 py-3">
-                    <small class="text-muted">
-                        <i class="bi bi-clock me-1"></i>Listed {{ product.created_at.strftime('%d %b %Y') }}
-                    </small>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <div class="col-12 text-center py-5">
-            <div class="mb-3 text-muted opacity-50">
-                <i class="bi bi-inbox" style="font-size: 4rem;"></i>
-            </div>
-            <h3 class="h5 text-muted">No products available at the moment.</h3>
-            <p class="text-muted small">Please check back later for updates from Krishi Bhavan.</p>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-
+{% block extra_css %}
 <style>
-    .hover-shadow:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    .kb-header {
+        padding: 80px 0;
+        background: linear-gradient(135deg, #064e3b 0%, #14532d 100%);
+        color: white;
+        border-radius: 0 0 60px 60px;
+        margin-bottom: -40px;
+        position: relative;
     }
 
-    .transition-all {
-        transition: all 0.3s ease;
+    .kb-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://www.transparenttextures.com/patterns/leaf.png');
+        opacity: 0.1;
+        pointer-events: none;
     }
 
-    .text-truncate-2 {
+    .kb-card {
+        border: none;
+        border-radius: 28px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+    }
+
+    .kb-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-wrap {
+        height: 200px;
+        position: relative;
+        overflow: hidden;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .price-pill {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        color: #064e3b;
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-label {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #10b981;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 100px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .kb-details {
+        padding: 24px;
+    }
+
+    .stock-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+
+    .stock-high {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .stock-low {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .kb-title {
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: #1e293b;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .kb-desc {
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 20px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+
+    .btn-officer {
+        background: #f1f5f9;
+        color: #1e293b;
+        border: none;
+        padding: 12px;
+        border-radius: 14px;
+        width: 100%;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        opacity: 0.8;
+    }
+
+    .btn-officer:hover {
+        background: #e2e8f0;
+        opacity: 1;
+    }
+
+    .info-bar {
+        background: #f8fafc;
+        padding: 15px 24px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
 </style>
 {% endblock %}
+
+{% block content %}
+<div class="kb-header">
+    <!-- Integrated Back Button -->
+    <div class="container text-start mb-4">
+        <a href="{{ url_for('main.index') }}"
+            class="text-decoration-none text-white opacity-75 fw-bold small hover-opacity-100">
+            <i class="bi bi-chevron-left"></i> BACK TO PORTAL
+        </a>
+    </div>
+
+    <div class="container text-center">
+        <div
+            class="badge bg-white bg-opacity-10 rounded-pill px-4 py-2 mb-3 fw-bold border border-white border-opacity-25">
+            GOVERNMENT OF KERALA RESOURCE PORTAL
+        </div>
+        <h1 class="display-4 fw-bold mb-2">Krishi Bhavan Marketplace</h1>
+        <p class="lead opacity-75 mb-0 mx-auto" style="max-width: 600px;">Providing quality seeds, fertilizers, and
+            tools at subsidized rates directly to our farmers.</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4 pt-5">
+        {% for product in products %}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="kb-card h-100">
+                <div class="card-img-wrap">
+                    {% if product.image_path %}
+                    <img src="{{ url_for('static', filename=product.image_path) }}" class="w-100 h-100 object-fit-cover"
+                        alt="{{ product.name }}">
+                    {% else %}
+                    <i class="bi bi-box-seam text-muted opacity-25 display-4"></i>
+                    {% endif %}
+
+                    <span class="category-label">{{ product.product_type }}</span>
+
+                    <div class="price-pill">
+                        {% if product.is_free %}
+                        <span class="text-success">FREE GIFT</span>
+                        {% else %}
+                        ₹{{ "%.0f"|format(product.price_per_unit) }}<span class="small opacity-50 ms-1">/{{ product.unit
+                            }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="kb-details">
+                    <div class="stock-badge {{ 'stock-low' if product.stock_quantity < 10 else 'stock-high' }}">
+                        <i
+                            class="bi {{ 'bi-exclamation-triangle' if product.stock_quantity < 10 else 'bi-check2-circle' }}"></i>
+                        {{ 'Low Stock: ' if product.stock_quantity < 10 else 'Available: ' }}{{ product.stock_quantity
+                            }} {{ product.unit }} </div>
+
+                            <h5 class="kb-title">{{ product.name }}</h5>
+                            <p class="kb-desc">{{ product.description }}</p>
+
+                            <button class="btn btn-officer" disabled>
+                                <i class="bi bi-person-lines-fill"></i> Visit Local Bhavan to Buy
+                            </button>
+                    </div>
+
+                    <div class="info-bar">
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="bi bi-calendar-event"></i>
+                            Updated {{ product.created_at.strftime('%d %b') }}
+                        </div>
+                        <div class="fw-bold text-dark">
+                            {{ "SUBSIDIZED" if not product.is_free else "FREE" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="bg-white p-5 rounded-5 shadow-sm d-inline-block">
+                    <i class="bi bi-inbox text-muted display-1 opacity-25"></i>
+                    <h3 class="fw-bold mt-4">Stock Unavailable</h3>
+                    <p class="text-muted">New supplies are being listed soon. Keep an eye on the portal!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Contact Info -->
+        <div class="mt-5 text-center">
+            <div class="d-inline-flex align-items-center gap-2 bg-light px-4 py-2 rounded-pill text-muted small">
+                <i class="bi bi-info-circle-fill text-success"></i>
+                Products here are subject to availability at your local Krishi Bhavan office.
+            </div>
+        </div>
+    </div>
+    {% endblock %}

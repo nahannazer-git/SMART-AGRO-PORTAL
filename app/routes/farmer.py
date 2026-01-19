@@ -169,51 +169,75 @@ def new_yield_prediction():
         flash('Access denied.', 'danger')
         return redirect(url_for('auth.farmer_login'))
     
+    # Get common lists for context
+    crop_list = ['Rice', 'Wheat', 'Corn', 'Tomato', 'Potato', 'Cotton', 'Sugarcane', 'Other']
+    soil_list = ['Loamy', 'Clay', 'Sandy', 'Silt', 'Red Soil', 'Black Soil']
+    irrigation_list = ['Drip', 'Sprinkler', 'Flood', 'Rainfed', 'Furrow']
+    fertilizer_list = ['Organic', 'Chemical', 'Mixed', 'None', 'Bio-fertilizer']
+    states = [
+        'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 
+        'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 
+        'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 
+        'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 
+        'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    ]
+
     if request.method == 'POST':
-        crop_type = request.form.get('crop_type')
-        crop_variety = request.form.get('crop_variety')
-        soil_type = request.form.get('soil_type')
-        irrigation_type = request.form.get('irrigation_type')
-        fertilizer_type = request.form.get('fertilizer_type')
-        planting_date = request.form.get('planting_date')
-        farm_size = request.form.get('farm_size')
-        location = request.form.get('location')
+        # Capture fields from the new template
+        crop_type = request.form.get('crop')  # Maps to 'crop' in radio buttons
+        state = request.form.get('state')
+        temperature = request.form.get('temperature')
+        humidity = request.form.get('humidity')
+        rainfall = request.form.get('rainfall')
         
-        # Auto-fetch temperature and rainfall from weather API
-        location_for_weather = location or current_user.farm_location or "Kerala, India"
-        weather_data = get_weather_data(location_for_weather)
-        temperature = float(request.form.get('temperature', weather_data.get('temperature', 28.0)))
-        rainfall = weather_data.get('rain_chance', 0.0) * 100  # Convert to mm estimate (simplified)
-        
+        # New model-required fields (mapping or default for now until UI updated)
+        soil_type = request.form.get('soil_type', 'Loamy')
+        irrigation_type = request.form.get('irrigation_type', 'Rainfed')
+        fertilizer_type = request.form.get('fertilizer_type', 'Organic')
+        planting_date = request.form.get('planting_date', datetime.utcnow().strftime('%Y-%m-%d'))
+        farm_size = request.form.get('farm_size', '1.0')
+        location = state or "Kerala"
+
         # Validation
-        if not all([crop_type, soil_type, irrigation_type, fertilizer_type, planting_date, farm_size, location]):
+        if not all([crop_type, farm_size, location]):
             flash('Please fill in all required fields.', 'danger')
-            return render_template('farmer/new_yield_prediction.html', temperature=temperature)
+            return render_template('farmer/new_yield_prediction.html', 
+                                 crops=crop_list, states=states, 
+                                 soil_types=soil_list, irrigation_types=irrigation_list, fertilizer_types=fertilizer_list,
+                                 crop=crop_type, state=state, soil_type=soil_type, irrigation_type=irrigation_type, fertilizer_type=fertilizer_type,
+                                 farm_size=farm_size, planting_date=planting_date,
+                                 temperature=temperature, humidity=humidity, rainfall=rainfall)
         
         try:
             farm_size_float = float(farm_size)
             planting_date_obj = datetime.strptime(planting_date, '%Y-%m-%d').date()
+            temperature_float = float(temperature) if temperature else 28.0
+            rainfall_float = float(rainfall) if rainfall else 0.0
         except ValueError:
-            flash('Invalid data format.', 'danger')
-            return render_template('farmer/new_yield_prediction.html', temperature=temperature)
+            flash('Invalid data format. Please enter numeric values for technical fields.', 'danger')
+            return render_template('farmer/new_yield_prediction.html', 
+                                 crops=crop_list, states=states, 
+                                 soil_types=soil_list, irrigation_types=irrigation_list, fertilizer_types=fertilizer_list,
+                                 crop=crop_type, state=state, soil_type=soil_type, irrigation_type=irrigation_type, fertilizer_type=fertilizer_type,
+                                 farm_size=farm_size, planting_date=planting_date,
+                                 temperature=temperature, humidity=humidity, rainfall=rainfall)
         
         # AI Yield Prediction
         prediction_result = predict_yield(
             crop_type, soil_type, irrigation_type, fertilizer_type,
-            temperature, rainfall, farm_size_float, location
+            temperature_float, rainfall_float, farm_size_float, location
         )
         
         # Create yield prediction record
         yield_prediction = YieldPrediction(
             farmer_id=current_user.id,
             crop_type=crop_type,
-            crop_variety=crop_variety,
             soil_type=soil_type,
             irrigation_type=irrigation_type,
             fertilizer_type=fertilizer_type,
             planting_date=planting_date_obj,
-            temperature=temperature,
-            rainfall=rainfall,
+            temperature=temperature_float,
+            rainfall=rainfall_float,
             farm_size=farm_size_float,
             location=location,
             predicted_yield=prediction_result['predicted_yield_per_acre'],
@@ -228,24 +252,20 @@ def new_yield_prediction():
             return redirect(url_for('farmer.view_yield_prediction', prediction_id=yield_prediction.id))
         except Exception as e:
             db.session.rollback()
-            flash(f'An error occurred while processing your yield prediction: {str(e)}. Please try again.', 'danger')
+            flash(f'An error occurred: {str(e)}', 'danger')
     
-    # Get current weather data for display
-    location = current_user.farm_location or "Kerala, India"
-    weather_data = get_weather_data(location)
-    temperature = weather_data.get('temperature', 28.0)
-    
-    crop_types = ['Rice', 'Wheat', 'Corn', 'Tomato', 'Potato', 'Cotton', 'Sugarcane', 'Other']
-    soil_types = ['Loamy', 'Clay', 'Sandy', 'Silt', 'Red Soil', 'Black Soil']
-    irrigation_types = ['Drip', 'Sprinkler', 'Flood', 'Rainfed', 'Furrow']
-    fertilizer_types = ['Organic', 'Chemical', 'Mixed', 'None', 'Bio-fertilizer']
+    # GET request context
+    location_default = current_user.farm_location or "Kerala, India"
+    weather_data = get_weather_data(location_default)
+    temperature_default = weather_data.get('temperature', 28.0)
     
     return render_template('farmer/new_yield_prediction.html',
-                         crop_types=crop_types,
-                         soil_types=soil_types,
-                         irrigation_types=irrigation_types,
-                         fertilizer_types=fertilizer_types,
-                         temperature=temperature)
+                         crops=crop_list,
+                         soil_types=soil_list,
+                         irrigation_types=irrigation_list,
+                         fertilizer_types=fertilizer_list,
+                         states=states,
+                         temperature=temperature_default)
 
 # ==================== VIEW PREDICTIONS ====================
 

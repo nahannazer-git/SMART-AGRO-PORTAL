@@ -21,7 +21,7 @@ class Config:
     
     # Upload settings
     UPLOAD_FOLDER = basedir / 'app' / 'static' / 'uploads'
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 32 * 1024 * 1024  # 32MB max file size
     
     # Crop images upload path
     CROP_IMAGES_FOLDER = UPLOAD_FOLDER / 'crops'

@@ -4,272 +4,371 @@
 
 {% block extra_css %}
 <style>
-    .inquiry-card {
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-left: 4px solid #28a745;
+    .inquiries-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
     }
 
-    .inquiry-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    .stats-row {
+        margin-bottom: 30px;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.3s;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 100px;
+        padding: 12px 28px;
+        font-weight: 700;
+        transition: all 0.2s;
+        color: #64748b;
+    }
+
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    }
+
+    .inquiry-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 20px;
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+        position: relative;
     }
 
     .inquiry-card.unread {
-        border-left-color: #ffc107;
-        background-color: #fff9e6;
+        border-left: 5px solid #f59e0b;
+        background: #fffbeb;
     }
 
-    .contact-badge {
-        display: inline-block;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
+    .inquiry-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
-    .sort-buttons {
+    .customer-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
         display: flex;
-        gap: 10px;
         align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .product-tag {
+        padding: 8px 16px;
+        background: #f0fdf4;
+        color: #059669;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border: 1px solid #dcfce7;
+    }
+
+    .timestamp {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        margin-bottom: 20px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-processing {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .sort-dropdown {
+        border-radius: 12px;
+        padding: 10px 20px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-weight: 600;
+        color: #64748b;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+<div class="inquiries-hero">
+    <div class="container">
+        <a href="{{ url_for('farmer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3><i class="bi bi-envelope-check"></i> Marketplace Inquiries</h3>
-                    <p class="text-muted mb-0">Inquiries from public users about your products</p>
-                </div>
-                <div class="sort-buttons">
-                    <span class="text-muted">Sort by:</span>
-                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='latest') }}"
-                        class="btn btn-sm btn-{{ 'primary' if sort_by == 'latest' else 'outline-primary' }}">
-                        <i class="bi bi-sort-down"></i> Latest
-                    </a>
-                    <a href="{{ url_for('farmer.marketplace_inquiries', sort='oldest') }}"
-                        class="btn btn-sm btn-{{ 'primary' if sort_by == 'oldest' else 'outline-primary' }}">
-                        <i class="bi bi-sort-up"></i> Oldest
-                    </a>
-                </div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold"><i class="bi bi-chat-heart me-2"></i>Marketplace Inquiries</h1>
+                <p class="opacity-75 mb-0">Customer questions and confirmed orders</p>
             </div>
-
-            <!-- Tabs Navigation -->
-            <ul class="nav nav-pills mb-4" id="marketplaceTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="enquiries-tab" data-bs-toggle="pill" data-bs-target="#enquiries"
-                        type="button" role="tab">
-                        <i class="bi bi-chat-left-text"></i> General Enquiries
-                        {% if unread_count > 0 %}
-                        <span class="badge bg-danger ms-1">{{ unread_count }}</span>
-                        {% endif %}
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders"
-                        type="button" role="tab">
-                        <i class="bi bi-cart-check"></i> Paid Orders
-                        {% if orders %}
-                        <span class="badge bg-primary ms-1 text-white">{{ orders|length }}</span>
-                        {% endif %}
-                    </button>
-                </li>
-            </ul>
-
-            <div class="tab-content" id="marketplaceTabsContent">
-                <!-- Enquiries Tab -->
-                <div class="tab-pane fade show active" id="enquiries" role="tabpanel">
-                    {% if inquiries %}
-                    <div class="row">
-                        {% for inquiry in inquiries %}
-                        <div class="col-12 mb-3">
-                            <div class="card inquiry-card shadow-sm {% if not inquiry.is_read %}unread{% endif %}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="flex-grow-1">
-                                            <h5 class="card-title mb-2">
-                                                <i class="bi bi-person-circle"></i> {{ inquiry.name }}
-                                                {% if not inquiry.is_read %}
-                                                <span class="badge bg-warning ms-2">New</span>
-                                                {% endif %}
-                                            </h5>
-                                            <div class="mb-2">
-                                                <span class="contact-badge bg-light text-dark">
-                                                    <i class="bi bi-telephone"></i> {{ inquiry.phone }}
-                                                </span>
-                                                <span class="contact-badge bg-light text-dark ms-2">
-                                                    <i class="bi bi-clock"></i> {{ inquiry.created_at.strftime('%Y-%m-%d
-                                                    %H:%M') }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        {% if not inquiry.is_read %}
-                                        <button type="button" class="btn btn-sm btn-outline-secondary mark-read-btn"
-                                            data-inquiry-id="{{ inquiry.id }}">
-                                            <i class="bi bi-check"></i> Mark as Read
-                                        </button>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="inquiry-message bg-light p-3 rounded mb-3">
-                                        <p class="mb-0">{{ inquiry.message }}</p>
-                                    </div>
-
-                                    <div class="d-flex gap-2">
-                                        {% if inquiry.phone != 'N/A' %}
-                                        <a href="tel:{{ inquiry.phone }}" class="btn btn-sm btn-success">
-                                            <i class="bi bi-telephone"></i> Call
-                                        </a>
-                                        <a href="https://wa.me/91{{ inquiry.phone|replace(' ', '')|replace('-', '') }}"
-                                            target="_blank" class="btn btn-sm btn-success">
-                                            <i class="bi bi-whatsapp"></i> WhatsApp
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info text-center py-5">
-                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                        <h5 class="mt-3">No inquiries yet</h5>
-                        <p class="mb-0">General inquiries about your products will appear here.</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <!-- Orders Tab -->
-                <div class="tab-pane fade" id="orders" role="tabpanel">
-                    {% if orders %}
-                    <div class="row">
-                        {% for order in orders %}
-                        <div class="col-12 mb-3">
-                            <div class="card shadow-sm border-0 border-start border-primary border-4">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="mb-0">Order #{{ order.id }} - <span class="text-success">₹{{
-                                                "%.2f"|format(order.total_price) }}</span></h5>
-                                        <span
-                                            class="badge bg-{{ 'success' if order.order_status == 'delivered' else 'primary' }}">
-                                            {{ order.order_status|upper }}
-                                        </span>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6 border-end">
-                                            <h6 class="small fw-bold text-uppercase text-muted">Product Info</h6>
-                                            <p class="mb-1"><strong>{{ order.product.product_name }}</strong></p>
-                                            <p class="small text-muted mb-0">Qty: {{ order.quantity }} {{
-                                                order.product.unit }}</p>
-                                            <p class="small text-muted">Paid on: {{ order.created_at.strftime('%Y-%m-%d
-                                                %H:%M') }}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h6 class="small fw-bold text-uppercase text-muted">Customer & Shipping</h6>
-                                            <p class="mb-1"><strong>{{ order.buyer_name }}</strong> ({{
-                                                order.buyer_phone }})</p>
-                                            <p class="small text-muted mb-0">{{ order.shipping_address }}</p>
-                                            <p class="small text-muted">{{ order.city }} - {{ order.postal_code }}</p>
-                                        </div>
-                                    </div>
-
-                                    <hr>
-                                    <div class="d-flex justify-content-end">
-                                        <a href="{{ url_for('marketplace.farmer_orders') }}"
-                                            class="btn btn-sm btn-outline-primary">
-                                            Manage Fulfillment <i class="bi bi-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="alert alert-info text-center py-5">
-                        <i class="bi bi-cash-stack" style="font-size: 3rem;"></i>
-                        <h5 class="mt-3">No paid orders yet</h5>
-                        <p class="mb-0">Completed sales with buyer shipping info will appear here.</p>
-                    </div>
-                    {% endif %}
-                </div>
+            <div>
+                <select class="sort-dropdown" onchange="window.location.href=this.value">
+                    <option value="{{ url_for('farmer.marketplace_inquiries', sort='latest') }}" {% if sort_by=='latest'
+                        %}selected{% endif %}>
+                        📅 Latest First
+                    </option>
+                    <option value="{{ url_for('farmer.marketplace_inquiries', sort='oldest') }}" {% if sort_by=='oldest'
+                        %}selected{% endif %}>
+                        🕐 Oldest First
+                    </option>
+                </select>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    // Handle mark as read button clicks
-    document.querySelectorAll('.mark-read-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const inquiryId = this.dataset.inquiryId;
-            const button = this;
-            const card = this.closest('.inquiry-card');
+<div class="container pb-5">
+    <!-- Stats Row -->
+    <div class="row g-4 stats-row mt-5">
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-envelope-exclamation-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ unread_count }}</h4>
+                        <p class="text-muted small mb-0 fw-bold text-uppercase">Unread Messages</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-cart-check-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ orders|length if orders else 0 }}</h4>
+                        <p class="text-muted small mb-0 fw-bold text-uppercase">Paid Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-chat-dots-fill"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">{{ inquiries|length if inquiries else 0 }}</h4>
+                        <p class="text-muted small mb-0 fw-bold text-uppercase">Total Inquiries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            // Disable button during request
-            button.disabled = true;
-            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-pills mb-4 justify-content-center" id="marketplaceTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="enquiries-tab" data-bs-toggle="pill" data-bs-target="#enquiries"
+                type="button" role="tab">
+                <i class="bi bi-chat-left-text me-2"></i> General Enquiries
+                {% if unread_count > 0 %}
+                <span class="badge bg-danger ms-2">{{ unread_count }}</span>
+                {% endif %}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="pill" data-bs-target="#orders" type="button"
+                role="tab">
+                <i class="bi bi-cart-check me-2"></i> Paid Orders
+                {% if orders %}
+                <span class="badge bg-white text-primary ms-2">{{ orders|length }}</span>
+                {% endif %}
+            </button>
+        </li>
+    </ul>
 
-            fetch(`/farmer/marketplace-inquiries/${inquiryId}/mark-read`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Remove unread styling
-                        card.classList.remove('unread');
+    <div class="tab-content" id="marketplaceTabsContent">
+        <!-- Enquiries Tab -->
+        <div class="tab-pane fade show active" id="enquiries" role="tabpanel">
+            {% if inquiries %}
+            {% for inquiry in inquiries %}
+            <div class="inquiry-card {% if not inquiry.is_read %}unread{% endif %}">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex gap-3 flex-grow-1">
+                        <div class="customer-avatar">
+                            {{ inquiry.name[0]|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold mb-1">{{ inquiry.name }}</h5>
+                            <div class="timestamp">
+                                <i class="bi bi-clock me-1"></i> {{ inquiry.created_at.strftime('%d %b, %Y • %I:%M %p')
+                                }}
+                            </div>
+                        </div>
+                    </div>
+                    {% if not inquiry.is_read %}
+                    <span class="badge bg-warning text-dark">NEW</span>
+                    {% endif %}
+                </div>
 
-                        // Remove "New" badge
-                        const badge = card.querySelector('.badge.bg-warning');
-                        if (badge) {
-                            badge.remove();
-                        }
+                <div class="p-4 bg-light rounded-4 mb-3">
+                    <p class="mb-0 text-secondary">"{{ inquiry.message }}"</p>
+                </div>
 
-                        // Remove the button
-                        button.remove();
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        {% if inquiry.phone and inquiry.phone != 'N/A' %}
+                        <a href="tel:{{ inquiry.phone }}" class="btn btn-sm btn-outline-success rounded-pill">
+                            <i class="bi bi-telephone-fill me-1"></i> {{ inquiry.phone }}
+                        </a>
+                        {% else %}
+                        <span class="text-muted small">
+                            <i class="bi bi-telephone-x me-1"></i> No phone provided
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if not inquiry.is_read %}
+                    <form method="POST" action="{{ url_for('farmer.mark_inquiry_read', inquiry_id=inquiry.id) }}"
+                        class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-dark rounded-pill px-4">
+                            <i class="bi bi-check2 me-1"></i> Mark as Read
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <div class="bg-light p-4 rounded-circle d-inline-block mb-4">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                </div>
+                <h4 class="fw-bold text-dark">No Enquiries Yet</h4>
+                <p class="text-muted">When customers ask questions, they'll appear here.</p>
+            </div>
+            {% endif %}
+        </div>
 
-                        // Update unread count if displayed
-                        const unreadAlert = document.querySelector('.alert-info');
-                        if (unreadAlert) {
-                            const countMatch = unreadAlert.textContent.match(/(\d+)/);
-                            if (countMatch) {
-                                const currentCount = parseInt(countMatch[1]);
-                                const newCount = currentCount - 1;
-                                if (newCount > 0) {
-                                    unreadAlert.innerHTML = `<i class="bi bi-info-circle"></i> You have <strong>${newCount}</strong> unread inquiry/inquiries.`;
-                                } else {
-                                    unreadAlert.remove();
-                                }
-                            }
-                        }
-                    } else {
-                        alert('Error: ' + (data.message || 'Failed to mark as read'));
-                        button.disabled = false;
-                        button.innerHTML = '<i class="bi bi-check"></i> Mark as Read';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to mark as read. Please try again.');
-                    button.disabled = false;
-                    button.innerHTML = '<i class="bi bi-check"></i> Mark as Read';
-                });
-        });
-    });
-</script>
+        <!-- Orders Tab -->
+        <div class="tab-pane fade" id="orders" role="tabpanel">
+            {% if orders %}
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-2">Order #{{ order.id }}</h5>
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="customer-avatar" style="width: 40px; height: 40px; font-size: 1rem;">
+                                {{ order.buyer_name[0]|upper }}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ order.buyer_name }}</div>
+                                <small class="text-muted">{{ order.buyer_email }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Product</label>
+                        <div class="fw-bold text-dark">{{ order.product.name }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Quantity</label>
+                        <div class="fw-bold text-dark">{{ order.quantity }} {{ order.product.unit }}</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="small fw-bold text-muted text-uppercase d-block mb-1">Total</label>
+                        <div class="fw-bold text-success fs-5">₹{{ order.total_price }}</div>
+                    </div>
+                </div>
+
+                {% if order.shipping_address %}
+                <div class="p-3 bg-light rounded-4 mb-3">
+                    <div class="small fw-bold text-muted text-uppercase mb-2">Shipping Address</div>
+                    <div class="text-dark">{{ order.shipping_address }}</div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="tel:{{ order.buyer_phone }}" class="btn btn-sm btn-outline-success rounded-pill">
+                        <i class="bi bi-telephone-fill me-1"></i> Call
+                    </a>
+                    <a href="mailto:{{ order.buyer_email }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                        <i class="bi bi-envelope-fill me-1"></i> Email
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <div class="bg-light p-4 rounded-circle d-inline-block mb-4">
+                    <i class="bi bi-cart-x fs-1 text-muted"></i>
+                </div>
+                <h4 class="fw-bold text-dark">No Orders Yet</h4>
+                <p class="text-muted">Confirmed purchases will show up here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

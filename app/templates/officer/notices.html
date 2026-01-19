@@ -2,98 +2,161 @@
 
 {% block title %}Manage Notices - Officer Portal{% endblock %}
 
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('officer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</nav>
+{% block extra_css %}
+<style>
+    .notices-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
 
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3><i class="bi bi-megaphone"></i> Manage Notices</h3>
-                <a href="{{ url_for('officer.add_notice') }}" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i> Add Notice
-                </a>
+    .notice-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border: 1px solid #fef3c7;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+
+    .notice-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .priority-badge {
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+
+    .category-tag {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    .action-btn-mini {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .action-btn-mini:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notices-hero">
+    <div class="container">
+        <a href="{{ url_for('officer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+        </a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold"><i class="bi bi-megaphone-fill me-2"></i>Manage Notices</h1>
+                <p class="opacity-75 mb-0">Broadcast announcements and updates to farmers</p>
             </div>
-            
-            <div class="card shadow-lg border-0">
-                <div class="card-body">
-                    {% if notices %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Category</th>
-                                        <th>Priority</th>
-                                        <th>Target</th>
-                                        <th>Status</th>
-                                        <th>Expires</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for notice in notices %}
-                                    <tr>
-                                        <td><strong>{{ notice.title }}</strong></td>
-                                        <td><span class="badge bg-info">{{ notice.category or 'N/A' }}</span></td>
-                                        <td>
-                                            <span class="badge bg-{{ 'danger' if notice.priority == 'High' else 'warning' if notice.priority == 'Normal' else 'secondary' }}">
-                                                {{ notice.priority or 'N/A' }}
-                                            </span>
-                                        </td>
-                                        <td>{{ notice.target_audience|title }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ 'success' if notice.is_active else 'secondary' }}">
-                                                {{ 'Active' if notice.is_active else 'Inactive' }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if notice.expires_at %}
-                                                {% if notice.expires_at < current_time %}
-                                                    <span class="text-danger">Expired</span>
-                                                {% else %}
-                                                    {{ notice.expires_at.strftime('%Y-%m-%d') }}
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">No expiry</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ notice.created_at.strftime('%Y-%m-%d') }}</td>
-                                        <td>
-                                            <a href="{{ url_for('officer.edit_notice', notice_id=notice.id) }}" 
-                                               class="btn btn-sm btn-primary">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                            <form method="POST" action="{{ url_for('officer.delete_notice', notice_id=notice.id) }}" 
-                                                  class="d-inline" 
-                                                  onsubmit="return confirm('Are you sure you want to delete this notice?');">
-                                                <button type="submit" class="btn btn-sm btn-danger">
-                                                    <i class="bi bi-trash"></i> Delete
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle"></i> No notices created yet.
-                            <a href="{{ url_for('officer.add_notice') }}">Create your first notice</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+            <a href="{{ url_for('officer.add_notice') }}" class="btn btn-dark rounded-pill px-4 py-3">
+                <i class="bi bi-plus-lg me-2"></i> Create Notice
+            </a>
         </div>
     </div>
 </div>
-{% endblock %}
 
+<div class="container pb-5">
+    <div class="mt-5">
+        {% if notices %}
+        {% for notice in notices %}
+        <div class="notice-card">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <div class="d-flex align-items-start gap-3 mb-2">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-4">
+                            <i class="bi bi-bell-fill fs-4 text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="fw-bold text-dark mb-2">{{ notice.title }}</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <span class="category-tag">{{ notice.category or 'General' }}</span>
+                                <span
+                                    class="priority-badge bg-{{ 'danger' if notice.priority == 'High' else 'warning' if notice.priority == 'Normal' else 'secondary' }}">
+                                    {{ notice.priority or 'N/A' }}
+                                </span>
+                            </div>
+                            <p class="text-muted small mb-2">
+                                <i class="bi bi-people-fill me-1"></i> Target: <span class="fw-bold">{{
+                                    notice.target_audience|title }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="mb-2">
+                        <span
+                            class="badge {{ 'bg-success' if notice.is_active else 'bg-secondary' }} rounded-pill px-3 py-2">
+                            {{ 'Active' if notice.is_active else 'Inactive' }}
+                        </span>
+                    </div>
+                    {% if notice.expires_at %}
+                    <small class="text-muted d-block">
+                        {% if notice.expires_at < current_time %} <i class="bi bi-clock-history text-danger me-1"></i>
+                            Expired
+                            {% else %}
+                            <i class="bi bi-calendar3 me-1"></i> Expires: {{ notice.expires_at.strftime('%b %d, %Y') }}
+                            {% endif %}
+                    </small>
+                    {% else %}
+                    <small class="text-muted"><i class="bi bi-infinity me-1"></i> No expiry</small>
+                    {% endif %}
+                </div>
+                <div class="col-md-2 text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('officer.edit_notice', notice_id=notice.id) }}"
+                            class="action-btn-mini bg-primary bg-opacity-10 text-primary" title="Edit">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('officer.delete_notice', notice_id=notice.id) }}"
+                            class="d-inline" onsubmit="return confirm('Are you sure you want to delete this notice?');">
+                            <button type="submit" class="action-btn-mini bg-danger bg-opacity-10 text-danger"
+                                title="Delete">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Created: {{ notice.created_at.strftime('%b %d') }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="text-center py-5">
+            <div class="bg-light p-4 rounded-circle d-inline-block mb-4">
+                <i class="bi bi-megaphone fs-1 text-muted"></i>
+            </div>
+            <h4 class="fw-bold text-dark">No Notices Yet</h4>
+            <p class="text-muted mb-4">Start broadcasting important updates to farmers</p>
+            <a href="{{ url_for('officer.add_notice') }}" class="btn btn-warning rounded-pill px-5 py-3 fw-bold">
+                <i class="bi bi-plus-circle me-2"></i> Create First Notice
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

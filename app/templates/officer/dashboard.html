@@ -1,233 +1,262 @@
 {% extends "base.html" %}
 
-{% block title %}Officer Dashboard - Smart Agriculture Support System{% endblock %}
+{% block title %}Officer Dashboard - Krishi Bhavan{% endblock %}
 
 {% block extra_css %}
 <style>
-    .stat-card {
-        transition: transform 0.2s;
+    .officer-hero {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -40px;
     }
+
+    .stat-card {
+        background: white;
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #fef3c7;
+        transition: all 0.3s;
+        height: 100%;
+    }
+
     .stat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+    }
+
+    .stat-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+        margin-bottom: 20px;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #92400e;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        color: #78350f;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 24px;
+        padding: 25px;
+        border: 1px solid #fef3c7;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+        height: 100%;
+    }
+
+    .action-card:hover {
+        transform: translateX(5px);
+        border-color: #f59e0b;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.1);
+        text-decoration: none;
+    }
+
+    .action-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        background: #fef3c7;
+        color: #d97706;
+        margin-bottom: 15px;
+    }
+
+    .welcome-banner {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-stat-pill {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 10px 20px;
+        border-radius: 100px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-warning mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('officer.dashboard') }}">
-            <i class="bi bi-building"></i> Krishi Bhavan Officer Portal
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('officer.dashboard') }}">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('officer.products') }}">Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('officer.notices') }}">Notices</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('officer.product_requests') }}">Product Requests</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<div class="container-fluid px-3 px-md-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h2 class="mb-1">Welcome, {{ current_user.full_name }}!</h2>
-                    <p class="text-muted mb-0">Krishi Bhavan Officer Dashboard</p>
+<div class="officer-hero">
+    <div class="container">
+        <div class="welcome-banner mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="fw-bold mb-2">
+                        <i class="bi bi-building-fill-gear me-3"></i>Officer Dashboard
+                    </h1>
+                    <p class="opacity-90 mb-0">Manage stock inventory, schemes, and farmer assistance requests</p>
                 </div>
-                <div class="mt-2 mt-md-0">
-                    {% if current_user.designation %}
-                    <span class="badge bg-warning text-dark fs-6">
-                        <i class="bi bi-briefcase"></i> {{ current_user.designation }}
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Products</h6>
-                            <h3 class="mb-0">{{ total_products }}</h3>
-                            <small class="text-danger">{{ low_stock_products }} low stock</small>
-                        </div>
-                        <div class="text-primary" style="font-size: 2.5rem;">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Product Requests</h6>
-                            <h3 class="mb-0">{{ total_requests }}</h3>
-                            <small class="text-warning">{{ pending_requests }} pending</small>
-                        </div>
-                        <div class="text-warning" style="font-size: 2.5rem;">
-                            <i class="bi bi-inbox"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Notices</h6>
-                            <h3 class="mb-0">{{ total_notices }}</h3>
-                            <small class="text-success">{{ active_notices }} active</small>
-                        </div>
-                        <div class="text-success" style="font-size: 2.5rem;">
-                            <i class="bi bi-megaphone"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Approved Requests</h6>
-                            <h3 class="mb-0">{{ approved_requests }}</h3>
-                        </div>
-                        <div class="text-info" style="font-size: 2.5rem;">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Recent Product Requests -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="bi bi-inbox"></i> Recent Product Requests</h5>
-                </div>
-                <div class="card-body">
-                    {% if recent_requests %}
-                        <div class="list-group list-group-flush">
-                            {% for req in recent_requests %}
-                            <a href="{{ url_for('officer.product_requests') }}" 
-                               class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ req.product_name }}</h6>
-                                    <span class="badge bg-{{ 'warning' if req.status == 'pending' else 'success' if req.status == 'approved' else 'danger' }}">
-                                        {{ req.status|title }}
-                                    </span>
-                                </div>
-                                <p class="mb-1 small">From: {{ req.farmer.full_name }}</p>
-                                <small>{{ req.created_at.strftime('%Y-%m-%d') }}</small>
-                            </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">No requests yet</p>
-                    {% endif %}
-                    <a href="{{ url_for('officer.product_requests') }}" class="btn btn-sm btn-warning w-100 mt-2">
-                        <i class="bi bi-list"></i> View All Requests
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Low Stock Products -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</h5>
-                </div>
-                <div class="card-body">
-                    {% if low_stock %}
-                        <div class="list-group list-group-flush">
-                            {% for product in low_stock %}
-                            <a href="{{ url_for('officer.products') }}" 
-                               class="list-group-item list-group-item-action">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ product.name }}</h6>
-                                    <span class="badge bg-danger">{{ product.stock_quantity }} {{ product.unit }}</span>
-                                </div>
-                                <small class="text-muted">{{ product.product_type }}</small>
-                            </a>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">All products have sufficient stock</p>
-                    {% endif %}
-                    <a href="{{ url_for('officer.products') }}" class="btn btn-sm btn-danger w-100 mt-2">
-                        <i class="bi bi-box-seam"></i> Manage Products
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Notices -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-megaphone"></i> Recent Notices</h5>
-                </div>
-                <div class="card-body">
-                    {% if recent_notices %}
-                        <div class="list-group list-group-flush">
-                            {% for notice in recent_notices %}
-                            <div class="list-group-item">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <h6 class="mb-1">{{ notice.title }}</h6>
-                                    <span class="badge bg-{{ 'success' if notice.is_active else 'secondary' }}">
-                                        {{ 'Active' if notice.is_active else 'Inactive' }}
-                                    </span>
-                                </div>
-                                <p class="mb-1 small text-muted">{{ notice.content[:80] }}...</p>
-                                <small>{{ notice.created_at.strftime('%Y-%m-%d') }}</small>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">No notices yet</p>
-                    {% endif %}
-                    <a href="{{ url_for('officer.notices') }}" class="btn btn-sm btn-success w-100 mt-2">
-                        <i class="bi bi-plus-circle"></i> Add New Notice
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-light rounded-pill px-4 py-2">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
                     </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
+<div class="container pb-5">
+    <!-- Stats Grid -->
+    <div class="row g-4 mb-5 mt-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+                <div class="stat-value">{{ total_products|default(0) }}</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                </div>
+                <div class="stat-value">{{ pending_requests|default(0) }}</div>
+                <div class="stat-label">Pending Requests</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-megaphone-fill"></i>
+                </div>
+                <div class="stat-value">{{ active_notices|default(0) }}</div>
+                <div class="stat-label">Active Notices</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="stat-value text-danger">{{ low_stock_products|default(0) }}</div>
+                <div class="stat-label">Low Stock Alerts</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h4 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Quick Actions
+            </h4>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('officer.products') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="bi bi-boxes"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Manage Products</h5>
+                <p class="text-muted small mb-0">View, add, update inventory and stock levels</p>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('officer.product_requests') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Farmer Requests</h5>
+                <p class="text-muted small mb-0">Approve or reject assistance requests</p>
+                {% if pending_requests and pending_requests > 0 %}
+                <span class="badge bg-danger mt-2">{{ pending_requests }} Pending</span>
+                {% endif %}
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('officer.notices') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="bi bi-bell-fill"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Post Notices</h5>
+                <p class="text-muted small mb-0">Create and manage farmer notifications</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Activity / Low Stock Products -->
+    {% if low_stock %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 24px; border-left: 5px solid #dc2626;">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-danger mb-0">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Low Stock Alert
+                    </h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle mb-0">
+                            <thead>
+                                <tr class="text-muted small text-uppercase">
+                                    <th>Product</th>
+                                    <th>Current Stock</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in low_stock %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">{{ product.name }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ product.stock_quantity }} {{ product.unit
+                                            }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ product.product_type }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{{ url_for('officer.edit_product', product_id=product.id) }}"
+                                            class="btn btn-sm btn-warning rounded-pill px-3">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Restock
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

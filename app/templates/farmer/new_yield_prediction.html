@@ -2,130 +2,294 @@
 
 {% block title %}Yield Prediction - Farmer Portal{% endblock %}
 
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</nav>
+{% block extra_css %}
+<style>
+    .prediction-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #059669 0%, #1e40af 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
 
-<div class="container">
+    .form-glass-card {
+        background: white;
+        border-radius: 35px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+    }
+
+    .form-section-title {
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.1rem;
+    }
+
+    .form-section-title i {
+        color: #3b82f6;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 16px;
+        padding: 12px 20px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-pill-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .pill-radio {
+        cursor: pointer;
+        display: inline-block;
+        margin: 0;
+    }
+
+    .pill-radio input {
+        display: none;
+    }
+
+    .pill-content {
+        display: inline-block;
+        padding: 12px 24px;
+        border-radius: 100px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+        white-space: nowrap;
+    }
+
+    .pill-radio input:checked+.pill-content {
+        background: #eff6ff;
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .submit-btn-modern {
+        background: linear-gradient(135deg, #059669 0%, #1e40af 100%);
+        border: none;
+        color: white;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.3s;
+        font-size: 1.1rem;
+    }
+
+    .submit-btn-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(5, 150, 105, 0.2);
+    }
+
+    .ai-disclaimer {
+        padding: 15px 25px;
+        background: #f0fdf4;
+        border-radius: 20px;
+        color: #15803d;
+        font-size: 0.85rem;
+        border: 1px solid #dcfce7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prediction-hero">
+    <div class="container">
+        <a href="{{ url_for('farmer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+        </a>
+        <h1 class="fw-bold"><i class="bi bi-lightning-charge-fill me-2"></i>Yield Predictor AI</h1>
+        <p class="opacity-75 mb-0">Estimate your harvest outcomes using climate and soil data insights</p>
+    </div>
+</div>
+
+<div class="container pb-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-graph-up"></i> Yield Prediction</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="temperature" class="form-label">Temperature (°C) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.1" class="form-control" id="temperature" name="temperature" 
-                                   value="{{ temperature }}" required readonly
-                                   style="background-color: #e9ecef; cursor: not-allowed;">
-                            <small class="text-muted">
-                                <i class="bi bi-info-circle"></i> 
-                                Auto-fetched from weather API for your location ({{ current_user.farm_location or 'Kerala, India' }})
-                            </small>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="crop_type" class="form-label">Crop Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="crop_type" name="crop_type" required>
-                                    <option value="">Select Crop Type</option>
-                                    {% for crop in crop_types %}
-                                    <option value="{{ crop }}">{{ crop }}</option>
+        <div class="col-lg-10 mt-5">
+            <div class="form-glass-card">
+                <form method="POST">
+                    <div class="row g-5">
+                        <!-- Left Side: Location & Environment Info -->
+                        <div class="col-lg-6">
+                            <div class="form-section-title">
+                                <i class="bi bi-geo-alt-fill"></i> Location & Environment
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Select State</label>
+                                <select class="form-select" name="state" required>
+                                    <option value="">Select State</option>
+                                    {% for state_opt in states %}
+                                    <option value="{{ state_opt }}" {% if state==state_opt %}selected{% endif %}>{{
+                                        state_opt }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="crop_variety" class="form-label">Crop Variety</label>
-                                <input type="text" class="form-control" id="crop_variety" name="crop_variety" 
-                                       placeholder="e.g., Basmati, Hybrid">
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Temperature (°C)</label>
+                                    <input type="number" step="0.01" class="form-control" name="temperature"
+                                        placeholder="e.g., 25.5" value="{{ temperature|default('28.0') }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Humidity (%)</label>
+                                    <input type="number" step="0.01" class="form-control" name="humidity"
+                                        placeholder="e.g., 60.0" value="{{ humidity|default('70.0') }}" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Rainfall (mm)</label>
+                                <input type="number" step="0.01" class="form-control" name="rainfall"
+                                    placeholder="Annual rainfall" value="{{ rainfall|default('100.0') }}" required>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Farm Size (Acres)</label>
+                                    <input type="number" step="0.1" class="form-control" name="farm_size"
+                                        placeholder="e.g., 5.0" value="{{ farm_size|default('1.0') }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Planting Date</label>
+                                    <input type="date" class="form-control" name="planting_date"
+                                        value="{{ planting_date }}" required>
+                                </div>
+                            </div>
+
+                            <div class="ai-disclaimer">
+                                <div class="d-flex gap-3">
+                                    <i class="bi bi-cpu fs-4"></i>
+                                    <div>
+                                        <div class="fw-bold">AI Data Processing</div>
+                                        <p class="mb-0 opacity-75 small">Your data is processed using our specialized
+                                            crop yield model to provide the most accurate predictions possible.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="soil_type" class="form-label">Soil Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="soil_type" name="soil_type" required>
-                                    <option value="">Select Soil Type</option>
-                                    {% for soil in soil_types %}
-                                    <option value="{{ soil }}">{{ soil }}</option>
+
+                        <!-- Right Side: Crop & Soil Details -->
+                        <div class="col-lg-6">
+                            <div class="form-section-title">
+                                <i class="bi bi-flower1"></i> Crop & Soil Information
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Select Crop</label>
+                                <div class="input-pill-group">
+                                    {% for crop_opt in crops %}
+                                    <label class="pill-radio">
+                                        <input type="radio" name="crop" value="{{ crop_opt }}" {% if crop==crop_opt
+                                            %}checked{% endif %} required>
+                                        <span class="pill-content">{{ crop_opt }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Soil Type</label>
+                                    <select class="form-select" name="soil_type" required>
+                                        {% for st in soil_types %}
+                                        <option value="{{ st }}" {% if soil_type==st %}selected{% endif %}>{{ st }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Irrigation</label>
+                                    <select class="form-select" name="irrigation_type" required>
+                                        {% for it in irrigation_types %}
+                                        <option value="{{ it }}" {% if irrigation_type==it %}selected{% endif %}>{{ it
+                                            }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Fertilizer Type</label>
+                                <select class="form-select" name="fertilizer_type" required>
+                                    {% for ft in fertilizer_types %}
+                                    <option value="{{ ft }}" {% if fertilizer_type==ft %}selected{% endif %}>{{ ft }}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="irrigation_type" class="form-label">Irrigation Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="irrigation_type" name="irrigation_type" required>
-                                    <option value="">Select Irrigation Type</option>
-                                    {% for irrigation in irrigation_types %}
-                                    <option value="{{ irrigation }}">{{ irrigation }}</option>
-                                    {% endfor %}
-                                </select>
+
+                            <div class="mb-4 pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <label class="form-label mb-0">Soil Analysis (Optional)</label>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary small">Advanced NPK</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <label class="small fw-bold text-muted mb-1">Nitrogen (N)</label>
+                                        <input type="number" step="0.01" class="form-control" name="nitrogen"
+                                            placeholder="N">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small fw-bold text-muted mb-1">Phosphorus (P)</label>
+                                        <input type="number" step="0.01" class="form-control" name="phosphorus"
+                                            placeholder="P">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="small fw-bold text-muted mb-1">Potassium (K)</label>
+                                        <input type="number" step="0.01" class="form-control" name="potassium"
+                                            placeholder="K">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fertilizer_type" class="form-label">Fertilizer Type <span class="text-danger">*</span></label>
-                                <select class="form-select" id="fertilizer_type" name="fertilizer_type" required>
-                                    <option value="">Select Fertilizer Type</option>
-                                    {% for fertilizer in fertilizer_types %}
-                                    <option value="{{ fertilizer }}">{{ fertilizer }}</option>
-                                    {% endfor %}
-                                </select>
+
+                            <div class="mb-4">
+                                <label class="form-label">Soil pH Level</label>
+                                <input type="number" step="0.01" class="form-control" name="ph"
+                                    placeholder="0.0 - 14.0">
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="planting_date" class="form-label">Planting Date <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="planting_date" name="planting_date" required>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="farm_size" class="form-label">Farm Size (acres) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" min="0.01" class="form-control" 
-                                       id="farm_size" name="farm_size" required
-                                       value="{{ current_user.farm_size or '' }}">
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="location" name="location" required
-                                       value="{{ current_user.farm_location or '' }}" 
-                                       placeholder="Farm location"
-                                       onchange="updateTemperature()">
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-calculator"></i> Predict Yield
+
+                            <button type="submit" class="submit-btn-modern">
+                                <i class="bi bi-stars me-2"></i> GENERATE PREDICTION
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-function updateTemperature() {
-    const location = document.getElementById('location').value;
-    if (location) {
-        // In a real implementation, you could make an AJAX call to update temperature
-        // For now, the temperature is set on page load
-        console.log('Location changed to:', location);
-    }
-}
-</script>
 {% endblock %}
-

@@ -1,282 +1,267 @@
 {% extends "base.html" %}
 
-{% block title %}Add New Product - Agro Marketplace{% endblock %}
+{% block title %}List New Product - Agro Marketplace{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-container {
-        max-width: 800px;
-        margin: 0 auto;
+    .page-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
+
+    .form-glass-card {
         background: white;
+        border-radius: 35px;
         padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .form-header {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-
-    .form-header h2 {
-        color: #2c3e50;
-        margin-bottom: 10px;
-    }
-
-    .form-header p {
-        color: #7f8c8d;
-        margin: 0;
-    }
-
-    .form-section {
-        margin-bottom: 30px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
     }
 
     .form-section-title {
-        font-weight: 600;
-        color: #2c3e50;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #27ae60;
-        margin-bottom: 20px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.1rem;
+    }
+
+    .form-section-title i {
+        color: #059669;
+        font-size: 1.2rem;
     }
 
     .form-label {
-        font-weight: 500;
-        color: #34495e;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.85rem;
         margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .form-control, .form-select {
-        border-radius: 5px;
-        border: 1px solid #ddd;
-    }
-
-    .form-control:focus, .form-select:focus {
-        border-color: #27ae60;
-        box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
-    }
-
-    .image-preview-container {
-        margin-top: 15px;
-        text-align: center;
-    }
-
-    .image-preview {
-        max-width: 300px;
-        max-height: 300px;
-        border-radius: 10px;
-        border: 2px solid #27ae60;
-        display: none;
-    }
-
-    .upload-hint {
-        color: #7f8c8d;
-        font-size: 0.9rem;
-        margin-top: 8px;
-    }
-
-    .submit-section {
-        display: flex;
-        gap: 10px;
-        margin-top: 40px;
-    }
-
-    .submit-section button {
-        flex: 1;
+    .form-control,
+    .form-select {
+        border-radius: 16px;
         padding: 12px 20px;
-        font-size: 1rem;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition: all 0.2s;
     }
 
-    .required-mark {
-        color: #e74c3c;
+    .form-control:focus,
+    .form-select:focus {
+        background: white;
+        border-color: #059669;
+        box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+    }
+
+    .image-preview-zone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: #f8fafc;
+    }
+
+    .image-preview-zone:hover {
+        border-color: #059669;
+        background: #f0fdf4;
+    }
+
+    .preview-img {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: 15px;
+        display: none;
+        margin: 0 auto;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #059669 0%, #064e3b 100%);
+        border: none;
+        color: white;
+        padding: 18px;
+        border-radius: 20px;
+        font-weight: 700;
+        width: 100%;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(5, 150, 105, 0.3);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5 mb-5">
-    <div class="form-container">
-        <!-- Header -->
-        <div class="form-header">
-            <h2><i class="bi bi-plus-circle"></i> Add New Product</h2>
-            <p>List your farm products for sale on the marketplace</p>
+<div class="page-hero">
+    <div class="container">
+        <a href="{{ url_for('marketplace.my_products') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO INVENTORY
+        </a>
+        <h1 class="fw-bold">List New Product</h1>
+        <p class="opacity-75 mb-0">Reach more customers by adding your farm fresh items to the market</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="form-glass-card">
+                <form method="POST" enctype="multipart/form-data" id="productForm">
+                    <div class="row g-5">
+                        <!-- Left Side: Basic Info -->
+                        <div class="col-lg-7">
+                            <div class="form-section-title">
+                                <i class="bi bi-info-circle-fill"></i> Product Details
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Full Product Name</label>
+                                <input type="text" class="form-control" name="product_name"
+                                    placeholder="e.g., Organic Red Tomatoes" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select" name="category" required>
+                                            <option value="">Select Category</option>
+                                            <option value="Vegetables">Vegetables</option>
+                                            <option value="Fruits">Fruits</option>
+                                            <option value="Grains">Grains</option>
+                                            <option value="Pulses">Pulses</option>
+                                            <option value="Dairy">Dairy Products</option>
+                                            <option value="Others">Others</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">Unit</label>
+                                        <select class="form-select" name="unit" required>
+                                            <option value="kg">Kilogram (kg)</option>
+                                            <option value="liter">Liter (L)</option>
+                                            <option value="ton">Ton</option>
+                                            <option value="piece">Piece</option>
+                                            <option value="box">Box</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Farm Location</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 rounded-start-4"><i
+                                            class="bi bi-geo-alt text-primary"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" name="location"
+                                        placeholder="City or Region" value="{{ current_user.farm_location or '' }}">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Detailed Description</label>
+                                <textarea class="form-control" name="description" rows="5"
+                                    placeholder="Share details about farming methods, quality, and origin..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Pricing & Image -->
+                        <div class="col-lg-5">
+                            <div class="form-section-title">
+                                <i class="bi bi-tag-fill"></i> Pricing & Stock
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <div class="p-4 bg-light rounded-4">
+                                        <label class="form-label d-block">Quantity</label>
+                                        <input type="number" class="form-control border-0 bg-white" name="quantity"
+                                            step="0.01" placeholder="0.0" id="qtyI" required>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-4 bg-light rounded-4 text-success">
+                                        <label class="form-label d-block">Price / Unit</label>
+                                        <input type="number" class="form-control border-0 bg-white"
+                                            name="price_per_unit" step="0.01" placeholder="₹0" id="priceI" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section-title mt-2">
+                                <i class="bi bi-camera-fill"></i> Product Media
+                            </div>
+                            <div class="image-preview-zone mb-4" onclick="document.getElementById('imgI').click()">
+                                <div id="uploadPlaceholder">
+                                    <i class="bi bi-cloud-arrow-up display-4 text-muted"></i>
+                                    <p class="mt-2 text-muted fw-bold">Click to upload photo</p>
+                                    <small class="text-muted opacity-50">PNG, JPG or WebP (Max 5MB)</small>
+                                </div>
+                                <img id="previewImg" class="preview-img">
+                                <input type="file" id="imgI" name="product_image" class="d-none" accept="image/*">
+                            </div>
+
+                            <div class="bg-primary bg-opacity-10 p-4 rounded-4 mb-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-primary">Estimated Value:</span>
+                                    <span class="fs-4 fw-bold text-primary" id="totalV">₹0.00</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="submit-btn">
+                                <i class="bi bi-check-circle-fill me-2"></i> LIST PRODUCT NOW
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <form method="POST" enctype="multipart/form-data" id="productForm">
-            <!-- Basic Information -->
-            <div class="form-section">
-                <div class="form-section-title">Basic Information</div>
-
-                <div class="mb-3">
-                    <label for="product_name" class="form-label">
-                        Product Name <span class="required-mark">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="product_name" name="product_name"
-                        placeholder="e.g., Tomato, Onion, Rice, Wheat" required>
-                    <small class="form-text text-muted">What are you selling?</small>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="category" class="form-label">
-                                Category <span class="required-mark">*</span>
-                            </label>
-                            <select class="form-select" id="category" name="category" required>
-                                <option value="">Select Category</option>
-                                <option value="Vegetables">Vegetables</option>
-                                <option value="Fruits">Fruits</option>
-                                <option value="Grains">Grains</option>
-                                <option value="Pulses">Pulses</option>
-                                <option value="Herbs & Spices">Herbs & Spices</option>
-                                <option value="Dairy">Dairy Products</option>
-                                <option value="Others">Others</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="location" name="location"
-                                placeholder="Your farm location/city">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4"
-                        placeholder="Describe your product quality, farming method, certifications, etc."></textarea>
-                    <small class="form-text text-muted">Help buyers understand your product better</small>
-                </div>
-            </div>
-
-            <!-- Pricing & Stock -->
-            <div class="form-section">
-                <div class="form-section-title">Pricing & Stock</div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="quantity" class="form-label">
-                                Quantity Available <span class="required-mark">*</span>
-                            </label>
-                            <input type="number" class="form-control" id="quantity" name="quantity"
-                                step="0.01" placeholder="10.5" required>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="unit" class="form-label">
-                                Unit <span class="required-mark">*</span>
-                            </label>
-                            <select class="form-select" id="unit" name="unit" required>
-                                <option value="">Select Unit</option>
-                                <option value="kg">Kilogram (kg)</option>
-                                <option value="liter">Liter (L)</option>
-                                <option value="ton">Ton</option>
-                                <option value="dozen">Dozen</option>
-                                <option value="piece">Piece</option>
-                                <option value="bunch">Bunch</option>
-                                <option value="box">Box</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="price_per_unit" class="form-label">
-                        Price per Unit (₹) <span class="required-mark">*</span>
-                    </label>
-                    <input type="number" class="form-control" id="price_per_unit" name="price_per_unit"
-                        step="0.01" placeholder="100" required>
-                    <small class="form-text text-muted">Price in Indian Rupees</small>
-                </div>
-
-                <!-- Price Preview -->
-                <div class="alert alert-info">
-                    <small>
-                        <strong>Total Value:</strong> <span id="totalValue">₹0</span>
-                    </small>
-                </div>
-            </div>
-
-            <!-- Product Image -->
-            <div class="form-section">
-                <div class="form-section-title">Product Image</div>
-
-                <div class="mb-3">
-                    <label for="product_image" class="form-label">Product Photo</label>
-                    <input type="file" class="form-control" id="product_image" name="product_image"
-                        accept="image/*">
-                    <div class="upload-hint">
-                        <i class="bi bi-info-circle"></i>
-                        Supported formats: JPG, PNG, GIF, WebP (Max 5MB)
-                    </div>
-                    <div class="image-preview-container">
-                        <img id="previewImage" class="image-preview" alt="Preview">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="submit-section">
-                <a href="{{ url_for('marketplace.my_products') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Cancel
-                </a>
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-check-circle"></i> Add Product
-                </button>
-            </div>
-        </form>
     </div>
 </div>
 
 <script>
-    // Calculate total value
-    function updateTotalValue() {
-        const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-        const price = parseFloat(document.getElementById('price_per_unit').value) || 0;
-        const total = quantity * price;
-        document.getElementById('totalValue').textContent = '₹' + total.toFixed(2);
+    const qtyI = document.getElementById('qtyI');
+    const priceI = document.getElementById('priceI');
+    const totalV = document.getElementById('totalV');
+
+    function calc() {
+        const q = parseFloat(qtyI.value) || 0;
+        const p = parseFloat(priceI.value) || 0;
+        totalV.innerText = '₹' + (q * p).toLocaleString(undefined, { minimumFractionDigits: 2 });
     }
 
-    document.getElementById('quantity').addEventListener('input', updateTotalValue);
-    document.getElementById('price_per_unit').addEventListener('input', updateTotalValue);
+    qtyI.addEventListener('input', calc);
+    priceI.addEventListener('input', calc);
 
-    // Image preview
-    document.getElementById('product_image').addEventListener('change', function (e) {
+    document.getElementById('imgI').addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (file) {
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Product image is too large! Maximum limit is 10MB.');
+                e.target.value = '';
+                return;
+            }
             const reader = new FileReader();
-            reader.onload = function (event) {
-                const preview = document.getElementById('previewImage');
-                preview.src = event.target.result;
-                preview.style.display = 'block';
-            };
+            reader.onload = function (ex) {
+                document.getElementById('previewImg').src = ex.target.result;
+                document.getElementById('previewImg').style.display = 'block';
+                document.getElementById('uploadPlaceholder').style.display = 'none';
+            }
             reader.readAsDataURL(file);
         }
     });
-
-    // Form validation
-    document.getElementById('productForm').addEventListener('submit', function (e) {
-        const quantity = parseFloat(document.getElementById('quantity').value);
-        const price = parseFloat(document.getElementById('price_per_unit').value);
-
-        if (quantity <= 0) {
-            e.preventDefault();
-            alert('Quantity must be greater than 0');
-            return false;
-        }
-
-        if (price <= 0) {
-            e.preventDefault();
-            alert('Price must be greater than 0');
-            return false;
-        }
-    });
 </script>
-
 {% endblock %}

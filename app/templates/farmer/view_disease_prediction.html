@@ -1,258 +1,335 @@
 {% extends "base.html" %}
 
-{% block title %}Disease Prediction Results - Farmer Portal{% endblock %}
+{% block title %}Disease Analysis - Farmer Portal{% endblock %}
 
-{% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('farmer.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="bi bi-shield-check"></i> AI Disease Prediction Results</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Crop Type:</strong> {{ issue.crop_type }}</p>
-                            <p><strong>Status:</strong> 
-                                <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
-                                    {{ issue.status }}
-                                </span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Submitted:</strong> {{ issue.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                            {% if issue.location %}
-                            <p><strong>Location:</strong> {{ issue.location }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                    
-                    {% if issue.image_path %}
-                    <div class="mb-3">
-                        <img src="{{ url_for('static', filename=issue.image_path) }}" 
-                             class="img-fluid rounded" alt="Crop Image" style="max-height: 300px;">
-                    </div>
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <h5>Issue Description:</h5>
-                        <p>{{ issue.issue_description }}</p>
-                    </div>
-                    
-                    {% if issue.symptoms %}
-                    <div class="mb-3">
-                        <h5>Selected Symptoms:</h5>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for symptom in issue.symptoms|from_json %}
-                            <span class="badge bg-secondary">{{ symptom }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            {% if prediction %}
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-robot"></i> AI Prediction</h4>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h5 class="mb-2">
-                            <i class="bi bi-bug"></i> Predicted Disease: 
-                            <strong>{{ prediction.disease_name }}</strong>
-                        </h5>
-                        <p class="mb-0">
-                            Confidence: <strong>{{ (prediction.confidence * 100)|round(1) }}%</strong> | 
-                            Severity: <strong>{{ prediction.severity }}</strong>
-                        </p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <h5><i class="bi bi-lightbulb"></i> Recommendations:</h5>
-                        <ul class="list-group">
-                            {% for rec in prediction.recommendations %}
-                            <li class="list-group-item">
-                                <i class="bi bi-check-circle text-success"></i> {{ rec }}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    
-                    <div>
-                        <h5><i class="bi bi-clipboard-check"></i> Treatment Options:</h5>
-                        <ul class="list-group">
-                            {% for treatment in prediction.treatment_options %}
-                            <li class="list-group-item">
-                                <i class="bi bi-arrow-right-circle text-primary"></i> {{ treatment }}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <a href="{{ url_for('farmer.chat_list') }}" class="btn btn-primary">
-                            <i class="bi bi-chat-dots"></i> Consult with Expert
-                        </a>
-                        <a href="{{ url_for('farmer.history_issues') }}" class="btn btn-secondary">
-                            <i class="bi bi-list"></i> View All Issues
-                        </a>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i> 
-                AI prediction is being processed. Please check back later.
-            </div>
-            {% endif %}
-            
-            <!-- Expert Diagnosis Report -->
-            {% if diagnosis_report %}
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-clipboard-check"></i> Expert Diagnosis Report</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Diagnosed by:</strong> {{ diagnosis_report.expert.full_name }}</p>
-                            <p><strong>Disease Identified:</strong> {{ diagnosis_report.disease_identified or 'N/A' }}</p>
-                            <p><strong>Severity:</strong> 
-                                <span class="badge bg-{{ 'danger' if diagnosis_report.severity == 'Critical' else 'warning' if diagnosis_report.severity == 'High' else 'info' if diagnosis_report.severity == 'Medium' else 'success' }}">
-                                    {{ diagnosis_report.severity or 'N/A' }}
-                                </span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Confidence Level:</strong> {{ diagnosis_report.confidence_level or 'N/A' }}</p>
-                            <p><strong>Reported on:</strong> {{ diagnosis_report.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="mb-3">
-                        <h5><i class="bi bi-file-medical"></i> Diagnosis:</h5>
-                        <p class="text-muted">{{ diagnosis_report.diagnosis }}</p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <h5><i class="bi bi-prescription"></i> Treatment Plan:</h5>
-                        <p class="text-muted">{{ diagnosis_report.treatment_plan }}</p>
-                    </div>
-                    
-                    {% if diagnosis_report.preventive_measures %}
-                    <div class="mb-3">
-                        <h5><i class="bi bi-shield-check"></i> Preventive Measures:</h5>
-                        <p class="text-muted">{{ diagnosis_report.preventive_measures }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    {% if diagnosis_report.recommended_products %}
-                    <div class="mb-3">
-                        <h5><i class="bi bi-box-seam"></i> Recommended Products:</h5>
-                        <ul class="list-group">
-                            {% for product in diagnosis_report.recommended_products|from_json %}
-                            <li class="list-group-item">{{ product }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Rating Form -->
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-star"></i> Rate Expert</h5>
-                </div>
-                <div class="card-body">
-                    {% if existing_rating %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> You have already rated this expert for this issue.
-                        <div class="mt-2">
-                            <strong>Your Rating:</strong>
-                            {% for i in range(1, 6) %}
-                                <i class="bi bi-star{{ '-fill' if i <= existing_rating.rating else '' }} text-warning"></i>
-                            {% endfor %}
-                            ({{ existing_rating.rating }}/5)
-                            {% if existing_rating.comment %}
-                            <br><strong>Your Comment:</strong> {{ existing_rating.comment }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <form method="POST" action="{{ url_for('farmer.rate_expert') }}">
-                        <input type="hidden" name="expert_id" value="{{ diagnosis_report.expert_id }}">
-                        <input type="hidden" name="issue_id" value="{{ issue.id }}">
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Rating (1-5 stars):</strong></label>
-                            <div class="star-rating">
-                                {% for i in range(1, 6) %}
-                                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" 
-                                       {% if existing_rating and existing_rating.rating == i %}checked{% endif %}
-                                       required>
-                                <label for="star{{ i }}" class="star-label">
-                                    <i class="bi bi-star-fill"></i>
-                                </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="comment" class="form-label"><strong>Your Comment (Optional):</strong></label>
-                            <textarea class="form-control" id="comment" name="comment" rows="3" 
-                                      placeholder="Share your experience with this expert's diagnosis...">{% if existing_rating %}{{ existing_rating.comment }}{% endif %}</textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle"></i> {{ 'Update Rating' if existing_rating else 'Submit Rating' }}
-                        </button>
-                    </form>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
+{% block extra_css %}
 <style>
-.star-rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: 5px;
-}
+    .analysis-hero {
+        padding: 50px 0;
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -30px;
+    }
 
-.star-rating input[type="radio"] {
-    display: none;
-}
+    .report-card {
+        background: white;
+        border-radius: 35px;
+        overflow: hidden;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+    }
 
-.star-rating label {
-    font-size: 2rem;
-    color: #ddd;
-    cursor: pointer;
-    transition: color 0.2s;
-}
+    .status-badge {
+        padding: 8px 20px;
+        border-radius: 100px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
 
-.star-rating input[type="radio"]:checked ~ label,
-.star-rating label:hover,
-.star-rating label:hover ~ label {
-    color: #ffc107;
-}
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 24px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .info-item span {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .crop-image-preview {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 24px;
+        margin-bottom: 30px;
+    }
+
+    .ai-insight-panel {
+        background: #f0fdfa;
+        border-radius: 30px;
+        padding: 30px;
+        border: 1px solid #ccfbf1;
+    }
+
+    .severity-meter {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 15px 0;
+    }
+
+    .severity-fill {
+        height: 100%;
+        border-radius: 10px;
+    }
+
+    .recommendation-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 15px;
+        transition: transform 0.2s;
+    }
+
+    .recommendation-card:hover {
+        transform: translateX(5px);
+        border-color: #059669;
+    }
+
+    .expert-response {
+        background: #f8fafc;
+        border-left: 5px solid #3b82f6;
+        border-radius: 0 24px 24px 0;
+        padding: 30px;
+    }
+
+    .rating-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 10px;
+    }
+
+    .rating-stars input {
+        display: none;
+    }
+
+    .rating-stars label {
+        font-size: 2.5rem;
+        color: #e2e8f0;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .rating-stars input:checked~label,
+    .rating-stars label:hover,
+    .rating-stars label:hover~label {
+        color: #f59e0b;
+    }
 </style>
 {% endblock %}
 
+{% block content %}
+<div class="analysis-hero">
+    <div class="container">
+        <a href="{{ url_for('farmer.dashboard') }}"
+            class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+        </a>
+        <h1 class="fw-bold"><i class="bi bi-activity me-2"></i>Analysis Report</h1>
+        <p class="opacity-75 mb-0">Detailed diagnostic report for Case #{{ issue.id }}</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 mt-5">
+            <div class="report-card p-4 p-md-5">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+                    <div>
+                        <h2 class="fw-bold text-dark mb-1">{{ issue.crop_type }} Issue</h2>
+                        <p class="text-muted small mb-0"><i class="bi bi-calendar3 me-2"></i>Submitted on {{
+                            issue.created_at.strftime('%d %b, %Y • %I:%M %p') }}</p>
+                    </div>
+                    <div
+                        class="status-badge bg-{{ 'warning text-warning' if issue.status == 'pending' else 'success text-success' }} bg-opacity-10">
+                        <i class="bi bi-record-circle-fill me-2"></i>{{ issue.status }}
+                    </div>
+                </div>
+
+                <div class="row g-5">
+                    <!-- Left Column: Case Details -->
+                    <div class="col-lg-6">
+                        {% if issue.image_path %}
+                        <img src="{{ url_for('static', filename=issue.image_path) }}" class="crop-image-preview"
+                            alt="Affected Crop">
+                        {% endif %}
+
+                        <h5 class="fw-bold text-dark mb-3">Case Information</h5>
+                        <div class="info-grid mb-4">
+                            <div class="info-item">
+                                <label>Location</label>
+                                <span>{{ issue.location or 'Not Specified' }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Crop</label>
+                                <span>{{ issue.crop_type }}</span>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3">Symptoms Reported</h5>
+                        <div class="d-flex flex-wrap gap-2 mb-5">
+                            {% for symptom in issue.symptoms|from_json %}
+                            <span class="badge bg-light text-dark border p-2 px-3 rounded-pill fw-bold">
+                                <i class="bi bi-check2-circle text-primary me-2"></i>{{ symptom }}
+                            </span>
+                            {% endfor %}
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3">Farmer's Description</h5>
+                        <p class="text-secondary leading-relaxed p-4 bg-light rounded-4">
+                            "{{ issue.issue_description }}"
+                        </p>
+                    </div>
+
+                    <!-- Right Column: Results & AI -->
+                    <div class="col-lg-6">
+                        {% if prediction %}
+                        <div class="ai-insight-panel mb-5">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-4">
+                                    <i class="bi bi-cpu fs-3"></i>
+                                </div>
+                                <h4 class="fw-bold text-dark mb-0">AI Diagnostic</h4>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-muted small fw-bold text-uppercase">Detected Disease</label>
+                                <h3 class="text-primary fw-bold">{{ prediction.disease_name }}</h3>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-end">
+                                    <label class="text-muted small fw-bold text-uppercase">AI Confidence</label>
+                                    <span class="fw-bold text-dark">{{ (prediction.confidence * 100)|round(1) }}%</span>
+                                </div>
+                                <div class="severity-meter">
+                                    <div class="severity-fill bg-success"
+                                        style="width: {{ prediction.confidence * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="text-muted small fw-bold text-uppercase mb-3 d-block">AI
+                                    Recommendations</label>
+                                {% for rec in prediction.recommendations %}
+                                <div class="recommendation-card">
+                                    <div class="d-flex gap-3">
+                                        <i class="bi bi-shield-check text-success fs-5"></i>
+                                        <p class="mb-0 small fw-bold text-secondary">{{ rec }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <a href="{{ url_for('farmer.chat_list') }}"
+                                class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm">
+                                <i class="bi bi-chat-dots-fill me-2"></i> TALK TO EXPERT
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="card border-0 bg-amber-50 rounded-5 p-5 text-center mb-5"
+                            style="background: #fffbeb;">
+                            <i class="bi bi-hourglass-split display-1 text-warning opacity-25 mb-4"></i>
+                            <h4 class="fw-bold text-dark">AI is Analyzing...</h4>
+                            <p class="text-muted">Our model is processing your upload. This usually takes less than 30
+                                seconds.</p>
+                        </div>
+                        {% endif %}
+
+                        {% if diagnosis_report %}
+                        <div class="expert-response border shadow-sm">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="expert-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                                    style="width: 50px; height: 50px;">
+                                    <i class="bi bi-person-badge fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-0">Expert Verdict</h5>
+                                    <p class="text-muted small mb-0">By {{ diagnosis_report.expert.full_name }}</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted text-uppercase d-block mb-2">Final
+                                    Diagnosis</label>
+                                <p class="fw-bold text-dark fs-5">{{ diagnosis_report.diagnosis }}</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted text-uppercase d-block mb-2">Treatment
+                                    Plan</label>
+                                <p class="text-secondary">{{ diagnosis_report.treatment_plan }}</p>
+                            </div>
+
+                            {% if diagnosis_report.recommended_products %}
+                            <div class="mb-4">
+                                <label class="small fw-bold text-muted text-uppercase d-block mb-3">Prescribed
+                                    Products</label>
+                                <div class="d-flex flex-column gap-2">
+                                    {% for product in diagnosis_report.recommended_products|from_json %}
+                                    <div class="p-3 bg-white border rounded-4 d-flex align-items-center gap-3">
+                                        <i class="bi bi-box-seam text-primary"></i>
+                                        <span class="fw-bold text-dark">{{ product }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div class="mt-5 p-5 bg-light rounded-5 border-2 border-dashed">
+                            <h4 class="fw-bold text-dark mb-4 text-center">Rate the Diagnosis</h4>
+
+                            {% if existing_rating %}
+                            <div class="text-center">
+                                <div class="mb-3">
+                                    {% for i in range(5, 0, -1) %}
+                                    <i
+                                        class="bi bi-star{{ '-fill text-warning' if i <= existing_rating.rating else ' text-muted opacity-25' }} fs-2"></i>
+                                    {% endfor %}
+                                </div>
+                                <p class="fw-bold mb-0">Feedback: "{{ existing_rating.comment }}"</p>
+                                <button class="btn btn-link text-primary fw-bold mt-2"
+                                    onclick="document.getElementById('ratingForm').classList.toggle('d-none')">Update
+                                    Rating</button>
+                            </div>
+                            {% endif %}
+
+                            <form id="ratingForm" method="POST" action="{{ url_for('farmer.rate_expert') }}"
+                                class="{{ 'd-none' if existing_rating }}">
+                                <input type="hidden" name="expert_id" value="{{ diagnosis_report.expert_id }}">
+                                <input type="hidden" name="issue_id" value="{{ issue.id }}">
+
+                                <div class="rating-stars justify-content-center mb-4">
+                                    {% for i in range(5, 0, -1) %}
+                                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if
+                                        existing_rating and existing_rating.rating==i %}checked{% endif %} required>
+                                    <label for="star{{ i }}"><i class="bi bi-star-fill"></i></label>
+                                    {% endfor %}
+                                </div>
+
+                                <textarea class="form-control border-0 rounded-4 p-4 mb-4" name="comment" rows="3"
+                                    placeholder="How helpful was this diagnosis?">{% if existing_rating %}{{ existing_rating.comment }}{% endif %}</textarea>
+
+                                <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-bold">
+                                    SUBMIT FEEDBACK
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

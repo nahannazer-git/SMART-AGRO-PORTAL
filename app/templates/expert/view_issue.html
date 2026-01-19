@@ -1,145 +1,272 @@
 {% extends "base.html" %}
 
-{% block title %}View Issue #{{ issue.id }} - Expert Portal{% endblock %}
+{% block title %}Issue #{{ issue.id }} - AgroPortal Expert{% endblock %}
 
 {% block extra_css %}
 <style>
-    .issue-image {
-        max-width: 100%;
-        max-height: 500px;
-        border-radius: 8px;
-        cursor: pointer;
+    .issue-hero {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        margin-bottom: -40px;
+        border-radius: 0 0 50px 50px;
     }
-    .modal-image {
-        max-width: 100%;
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .section-border {
+        border-left: 4px solid #3b82f6;
+        padding-left: 20px;
+        margin-bottom: 25px;
+    }
+
+    .issue-image-preview {
+        width: 100%;
+        height: auto;
+        border-radius: 24px;
+        cursor: zoom-in;
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .issue-image-preview:hover {
+        transform: scale(1.02);
+    }
+
+    .ai-insight {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+        border-radius: 24px;
+        padding: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-insight::after {
+        content: '\F52A';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        right: -10px;
+        bottom: -20px;
+        font-size: 8rem;
+        opacity: 0.05;
+        color: #3b82f6;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 2px;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .symptom-tag {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        padding: 5px 15px;
+        border-radius: 100px;
+        font-size: 0.85rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('expert.pending_issues') }}">
-            <i class="bi bi-arrow-left"></i> Back to Issues
+<div class="issue-hero">
+    <div class="container">
+        <a href="{{ url_for('expert.pending_issues') }}"
+            class="text-white text-opacity-75 text-decoration-none fw-bold small mb-3 d-inline-block">
+            <i class="bi bi-chevron-left"></i> BACK TO ISSUES
         </a>
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="fw-bold mb-0">Crop Issue Analysis</h1>
+                <p class="mb-0 opacity-75">Case ID #{{ issue.id }} &bull; Submitted by {{ issue.farmer.full_name }}</p>
+            </div>
+            <span class="badge rounded-pill bg-white px-4 py-2 mt-3 mt-md-0 fw-bold shadow-sm" style="color: #1e3a8a;">
+                Status: {{ issue.status|upper }}
+            </span>
+        </div>
     </div>
-</nav>
+</div>
 
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0"><i class="bi bi-bug"></i> Crop Issue #{{ issue.id }}</h4>
-                    <span class="badge bg-{{ 'warning' if issue.status == 'pending' else 'success' }}">
-                        {{ issue.status|title }}
-                    </span>
+<div class="container pb-5">
+    <div class="row g-4">
+        <!-- Main Analysis Column -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4 p-md-5 mb-4">
+                <div class="section-border">
+                    <h5 class="fw-bold mb-1">Issue Overview</h5>
+                    <p class="text-muted small">Primary details regarding the reported problem</p>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Issue Information</h5>
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th>Crop Type:</th>
-                                    <td>{{ issue.crop_type }}</td>
-                                </tr>
-                                {% if issue.crop_variety %}
-                                <tr>
-                                    <th>Variety:</th>
-                                    <td>{{ issue.crop_variety }}</td>
-                                </tr>
-                                {% endif %}
-                                {% if issue.planting_date %}
-                                <tr>
-                                    <th>Planting Date:</th>
-                                    <td>{{ issue.planting_date }}</td>
-                                </tr>
-                                {% endif %}
-                                <tr>
-                                    <th>Location:</th>
-                                    <td>{{ issue.location or 'N/A' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Farmer:</th>
-                                    <td>{{ issue.farmer.full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Submitted:</th>
-                                    <td>{{ issue.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>Description</h5>
-                            <p>{{ issue.issue_description }}</p>
-                            
-                            {% if issue.symptoms %}
-                            <h5 class="mt-3">Symptoms</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                {% for symptom in issue.symptoms|from_json %}
-                                <span class="badge bg-secondary">{{ symptom }}</span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                        </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="info-label">Crop Category</div>
+                        <div class="info-value fs-5">{{ issue.crop_type }}</div>
                     </div>
-                    
-                    {% if issue.image_path %}
-                    <div class="mt-4">
-                        <h5>Crop Image</h5>
-                        <img src="{{ url_for('static', filename=issue.image_path) }}" 
-                             class="issue-image" 
-                             alt="Crop Image"
-                             data-bs-toggle="modal" 
-                             data-bs-target="#imageModal">
+                    {% if issue.crop_variety %}
+                    <div class="col-md-4">
+                        <div class="info-label">Variety</div>
+                        <div class="info-value fs-5">{{ issue.crop_variety }}</div>
                     </div>
                     {% endif %}
-                    
-                    {% if ai_prediction %}
-                    <div class="mt-4">
-                        <div class="alert alert-info">
-                            <h5><i class="bi bi-robot"></i> AI Prediction Available</h5>
-                            <p><strong>Disease:</strong> {{ ai_prediction.disease_name }}</p>
-                            <p><strong>Confidence:</strong> {{ (ai_prediction.confidence * 100)|round(1) }}%</p>
-                            <p><strong>Severity:</strong> {{ ai_prediction.severity }}</p>
-                        </div>
+                    <div class="col-md-4">
+                        <div class="info-label">Location</div>
+                        <div class="info-value fs-5">{{ issue.location or 'Local' }}</div>
                     </div>
-                    {% endif %}
                 </div>
+
+                <div class="mb-4">
+                    <div class="info-label">Farmer's Description</div>
+                    <p class="lead text-dark" style="line-height: 1.6;">{{ issue.issue_description }}</p>
+                </div>
+
+                {% if issue.symptoms %}
+                <div class="mb-4">
+                    <div class="info-label mb-2">Symptoms Observed</div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for symptom in issue.symptoms|from_json %}
+                        <span class="symptom-tag">{{ symptom }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if issue.image_path %}
+                <div class="mt-4">
+                    <div class="info-label mb-2">Visual Evidence</div>
+                    <img src="{{ url_for('static', filename=issue.image_path) }}" class="issue-image-preview"
+                        alt="Crop Image" data-bs-toggle="modal" data-bs-target="#imageModal">
+                </div>
+                {% endif %}
             </div>
-            
+
             {% if existing_report %}
-            <div class="card shadow-lg border-0 mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Diagnosis Report</h5>
+            <div class="glass-card p-4 p-md-5">
+                <div class="section-border" style="border-color: #10b981;">
+                    <h5 class="fw-bold mb-1">Diagnosis Report</h5>
+                    <p class="text-muted small">Final assessment provided by expert</p>
                 </div>
-                <div class="card-body">
-                    <p><strong>Diagnosed by:</strong> {{ existing_report.expert.full_name }}</p>
-                    <p><strong>Disease Identified:</strong> {{ existing_report.disease_identified or 'N/A' }}</p>
-                    <p><strong>Severity:</strong> {{ existing_report.severity or 'N/A' }}</p>
-                    <hr>
-                    <h6>Diagnosis:</h6>
-                    <p>{{ existing_report.diagnosis }}</p>
-                    <h6>Treatment Plan:</h6>
-                    <p>{{ existing_report.treatment_plan }}</p>
-                    {% if existing_report.preventive_measures %}
-                    <h6>Preventive Measures:</h6>
-                    <p>{{ existing_report.preventive_measures }}</p>
-                    {% endif %}
-                    <p class="text-muted small">Reported on: {{ existing_report.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-4">
+                            <div class="info-label">Identified Disease</div>
+                            <div class="info-value text-success fs-5">{{ existing_report.disease_identified }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-4">
+                            <div class="info-label">Severity Level</div>
+                            <span
+                                class="badge fs-6 rounded-pill bg-{{ 'danger' if existing_report.severity == 'Critical' else 'warning' if existing_report.severity == 'High' else 'info' }}">
+                                {{ existing_report.severity }}
+                            </span>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-journal-text me-1"></i> Diagnosis Details</h6>
+                    <p class="text-muted">{{ existing_report.diagnosis }}</p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold"><i class="bi bi-capsule me-1"></i> Treatment Plan</h6>
+                    <p class="text-muted">{{ existing_report.treatment_plan }}</p>
+                </div>
+
+                {% if existing_report.preventive_measures %}
+                <div class="mb-0">
+                    <h6 class="fw-bold"><i class="bi bi-shield-check me-1"></i> Preventive Measures</h6>
+                    <p class="text-muted">{{ existing_report.preventive_measures }}</p>
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="card shadow-lg border-0">
-                <div class="card-body text-center">
-                    <a href="{{ url_for('expert.diagnose_issue', issue_id=issue.id) }}" 
-                       class="btn btn-success btn-lg">
-                        <i class="bi bi-clipboard-check"></i> Diagnose This Issue
-                    </a>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar / AI Column -->
+        <div class="col-lg-4">
+            {% if ai_prediction %}
+            <div class="ai-insight mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-3">
+                        <i class="bi bi-robot text-primary fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">AI Diagnosis</h5>
+                </div>
+
+                <div class="mb-3">
+                    <div class="info-label">Predicted Disease</div>
+                    <div class="fw-bold text-primary fs-5">{{ ai_prediction.disease_name }}</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="info-label">Confidence</div>
+                    <div class="progress rounded-pill bg-white bg-opacity-50" style="height: 10px;">
+                        <div class="progress-bar rounded-pill" style="width: {{ ai_prediction.confidence * 100 }}%">
+                        </div>
+                    </div>
+                    <div class="text-end small fw-bold mt-1">{{ (ai_prediction.confidence * 100)|round(1) }}%</div>
+                </div>
+
+                <div class="alert alert-white bg-white bg-opacity-50 border-0 rounded-4 p-3 mb-0">
+                    <div class="small fw-bold mb-1"><i class="bi bi-exclamation-circle text-primary me-1"></i> AI Note:
+                    </div>
+                    <p class="small text-muted mb-0">This is a machine prediction. Please cross-verify with your
+                        expertise before final diagnosis.</p>
                 </div>
             </div>
             {% endif %}
+
+            {% if not existing_report %}
+            <div class="modern-card p-4 text-center">
+                <div class="bg-success bg-opacity-10 p-4 rounded-circle d-inline-flex mb-4">
+                    <i class="bi bi-clipboard-pulse text-success display-5"></i>
+                </div>
+                <h5 class="fw-bold">Ready to Help?</h5>
+                <p class="text-muted small mb-4">Provide your expert diagnosis to help this farmer save their crop.</p>
+                <a href="{{ url_for('expert.diagnose_issue', issue_id=issue.id) }}"
+                    class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm">
+                    START DIAGNOSIS <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+            {% else %}
+            <div class="modern-card p-4 text-center">
+                <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
+                <h5 class="fw-bold">Problem Solved</h5>
+                <p class="text-muted small">You have already provided a diagnosis for this issue. The farmer has been
+                    notified.</p>
+                <a href="{{ url_for('expert.pending_issues') }}"
+                    class="btn btn-outline-primary w-100 rounded-pill mt-2">Back to Dashboard</a>
+            </div>
+            {% endif %}
+
+            <div class="modern-card p-4 mt-4">
+                <h6 class="fw-bold mb-3">Communication</h6>
+                <a href="{{ url_for('expert.chat_with_farmer', farmer_id=issue.farmer_id) }}"
+                    class="btn btn-soft-primary w-100 rounded-pill mb-2">
+                    <i class="bi bi-chat-dots me-2"></i> Chat with Farmer
+                </a>
+                <a href="tel:{{ issue.farmer.phone }}" class="btn btn-soft-secondary w-100 rounded-pill">
+                    <i class="bi bi-telephone me-2"></i> Call Farmer
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -147,19 +274,15 @@
 <!-- Image Modal -->
 {% if issue.image_path %}
 <div class="modal fade" id="imageModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Crop Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img src="{{ url_for('static', filename=issue.image_path) }}" 
-                     class="modal-image" alt="Crop Image">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content overflow-hidden" style="border-radius: 30px; border: none;">
+            <div class="modal-body p-0">
+                <img src="{{ url_for('static', filename=issue.image_path) }}" class="w-100" alt="Crop Full View">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-white p-2 rounded-circle"
+                    data-bs-dismiss="modal"></button>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
 {% endblock %}
-

@@ -1,112 +1,168 @@
 {% extends "base.html" %}
 
-{% block title %}Ratings - Expert Portal{% endblock %}
+{% block title %}Public Feedback & Ratings - Expert Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ratings-hero {
+        padding: 60px 0;
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        color: white;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: -40px;
+    }
+
+    .stat-glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        text-align: center;
+    }
+
+    .rating-item {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid #f1f5f9;
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+
+    .rating-item:hover {
+        transform: scale(1.01);
+        border-color: #4f46e5;
+    }
+
+    .progress {
+        background-color: #f1f5f9;
+        border-radius: 100px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+    }
+
+    .star-lg {
+        font-size: 2.5rem;
+        color: #f59e0b;
+        font-weight: 800;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('expert.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3><i class="bi bi-star"></i> My Ratings</h3>
+<div class="ratings-hero">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <a href="{{ url_for('expert.dashboard') }}"
+                    class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+                    <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+                </a>
+                <h1 class="fw-bold mb-0">Professional Reputation</h1>
+                <p class="mb-0 opacity-75">Feedback from farmers you have assisted</p>
             </div>
-            
-            <!-- Rating Summary -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card shadow-sm border-0 text-center">
-                        <div class="card-body">
-                            <h2 class="text-warning">{{ avg_rating }}</h2>
-                            <p class="text-muted mb-0">Average Rating</p>
-                            <div class="mt-2">
-                                {% for i in range(1, 6) %}
-                                    <i class="bi bi-star{{ '-fill' if i <= avg_rating|int else '' }} text-warning"></i>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card shadow-sm border-0 text-center">
-                        <div class="card-body">
-                            <h2>{{ total_ratings }}</h2>
-                            <p class="text-muted mb-0">Total Ratings</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-body">
-                            <h6>Rating Distribution</h6>
-                            {% for i in range(5, 0, -1) %}
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="me-2">{{ i }} <i class="bi bi-star-fill text-warning"></i></span>
-                                <div class="progress flex-grow-1" style="height: 20px;">
-                                    <div class="progress-bar bg-warning" 
-                                         style="width: {{ (rating_dist.get(i, 0) / total_ratings * 100) if total_ratings > 0 else 0 }}%">
-                                        {{ rating_dist.get(i, 0) }}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Ratings List -->
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">All Ratings</h5>
-                </div>
-                <div class="card-body">
-                    {% if ratings %}
-                        <div class="list-group">
-                            {% for rating in ratings %}
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <h6 class="mb-0 me-2">{{ rating.farmer.full_name }}</h6>
-                                            <div>
-                                                {% for i in range(1, 6) %}
-                                                    <i class="bi bi-star{{ '-fill' if i <= rating.rating else '' }} text-warning"></i>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                        {% if rating.comment %}
-                                        <p class="mb-1">{{ rating.comment }}</p>
-                                        {% endif %}
-                                        {% if rating.crop_issue %}
-                                        <small class="text-muted">
-                                            Related to Issue #{{ rating.crop_issue_id }} - {{ rating.crop_issue.crop_type }}
-                                        </small>
-                                        {% endif %}
-                                        <small class="text-muted d-block mt-1">
-                                            {{ rating.created_at.strftime('%Y-%m-%d %H:%M') }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info text-center">
-                            <i class="bi bi-info-circle"></i> 
-                            No ratings yet. Farmers can rate you after you diagnose their issues.
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="bg-white px-4 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2"
+                style="color: #1e3a8a;">
+                <i class="bi bi-person-check-fill"></i> Verified Expert Feedback
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
+<div class="container pb-5">
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="stat-glass-card">
+                <div class="star-lg mb-1">{{ avg_rating }}</div>
+                <div class="mb-3">
+                    {% for i in range(1, 6) %}
+                    <i class="bi bi-star{{ '-fill' if i <= avg_rating|int else '' }} text-warning fs-5"></i>
+                    {% endfor %}
+                </div>
+                <div class="text-muted small fw-bold text-uppercase">Mean Satisfaction Score</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-glass-card">
+                <div class="display-5 fw-bold text-dark mb-2">{{ total_ratings }}</div>
+                <p class="text-muted small fw-bold text-uppercase">Total Reviews Received</p>
+                <div class="mt-4"><span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">+12% this
+                        month</span></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-glass-card text-start">
+                <h6 class="fw-bold mb-3 small text-uppercase opacity-50">Score breakdown</h6>
+                {% for i in range(5, 0, -1) %}
+                <div class="d-flex align-items-center mb-2">
+                    <span class="small fw-bold me-3" style="min-width: 40px;">{{ i }} ★</span>
+                    <div class="progress flex-grow-1" style="height: 8px;">
+                        <div class="progress-bar"
+                            style="width: {{ (rating_dist.get(i, 0) / total_ratings * 100) if total_ratings > 0 else 0 }}%">
+                        </div>
+                    </div>
+                    <span class="small text-muted ms-3">{{ rating_dist.get(i, 0) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Feed -->
+    <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
+        <i class="bi bi-chat-left-quote text-primary"></i> Latest Farmer Reviews
+    </h5>
+
+    {% if ratings %}
+    <div class="row">
+        <div class="col-lg-10">
+            {% for rating in ratings %}
+            <div class="rating-item shadow-sm">
+                <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center fw-bold"
+                            style="width: 45px; height: 45px;">
+                            {{ rating.farmer.full_name[0]|upper }}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">{{ rating.farmer.full_name }}</h6>
+                            <div class="small text-muted">{{ rating.created_at.strftime('%d %b %Y') }}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-1">
+                        {% for i in range(1, 6) %}
+                        <i class="bi bi-star{{ '-fill' if i <= rating.rating else '' }} text-warning"></i>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if rating.comment %}
+                <p class="text-dark mb-3" style="font-style: italic;">“{{ rating.comment }}”</p>
+                {% endif %}
+
+                {% if rating.crop_issue %}
+                <div class="pt-3 border-top border-light d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-muted fw-bold">Issue #{{ rating.crop_issue_id }}</span>
+                    <span class="small text-muted">{{ rating.crop_issue.crop_type }} Diagnosis</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5 bg-white rounded-5 shadow-sm">
+        <i class="bi bi-patch-question text-muted display-4"></i>
+        <h5 class="fw-bold mt-3">No reviews yet</h5>
+        <p class="text-muted">Ratings will appear here once farmers review your diagnosis reports.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

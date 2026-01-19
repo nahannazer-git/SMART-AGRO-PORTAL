@@ -1,188 +1,288 @@
 {% extends "base.html" %}
 
-{% block title %}Analytics - Expert Portal{% endblock %}
+{% block title %}Analytics Hub - Expert Portal{% endblock %}
 
 {% block extra_css %}
 <style>
-    .chart-container {
-        position: relative;
-        height: 300px;
+    .analytics-hero {
+        padding: 40px 0;
+        background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
+        color: white;
+        border-radius: 0 0 40px 40px;
     }
-    .stat-card {
-        transition: transform 0.2s;
+
+    .modern-stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
     }
-    .stat-card:hover {
-        transform: translateY(-5px);
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    /* Chart Switcher Cards */
+    .chart-selector-card {
+        background: white;
+        border-radius: 16px;
+        padding: 15px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .chart-selector-card:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
+
+    .chart-selector-card.active {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    .icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .chart-display-area {
+        background: white;
+        border-radius: 30px;
+        padding: 30px;
+        border: 1px solid #f1f5f9;
+        min-height: 450px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    }
+
+    .chart-panel {
+        display: none;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .chart-panel.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .export-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .export-btn:hover {
+        background: white;
+        color: #0f172a;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav class="navbar navbar-expand-lg navbar-dark bg-success mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{{ url_for('expert.dashboard') }}">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-</nav>
-
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2><i class="bi bi-graph-up"></i> Analytics Dashboard</h2>
-                    <p class="text-muted">Performance metrics and insights</p>
-                </div>
-                <div>
-                    <a href="{{ url_for('expert.report_performance_pdf') }}" class="btn btn-danger">
-                        <i class="bi bi-file-pdf"></i> PDF Report
-                    </a>
-                    <a href="{{ url_for('expert.report_performance_csv') }}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV Report
-                    </a>
-                </div>
+<div class="analytics-hero mb-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <a href="{{ url_for('expert.dashboard') }}"
+                    class="text-white text-opacity-75 text-decoration-none small fw-bold mb-2 d-inline-block">
+                    <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
+                </a>
+                <h2 class="fw-bold mb-1"><i class="bi bi-cpu me-2"></i>Analytics Hub</h2>
+                <p class="mb-0 opacity-50 small">Insights & Performance Overview</p>
             </div>
-        </div>
-    </div>
-
-    <!-- Key Metrics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-primary">{{ total_diagnoses }}</h3>
-                    <p class="text-muted mb-0">Total Diagnoses</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-warning">{{ avg_rating }}/5.0</h3>
-                    <p class="text-muted mb-0">Average Rating</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-success">{{ total_ratings }}</h3>
-                    <p class="text-muted mb-0">Total Ratings</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card shadow-sm border-0">
-                <div class="card-body text-center">
-                    <h3 class="text-info">{{ avg_response_days }} days</h3>
-                    <p class="text-muted mb-0">Avg Response Time</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Diagnoses by Crop Type</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="cropChart" class="chart-container"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Diagnoses by Severity</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="severityChart" class="chart-container"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monthly Performance -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Monthly Performance (Last 12 Months)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="monthlyChart" class="chart-container"></canvas>
-                </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('expert.report_performance_pdf') }}" class="export-btn"><i
+                        class="bi bi-file-pdf"></i> PDF</a>
+                <a href="{{ url_for('expert.report_performance_csv') }}" class="export-btn"><i class="bi bi-table"></i>
+                    CSV</a>
             </div>
         </div>
     </div>
 </div>
 
+<div class="container pb-5">
+    <!-- Quick Stats Row (Slim) -->
+    <div class="row g-3 mb-4">
+        {% set stats = [
+        ('Total Cases', total_diagnoses, 'bi-journal-check', 'text-primary', 'bg-primary'),
+        ('Avg Rating', avg_rating ~ '/5', 'bi-star-fill', 'text-warning', 'bg-warning'),
+        ('Farmers', total_ratings, 'bi-people', 'text-success', 'bg-success'),
+        ('Response', avg_response_days ~ 'd', 'bi-lightning', 'text-info', 'bg-info')
+        ] %}
+        {% for label, val, icon, text_cls, bg_cls in stats %}
+        <div class="col-6 col-md-3">
+            <div class="modern-stat-card d-flex align-items-center gap-3">
+                <div class="{{ bg_cls }} bg-opacity-10 {{ text_cls }} p-2 rounded-3"><i class="bi {{ icon }}"></i></div>
+                <div>
+                    <div class="stat-label">{{ label }}</div>
+                    <div class="stat-value">{{ val }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Chart Switcher -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="chart-selector-card active" onclick="switchChart('monthly', this)">
+                <div class="icon-box bg-success bg-opacity-10 text-success"><i class="bi bi-graph-up-arrow"></i></div>
+                <div>
+                    <h6 class="fw-bold mb-0">Monthly Trend</h6>
+                    <small class="text-muted">Volume history</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-selector-card" onclick="switchChart('crop', this)">
+                <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-pie-chart"></i></div>
+                <div>
+                    <h6 class="fw-bold mb-0">Crop Breakdown</h6>
+                    <small class="text-muted">Plant distribution</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-selector-card" onclick="switchChart('severity', this)">
+                <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="bi bi-bar-chart"></i></div>
+                <div>
+                    <h6 class="fw-bold mb-0">Case Severity</h6>
+                    <small class="text-muted">Impact levels</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chart Display -->
+    <div class="chart-display-area">
+        <div id="monthly-panel" class="chart-panel active">
+            <h5 class="fw-bold mb-4">Monthly Performance History</h5>
+            <div style="height: 350px;"><canvas id="monthlyChart"></canvas></div>
+        </div>
+        <div id="crop-panel" class="chart-panel">
+            <h5 class="fw-bold mb-4">Diagnoses by Crop Type</h5>
+            <div style="height: 350px;"><canvas id="cropChart"></canvas></div>
+        </div>
+        <div id="severity-panel" class="chart-panel">
+            <h5 class="fw-bold mb-4">Issue Severity Analysis</h5>
+            <div style="height: 300px;"><canvas id="severityChart"></canvas></div>
+            <div class="mt-4 p-3 bg-light rounded-4 small text-muted">
+                <i class="bi bi-info-circle me-1"></i> Most cases fall under the "High" severity category this month.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Store -->
+<div id="analytics-data" data-crops-labels='{{ diagnoses_by_crop.keys()|list|tojson|safe }}'
+    data-crops-values='{{ diagnoses_by_crop.values()|list|tojson|safe }}'
+    data-severity-labels='{{ diagnoses_by_severity.keys()|list|tojson|safe }}'
+    data-severity-values='{{ diagnoses_by_severity.values()|list|tojson|safe }}'
+    data-monthly-labels='{{ monthly_performance.keys()|list|tojson|safe }}'
+    data-monthly-values='{{ monthly_performance.values()|list|tojson|safe }}' style="display: none;">
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Crop Type Chart
-const cropCtx = document.getElementById('cropChart').getContext('2d');
-new Chart(cropCtx, {
-    type: 'doughnut',
-    data: {
-        labels: Object.keys({{ diagnoses_by_crop|tojson }}),
-        datasets: [{
-            data: Object.values({{ diagnoses_by_crop|tojson }}),
-            backgroundColor: [
-                '#0d6efd', '#198754', '#ffc107', '#dc3545', 
-                '#0dcaf0', '#6610f2', '#fd7e14'
-            ]
-        }]
-    }
-});
+    function switchChart(type, element) {
+        // Update selectors
+        document.querySelectorAll('.chart-selector-card').forEach(c => c.classList.remove('active'));
+        element.classList.add('active');
 
-// Severity Chart
-const severityCtx = document.getElementById('severityChart').getContext('2d');
-new Chart(severityCtx, {
-    type: 'bar',
-    data: {
-        labels: Object.keys({{ diagnoses_by_severity|tojson }}),
-        datasets: [{
-            label: 'Diagnoses',
-            data: Object.values({{ diagnoses_by_severity|tojson }}),
-            backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#dc3545']
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
+        // Update panels
+        document.querySelectorAll('.chart-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(type + '-panel').classList.add('active');
     }
-});
 
-// Monthly Performance Chart
-const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-const monthlyData = {{ monthly_performance|tojson }};
-new Chart(monthlyCtx, {
-    type: 'line',
-    data: {
-        labels: Object.keys(monthlyData).reverse(),
-        datasets: [{
-            label: 'Diagnoses',
-            data: Object.values(monthlyData).reverse(),
-            borderColor: '#0d6efd',
-            backgroundColor: 'rgba(13, 110, 253, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        const store = document.getElementById('analytics-data');
+        const parse = (attr) => JSON.parse(store.getAttribute(attr));
+
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // Monthly
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: parse('data-monthly-labels').reverse(),
+                datasets: [{
+                    label: 'Diagnoses',
+                    data: parse('data-monthly-values').reverse(),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                    fill: true, tension: 0.4, pointRadius: 5
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Crop
+        new Chart(document.getElementById('cropChart'), {
+            type: 'doughnut',
+            data: {
+                labels: parse('data-crops-labels'),
+                datasets: [{
+                    data: parse('data-crops-values'),
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+        });
+
+        // Severity
+        new Chart(document.getElementById('severityChart'), {
+            type: 'bar',
+            data: {
+                labels: parse('data-severity-labels'),
+                datasets: [{
+                    label: 'Cases',
+                    data: parse('data-severity-values'),
+                    backgroundColor: '#fb7185',
+                    borderRadius: 8
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    });
 </script>
 {% endblock %}
-
