@@ -8,6 +8,7 @@ from app.models import db, FarmerProduct, User, ChatMessage, MarketplaceOrder
 import os
 from datetime import datetime
 from flask import current_app
+from werkzeug.utils import secure_filename
 import uuid
 
 marketplace_bp = Blueprint('marketplace', __name__, url_prefix='/marketplace')
@@ -364,9 +365,10 @@ def delete_product(product_id):
         return redirect(url_for('marketplace.my_products'))
     
     try:
-        # Soft delete - mark as unavailable instead of hard delete
-        product.is_available = False
-        product.updated_at = datetime.utcnow()
+        # Delete related orders first to avoid foreign key constraints
+        MarketplaceOrder.query.filter_by(product_id=product.id).delete()
+        # Hard delete the product
+        db.session.delete(product)
         db.session.commit()
         flash('Product removed from marketplace.', 'success')
     except Exception as e:
