@@ -250,6 +250,132 @@
         position: relative;
         z-index: 2;
     }
+
+    /* Lottie-like Continuous CSS Micro-Animations */
+    @keyframes float-rotate {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(6deg);
+        }
+    }
+
+    @keyframes icon-pulse-glow {
+
+        0%,
+        100% {
+            transform: scale(1);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        50% {
+            transform: scale(1.15);
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+    }
+
+    @keyframes shield-defend {
+
+        0%,
+        100% {
+            transform: scale(1) translateY(0);
+            color: inherit;
+        }
+
+        25% {
+            transform: scale(1.1) translateY(-3px) rotate(-5deg);
+            color: #10b981;
+        }
+
+        75% {
+            transform: scale(1.1) translateY(-3px) rotate(5deg);
+            color: #10b981;
+        }
+    }
+
+    @keyframes leaf-grow {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.15) rotate(15deg);
+            color: #02c27b;
+        }
+    }
+
+    @keyframes shop-bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        30% {
+            transform: translateY(-10px) scaleY(1.1);
+            text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        50% {
+            transform: translateY(0) scaleY(0.95);
+        }
+
+        70% {
+            transform: translateY(-5px);
+        }
+    }
+
+    /* Assigning Lottie-like animations to specific icons */
+    .market-card-kb .bi-bank {
+        display: inline-block;
+        animation: float-rotate 4s ease-in-out infinite;
+    }
+
+    .market-card-agro .bi-shop-window {
+        display: inline-block;
+        animation: shop-bounce 3s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+        color: #10b981;
+    }
+
+    .role-card .bi-person-heart {
+        display: inline-block;
+        animation: float-rotate 3s ease-in-out infinite reverse;
+    }
+
+    .role-card .bi-mortarboard {
+        display: inline-block;
+        animation: icon-pulse-glow 3s ease-in-out infinite;
+    }
+
+    .role-card .bi-building {
+        display: inline-block;
+        animation: float-rotate 5s ease-in-out infinite;
+    }
+
+    .role-card .bi-shield-lock {
+        display: inline-block;
+        animation: shield-defend 4s ease-in-out infinite;
+    }
+
+    /* Typed JS Cursor tweaking (Now used for pure CSS blinking cursor) */
+    .typed-cursor {
+        color: #10b981;
+        font-size: 1.1em;
+        font-weight: 300;
+        animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -264,9 +390,9 @@
         <div class="badge bg-soft-emerald rounded-pill px-4 py-2 mb-4 fw-bold hero-badge fade-in-up">
             <i class="bi bi-shield-check me-2"></i> Kerala's Digital Agriculture Hub
         </div>
-        <h1 class="hero-title display-2 mb-4 fade-in-up stagger-1">
+        <h1 class="hero-title display-2 mb-4 fade-in-up stagger-1" style="min-height: 140px;">
             The Future of <br>
-            <span class="accent-text">Smart Farming</span> is here.
+            <span class="accent-text"><span id="typed-text"></span></span>
         </h1>
         <p class="lead text-muted mx-auto mb-5 fade-in-up stagger-2" style="max-width: 700px;">
             A unified ecosystem connecting farmers with experts, quality resources, and a direct-to-consumer
@@ -378,12 +504,9 @@
     </div>
 </div>
 
-<!-- Vanilla Tilt.js Library (3KB) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
-
-<!-- Scroll Reveal Animation -->
+<!-- Scroll Reveal Animation & Custom Lightweight Scripts -->
 <script>
-    // Scroll reveal observer
+    // 1. Scroll reveal observer (No external library)
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -397,19 +520,73 @@
         });
     }, observerOptions);
 
-    // Observe all fade-in elements
+    // 2. Custom Auto-Typer (Replaces 20KB Typed.js)
+    const words = ['Smart Farming', 'Direct Trade', 'Sustainable Growth', 'Digital Kerala'];
+    let wordIndex = 0, charIndex = 0, isDeleting = false;
+
+    function typeEffect() {
+        const el = document.getElementById("typed-text");
+        if (!el) return;
+
+        const currentWord = words[wordIndex];
+
+        if (isDeleting) {
+            el.innerText = currentWord.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            el.innerText = currentWord.substring(0, charIndex + 1);
+            charIndex++;
+        }
+
+        let typeSpeed = isDeleting ? 30 : 70;
+
+        if (!isDeleting && charIndex === currentWord.length) {
+            typeSpeed = 2000; // Pause at end of word
+            isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            wordIndex = (wordIndex + 1) % words.length;
+            typeSpeed = 500; // Pause before new word
+        }
+
+        setTimeout(typeEffect, typeSpeed);
+    }
+
+    // Observe all fade-in elements & initialize typer
     document.addEventListener('DOMContentLoaded', () => {
         const fadeElements = document.querySelectorAll('.fade-in-up');
         fadeElements.forEach(el => observer.observe(el));
+
+        // Add custom blinking cursor
+        const textSpan = document.getElementById("typed-text");
+        if (textSpan) {
+            textSpan.insertAdjacentHTML('afterend', '<span class="typed-cursor">|</span>');
+            typeEffect(); // Start typing
+        }
     });
 
-    // Initialize Vanilla Tilt on main cards
-    VanillaTilt.init(document.querySelectorAll(".tilt-card"), {
-        max: 10,
-        speed: 400,
-        glare: true,
-        "max-glare": 0.2,
-        scale: 1.03
+    // 3. Custom 3D Tilt Effect (Replaces Vanilla Tilt JS)
+    const tiltCards = document.querySelectorAll('.tilt-card');
+    tiltCards.forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left; // x position within the element
+            const y = e.clientY - rect.top; // y position within the element
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            // Calculate rotation (max 10 degrees)
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+            card.style.transition = 'none';
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+            card.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+        });
     });
 </script>
 {% endblock %}
