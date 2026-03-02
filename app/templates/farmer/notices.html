@@ -27,6 +27,11 @@
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
     }
 
+    .unread-notice {
+        border-right: 4px solid #10b981;
+        background-color: #f8fafc;
+    }
+
     .notice-accent {
         width: 8px;
         flex-shrink: 0;
@@ -102,17 +107,27 @@
             <i class="bi bi-chevron-left"></i> BACK TO DASHBOARD
         </a>
         <h1 class="fw-bold"><i class="bi bi-megaphone-fill me-2"></i>Official Notices</h1>
-        <p class="opacity-75 mb-0">Crucial updates and announcements from Krishi Bhavan</p>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <p class="opacity-75 mb-0">Crucial updates and announcements from Krishi Bhavan</p>
+            {% if unread_notices_count > 0 %}
+            <form action="{{ url_for('farmer.mark_all_notices_read') }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-light text-primary rounded-pill px-4 fw-bold shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i>Mark All as Read
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 </div>
 
 <div class="container pb-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10 mt-5">
+        <div class="col-lg-10 mt-5 notices-container">
             {% if notices %}
             {% for notice in notices %}
-            <div class="notice-card-modern d-flex">
-                <div class="notice-accent bg-{{ 'danger' if notice.priority == 'high' else 'primary' }}"></div>
+            <div class="notice-card-modern d-flex {% if notice.id not in read_notice_ids %}unread-notice{% endif %}"
+                id="notice-{{ notice.id }}">
+                <div class="notice-accent bg-{{ 'danger' if notice.priority|lower == 'high' else 'primary' }}"></div>
                 <div class="notice-content-area text-dark">
                     <div class="notice-meta">
                         <div class="meta-item">
@@ -131,6 +146,21 @@
                     </div>
                     <h4 class="fw-bold mb-3">{{ notice.title }}</h4>
                     <p class="mb-0 text-muted lh-lg">{{ notice.content }}</p>
+                    <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+                        {% if notice.attachment_path %}
+                        <a href="{{ url_for('static', filename=notice.attachment_path) }}"
+                            class="btn btn-primary rounded-pill px-4 shadow-sm" target="_blank" download>
+                            <i class="bi bi-download me-2"></i>Download Required Form
+                        </a>
+                        {% endif %}
+
+                        {% if notice.id not in read_notice_ids %}
+                        <button class="btn btn-outline-success rounded-pill px-4 ms-auto mark-read-btn"
+                            data-notice-id="{{ notice.id }}">
+                            <i class="bi bi-check2-all me-2"></i>Mark as Read
+                        </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -146,4 +176,60 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const markReadBtns = document.querySelectorAll('.mark-read-btn');
+
+        markReadBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const noticeId = this.getAttribute('data-notice-id');
+                const btnRef = this;
+
+                // Show loading state
+                btnRef.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Marking...';
+                btnRef.disabled = true;
+
+                fetch(`/farmer/notices/mark-read/${noticeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const noticeCard = document.getElementById(`notice-${noticeId}`);
+
+                            // Visual updates
+                            if (noticeCard) {
+                                noticeCard.classList.remove('unread-notice');
+                                noticeCard.style.backgroundColor = 'white';
+                            }
+
+                            // Animate button away
+                            btnRef.style.transition = 'all 0.3s ease';
+                            btnRef.style.transform = 'scale(0.8)';
+                            btnRef.style.opacity = '0';
+
+                            setTimeout(() => {
+                                btnRef.remove();
+                            }, 300);
+
+                        } else {
+                            alert('Failed to mark read: ' + data.message);
+                            btnRef.innerHTML = '<i class="bi bi-check2-all me-2"></i>Mark as Read';
+                            btnRef.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        prompt('Error marking notice as read.');
+                        btnRef.innerHTML = '<i class="bi bi-check2-all me-2"></i>Mark as Read';
+                        btnRef.disabled = false;
+                    });
+            });
+        });
+    });
+</script>
 {% endblock %}

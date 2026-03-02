@@ -66,11 +66,26 @@ class Notice(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     expires_at = db.Column(db.DateTime)
+    attachment_path = db.Column(db.String(255))
     
     officer = db.relationship('User', backref='notices')
     
     def __repr__(self):
         return f'<Notice {self.id} - {self.title}>'
+
+class FarmerNoticeRead(db.Model):
+    __tablename__ = 'farmer_notice_reads'
+
+    id = db.Column(db.Integer, primary_key=True)
+    notice_id = db.Column(db.Integer, db.ForeignKey('notices.id'), nullable=False)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    read_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    notice = db.relationship('Notice', backref=db.backref('reads', lazy='dynamic'))
+    farmer = db.relationship('User', backref=db.backref('notice_reads', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<FarmerNoticeRead {self.notice_id} - {self.farmer_id}>'
 
 class ProductRequest(db.Model):
     __tablename__ = 'product_requests'

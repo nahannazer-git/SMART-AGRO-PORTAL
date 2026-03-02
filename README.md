@@ -1,74 +1,65 @@
 # Smart Agriculture Support System
 
-> **🚀 Want to deploy?** See [`deployment/DEPLOYMENT.md`](deployment/DEPLOYMENT.md) for complete Render deployment guide.
+> **Bridging the gap between Technology and Agriculture**
 
-A Flask-based web application for agricultural support with multi-role functionality.
+**Farmers Portal** is a comprehensive platform connecting Farmers, Agricultural Experts, and Government Officers. It leverages AI for disease detection, facilitates expert consultation, streamlines subsidy distribution, and opens new market avenues for farmers.
 
-## Project Structure
+## 🚀 Quick Links
+- [**Project Report**](REPORT.md) - Formal documentation of the system.
+- [**User Manual**](USER_MANUAL.md) - Guide for Farmers, Experts, and Officers.
+- [**Deployment Guide**](docs/DEPLOY_INSTRUCTIONS.md) - How to deploy to Render.
+- [**Scrum Log**](docs/SCRUM_BOOK.txt) - Development timeline and task tracking.
 
-```
-/app
-  /static
-    /css          - CSS stylesheets
-    /js           - JavaScript files
-    /uploads/crops - Crop image uploads
-  /templates      - HTML templates
-  /models         - Database models
-  /routes         - Application routes/blueprints
-  /utils          - Utility functions
-  /ml             - Machine Learning models
-  config.py       - Application configuration
-  __init__.py     - Flask app factory
-/run.py           - Application entry point
-```
+## ✨ Key Features
 
-## Setup
+### 🌾 For Farmers
+- **AI Disease Detection**: Snap a photo of a sick plant and get instant analysis.
+- **Expert Access**: Chat directly with agricultural scientists.
+- **Yield Prediction**: Plan your season with ML-based yield estimates.
+- **E-Marketplace**: Sell your harvest directly to consumers.
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-```
+### 🔬 For Experts
+- **Digital Consulting**: Review cases remotely and prescribe treatments.
+- **Patient Management**: Track cases and follow up with farmers.
 
-2. Activate the virtual environment:
-```bash
-# Windows
-venv\Scripts\activate
+### 🏛️ For Government (Krishi Bhavan)
+- **Subsidy Management**: Distribute seeds and fertilizers efficiently.
+- **Digital Notices**: Broadcast schemes and alerts instantly.
 
-# Linux/Mac
-source venv/bin/activate
-```
+## 🛠️ Technology Stack
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+- **Backend**: Python, Flask, SQLAlchemy
+- **Frontend**: HTML5, Bootstrap 5, Vanilla JS
+- **AI/ML**: TensorFlow, Scikit-Learn, NumPy
+- **Database**: PostgreSQL (Production), SQLite (Dev)
 
-4. Run the application:
-```bash
-python run.py
-```
+## 📦 Installation
 
-## Technologies
+1. **Clone the repo**
+   ```bash
+   git clone https://github.com/yourusername/farmers-portal.git
+   cd farmers-portal
+   ```
 
-- Flask 3.0.0
-- SQLite
-- Bootstrap 5
-- OpenWeatherMap API (for weather data)
+2. **Setup Virtual Environment**
+   ```bash
+   python -m venv venv
+   # Windows
+   venv\Scripts\activate
+   # Mac/Linux
+   source venv/bin/activate
+   ```
 
-## Environment Variables
+3. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Create a `.env` file in the project root (optional):
+4. **Run Application**
+   ```bash
+   python run.py
+   ```
+   Visit `http://localhost:5000` in your browser.
 
-```env
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///instance/farmers_portal.db
-WEATHER_API_KEY=your-openweathermap-api-key
-```
-
-### Getting OpenWeatherMap API Key
-
-1. Sign up at https://openweathermap.org/api
-2. Get your free API key
-3. Add it to `.env` file as `WEATHER_API_KEY=your-key-here`
-4. Without API key, the system will use mock weather data
-
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.

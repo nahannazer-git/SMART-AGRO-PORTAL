@@ -80,7 +80,7 @@
     <div class="row justify-content-center mt-5">
         <div class="col-lg-10">
             <div class="form-card">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="row g-4">
                         <div class="col-12">
                             <label for="title" class="form-label">Notice Title <span
@@ -137,6 +137,19 @@
                             <input type="date" class="form-control" id="expires_at" name="expires_at"
                                 value="{{ notice.expires_at.strftime('%Y-%m-%d') if notice.expires_at else '' }}">
                             <small class="text-muted">Leave empty for notices that don't expire</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="attachment" class="form-label">Form/Attachment (Optional)</label>
+                            {% if notice.attachment_path %}
+                            <div class="mb-2">
+                                <span class="badge bg-info text-dark">Current file: {{
+                                    notice.attachment_path.split('/')[-1] }}</span>
+                            </div>
+                            {% endif %}
+                            <input type="file" class="form-control" id="attachment" name="attachment">
+                            <small class="text-muted">Attach any PDF or document forms that farmers need to download and
+                                fill out. Uploading a new file will replace the current one.</small>
                         </div>
 
                         <div class="col-12">

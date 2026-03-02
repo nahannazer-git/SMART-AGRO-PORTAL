@@ -80,7 +80,7 @@
     <div class="row justify-content-center mt-5">
         <div class="col-lg-10">
             <div class="form-card">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="row g-4">
                         <div class="col-12">
                             <label for="title" class="form-label">Notice Title <span
@@ -131,6 +131,13 @@
                             <label for="expires_at" class="form-label">Expiry Date (Optional)</label>
                             <input type="date" class="form-control" id="expires_at" name="expires_at">
                             <small class="text-muted">Leave empty for notices that don't expire</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="attachment" class="form-label">Form/Attachment (Optional)</label>
+                            <input type="file" class="form-control" id="attachment" name="attachment">
+                            <small class="text-muted">Attach any PDF or document forms that farmers need to download and
+                                fill out.</small>
                         </div>
 
                         <div class="col-12">

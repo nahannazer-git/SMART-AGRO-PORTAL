@@ -43,10 +43,19 @@ def dashboard():
     recent_issues = CropIssue.query.filter_by(farmer_id=current_user.id)\
         .order_by(CropIssue.created_at.desc()).limit(5).all()
     
-    # Recent notices
-    recent_notices = Notice.query.filter_by(is_active=True)\
+    # Get all active farmer notices
+    all_active_notices = Notice.query.filter_by(is_active=True)\
         .filter(Notice.target_audience.in_(['all', 'farmers']))\
-        .order_by(Notice.created_at.desc()).limit(5).all()
+        .order_by(Notice.created_at.desc()).all()
+    
+    # Get IDs of notices the user has read
+    from app.models.farmer import FarmerNoticeRead
+    read_notice_ids = [r.notice_id for r in FarmerNoticeRead.query.filter_by(farmer_id=current_user.id).all()]
+    
+    # Separate read/unread
+    unread_notices = [n for n in all_active_notices if n.id not in read_notice_ids]
+    recent_notices = all_active_notices[:5]
+    unread_notices_count = len(unread_notices)
     
     # Marketplace inquiries count
     marketplace_inquiries_count = ChatMessage.query.filter_by(
@@ -63,6 +72,7 @@ def dashboard():
                          active_chats=active_chats,
                          recent_issues=recent_issues,
                          recent_notices=recent_notices,
+                         unread_notices_count=unread_notices_count,
                          marketplace_inquiries_count=marketplace_inquiries_count)
 
 @farmer_bp.route('/weather')
@@ -335,8 +345,61 @@ def notices():
     notices_list = Notice.query.filter_by(is_active=True)\
         .filter(Notice.target_audience.in_(['all', 'farmers']))\
         .order_by(Notice.created_at.desc()).all()
+        
+    # Mark read state
+    from app.models.farmer import FarmerNoticeRead
+    read_notice_ids = [r.notice_id for r in FarmerNoticeRead.query.filter_by(farmer_id=current_user.id).all()]
+    unread_notices_count = len([n for n in notices_list if n.id not in read_notice_ids])
     
-    return render_template('farmer/notices.html', notices=notices_list)
+    return render_template('farmer/notices.html', notices=notices_list, read_notice_ids=read_notice_ids, unread_notices_count=unread_notices_count)
+
+@farmer_bp.route('/notices/mark-read/<int:notice_id>', methods=['POST'])
+@login_required
+def mark_notice_read(notice_id):
+    if not current_user.is_farmer():
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+        
+    notice = Notice.query.get_or_404(notice_id)
+    from app.models.farmer import FarmerNoticeRead
+    
+    existing = FarmerNoticeRead.query.filter_by(notice_id=notice_id, farmer_id=current_user.id).first()
+    if not existing:
+        new_read = FarmerNoticeRead(notice_id=notice_id, farmer_id=current_user.id)
+        db.session.add(new_read)
+        try:
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Notice marked as read'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': str(e)}), 500
+    return jsonify({'status': 'success', 'message': 'Already read'})
+
+@farmer_bp.route('/notices/mark-all-read', methods=['POST'])
+@login_required
+def mark_all_notices_read():
+    if not current_user.is_farmer():
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+        
+    from app.models.farmer import FarmerNoticeRead
+    
+    active_notices = Notice.query.filter_by(is_active=True)\
+        .filter(Notice.target_audience.in_(['all', 'farmers'])).all()
+        
+    existing_reads = [r.notice_id for r in FarmerNoticeRead.query.filter_by(farmer_id=current_user.id).all()]
+    
+    added = False
+    for notice in active_notices:
+        if notice.id not in existing_reads:
+            db.session.add(FarmerNoticeRead(notice_id=notice.id, farmer_id=current_user.id))
+            added = True
+            
+    if added:
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+            
+    return redirect(url_for('farmer.notices'))
 
 # ==================== PRODUCT REQUESTS ====================
 

@@ -332,6 +332,23 @@ def add_notice():
         expires_at = request.form.get('expires_at')
         is_broadcast = request.form.get('is_broadcast') == 'on'
         
+        # Attachment upload
+        attachment_path = None
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"notice_{current_user.id}_{timestamp}_{filename}"
+                
+                # We can use UPLOAD_FOLDER from config, but since it's an existing app let's do:
+                upload_folder = Path(current_app.config['UPLOAD_FOLDER']) / 'notices'
+                upload_folder.mkdir(parents=True, exist_ok=True)
+                
+                file_path = upload_folder / filename
+                file.save(str(file_path))
+                attachment_path = f"uploads/notices/{filename}"
+        
         if not all([title, content]):
             flash('Please fill in all required fields.', 'danger')
             return render_template('officer/add_notice.html')
@@ -344,7 +361,8 @@ def add_notice():
             posted_by=current_user.id,
             target_audience=target_audience if not is_broadcast else 'all',
             expires_at=datetime.strptime(expires_at, '%Y-%m-%d').replace(hour=23, minute=59) if expires_at else None,
-            is_active=True
+            is_active=True,
+            attachment_path=attachment_path
         )
         
         try:
@@ -387,6 +405,27 @@ def edit_notice(notice_id):
         expires_at = request.form.get('expires_at')
         notice.expires_at = datetime.strptime(expires_at, '%Y-%m-%d').replace(hour=23, minute=59) if expires_at else None
         notice.is_active = request.form.get('is_active') == 'on'
+        
+        # Attachment upload (optional update)
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename != '':
+                # Delete old attachment if exists
+                if notice.attachment_path:
+                    old_path = Path(current_app.config['UPLOAD_FOLDER'].parent) / 'app' / 'static' / notice.attachment_path
+                    if old_path.exists() and old_path.is_file():
+                        old_path.unlink()
+                
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"notice_{current_user.id}_{timestamp}_{filename}"
+                
+                upload_folder = Path(current_app.config['UPLOAD_FOLDER']) / 'notices'
+                upload_folder.mkdir(parents=True, exist_ok=True)
+                
+                file_path = upload_folder / filename
+                file.save(str(file_path))
+                notice.attachment_path = f"uploads/notices/{filename}"
         
         try:
             db.session.commit()
